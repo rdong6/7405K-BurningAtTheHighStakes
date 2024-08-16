@@ -1,8 +1,9 @@
 #include "lib/physics/ProfiledMotion.h"
 #include "Constants.h"
 #include "Logger.h"
-#include "Odometry.h"
+#include "Robot.h"
 #include "lib/utils/Math.h"
+#include "subsystems/Odometry.h"
 
 // Motion based on the trapezoidal profile
 
@@ -18,7 +19,8 @@ ProfiledMotion::ProfiledMotion(double dist, double maxVel, double accel, double 
 void ProfiledMotion::start() {
 	if (startTime == 0) [[unlikely]] {
 		logger->debug("Motion start. Total Time: {}\n", profile.getTotalTime());
-		startPose = sOdom.getCurrentState().position;
+		auto odom = robotInstance->getSubsystem<Odometry>();
+		if (odom) { startPose = odom.value()->getCurrentState().position; }
 		IMotion::start();
 	}
 }
@@ -28,7 +30,7 @@ bool ProfiledMotion::isVelocityControlled() const {
 	return true;
 }
 
-IMotion::MotorVoltages ProfiledMotion::calculateVoltages(kinState state) {
+IMotion::MotorVoltages ProfiledMotion::calculate(const kinState state) {
 	double time = (pros::millis() - startTime) / 1000.0;// because profile works in terms of seconds
 
 	// testing to see if forcing it to the end of motion is better
@@ -53,69 +55,12 @@ IMotion::MotorVoltages ProfiledMotion::calculateVoltages(kinState state) {
 	              state.position.getTheta() / M_PI * 180, state.position.getX(), motorRPM);
 
 	return {motorRPM, motorRPM};
-
-
-	// TODO: shift this away to using velocity motion and have that manage the voltage calculation part
-	// basically remove most of this code
-
-	// testing
-	/*constexpr double kSLeft = 1065.65839038;    // original
-	constexpr double kVLeft = 152.4539999079319;// original
-	// constexpr double kVLeft = 157.4539999079319;
-	constexpr double kALeft = 35.450363464220203;
-	constexpr double kDeLeft = 38.5;
-	// constexpr double kDeLeft = kALeft;
-
-	constexpr double kSRight = 835.517;
-	// constexpr double kVRight = 157.135;
-	constexpr double kVRight = 153.535;
-	constexpr double kARight = 35.3875;
-	// constexpr double kDeRight = 35;
-	constexpr double kDeRight = kARight;
-
-	int sign = util::sign(targetState.vel);
-	if (util::fpEquality(targetState.vel, 0.0)) { sign = 0; }
-
-	double FFLeft = kVLeft * targetState.vel + sign * kSLeft;
-	FFLeft += targetState.acc > 0 ? kALeft * targetState.acc : kDeLeft * targetState.acc;
-
-	double FFRight = kVRight * targetState.vel + sign * kSRight;
-	FFRight += targetState.acc > 0 ? kARight * targetState.acc : kDeRight * targetState.acc;
-
-	auto curState = sOdom.getCurrentState();
-	double distTraveled = curState.position.distanceTo(startPose) * util::sign(targetState.pos);
-	double error = -1 * (distTraveled - targetState.pos);
-
-	// TODO: For wednesday - take out FB pwr first and just tune the FF values first - minimize drift and get as close
-	// as possible
-	// double fbPwr = 0;
-	double fbPwr = error * 750;
-	// double fbPwr = error > 0 ? error * 500 : error * 250;
-	if (std::abs(profile.getTargetDist() - distTraveled) < 2) { errorSum += error; }
-	if (util::sign(error) != prevSign) {
-	    errorSum = 0;
-	    prevSign = util::sign(error);
-	}
-
-	fbPwr += errorSum * 250;
-
-	double leftPwr = FFLeft + fbPwr;
-	double rightPwr = FFRight + fbPwr;
-
-	logger->debug("TIME: {} tpos: {:.2f} tvel: {:.2f} cvel: {:.2f} tacc: {:.2f} err: {:.2f} dist traveled: {:.2f} "
-	              "ff: {:.2f} fb: {:.2f} "
-	              "total pwr: {:.2f} curHeading: {} x: {} err sum: {}"
-	              "\n",
-	              time, targetState.pos, targetState.vel, curState.velocity().y, targetState.acc, error, distTraveled,
-	              FFLeft, fbPwr, leftPwr, curState.position.getTheta() / M_PI * 180, curState.position.getX(),
-	              errorSum);
-
-	return {leftPwr, rightPwr};*/
 }
 
-bool ProfiledMotion::isSettled(kinState state) {
+bool ProfiledMotion::isSettled(const kinState state) {
 	// Considers the bot settled if the total distance travelled during the motion of the bot is within a certain
 	// threshold of the desired distance
-	double distTraveled = sOdom.getCurrentState().position.distanceTo(startPose);
+	auto odom = robotInstance->getSubsystem<Odometry>();
+	double distTraveled = odom ? odom.value()->getCurrentState().position.distanceTo(startPose) : 0;
 	return std::abs(profile.getTargetDist() - distTraveled) < threshold && overtime;
 }

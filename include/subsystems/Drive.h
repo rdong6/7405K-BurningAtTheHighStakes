@@ -1,8 +1,9 @@
 #pragma once
-
 #include "Constants.h"
 #include "Logger.h"
 #include "Odometry.h"
+#include "RobotBase.h"
+#include "Subsystem.h"
 #include "lib/physics/Motion.h"
 #include "lib/physics/NullMotion.h"
 #include "lib/utils/Mutex.h"
@@ -13,34 +14,26 @@
 #include "pros/motor_group.hpp"
 #include "pros/motors.hpp"
 #include "pros/rtos.hpp"
-#include <atomic>
 #include <cstddef>
 #include <memory>
 
-#define sDrive Drive::getInstance()
-
-class Drive {
+class Drive : public Subsystem {
 private:
 	// Motors
-	pros::MotorGroup leftDrive{0};
-	pros::MotorGroup rightDrive{0};
+	pros::MotorGroup leftDrive{ports::middleLeftMotor, ports::frontLeftMotor, ports::backLeftMotor};
+	pros::Motor weakLeft{ports::weakLeftMotor};
+	pros::MotorGroup rightDrive{ports::middleRightMotor, ports::frontRightMotor, ports::backRightMotor};
+	pros::Motor weakRight{ports::weakRightMotor};
 
-	// General Stuff
-	pros::task_t task = nullptr;
-	LoggerPtr logger = nullptr;
+	// motion stuff
+	bool isSettled = false;
+	bool isTimedOut = false;
+	Motion curMotion = NullMotion();
 
-	// thread safety
-	std::atomic<bool> isSettled = false;
-	std::atomic<bool> isTimedOut = false;
-	// pros::Mutex currentMotionMutex = pros::Mutex();
-	// Motion currentMotion = NullMotion();
-	util::Mutex<Motion> currentMotion = util::Mutex<Motion>(NullMotion());
+	double gearRatioWeak2Normal =
+	        1;// gear ratio between normal and weak motor -> used to scale velocities accordingly for 5.5w
 
-	Drive() = default;
-	Drive(const Drive&) = delete;
-	Drive& operator=(const Drive&) = delete;
-
-	[[noreturn]] void runner();
+	RobotThread runner();
 
 	// Motor Control
 	void setVoltageLeft(int voltage);
@@ -50,13 +43,14 @@ private:
 	void setVelocityRight(int velocity);
 
 public:
-	inline static Drive& getInstance() {
-		static Drive INSTANCE;
+	struct flags {
+		//
+	};
 
-		return INSTANCE;
-	}
+	explicit Drive(RobotBase* robot);
 
-	void initialize();
+	void registerTasks() override;
+
 	void setCurrentMotion(Motion motion);
 
 	double getLeftPosition() const;
@@ -68,9 +62,7 @@ public:
 	void setBrakeModeRight(pros::motor_brake_mode_e_t mode);
 	pros::motor_brake_mode_e_t getBrakeMode() const;
 
-	/**
-	 * @return returns true if settled, false if timed out
-	 */
-	bool waitUntilSettled(uint32_t timeout = TIMEOUT_MAX);
-	void waitUntilDist(double dist);
+	// todo: reimpl a way to indicate if motion timed out or settled
+	RobotFunc waitUntilSettled(uint32_t timeout = TIMEOUT_MAX);
+	RobotFunc waitUntilDist(double dist);
 };

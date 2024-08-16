@@ -1,41 +1,69 @@
 #pragma once
-#include <atomic>
+#include "RobotBase.h"
+#include "lib/utils/ReferenceWrapper.h"
+#include "lib/utils/TupleFuncs.h"
+#include "pros/rtos.h"
+#include "subsystems/Controller.h"
+#include "subsystems/Drive.h"
+#include "subsystems/Odometry.h"
+#include "subsystems/Subsystem.h"
+#include <functional>
+#include <optional>
+#include <tuple>
+#include <type_traits>
 
-#define sRobot Robot::getInstance()
+namespace {
+	template<typename, typename>
+	struct tuple_holds {};
 
-enum class Auton : uint32_t { NONE = 0, LEFT, RIGHT };
+	template<typename... A, typename B>
+	struct tuple_holds<std::tuple<A...>, B> : std::bool_constant<(std::is_same_v<A, B> || ...)> {};
+}// namespace
 
-class Robot {
-public:
-	enum OpMode { DRIVER, AUTONOMOUS };
-
+template<typename... Args>
+class Robot : public RobotBase {
 private:
-	// Singleton Stuff
-	Robot() = default;
+	std::tuple<Args*...> subsystems{new Args(this)...};
+	std::tuple<typename Args::flags*...> flags{new typename Args::flags()...};
+
+public:
 	Robot(const Robot&) = delete;
+	Robot(Robot&&) = delete;
 	Robot& operator=(const Robot&) = delete;
+	Robot& operator=(Robot&&) = delete;
 
-	// OpMode
-	std::atomic<OpMode> opmode = AUTONOMOUS;
-	std::atomic<Auton> auton = Auton::NONE;
+	Robot() : RobotBase() {
+		// setup the function table to get access to each subsystem & register tasks
 
-public:
-	// Robot Config stuff - yes it's public, idc <-- bad code that will be fixed at some point
-	std::atomic<bool> isQual = true;// true if qual, false if elim
+		// in order to ensure that the subsysetms get scheduled in the order they are specified in the parameter pack
+		// we need to apply this custom for_each func to the tuple
+		// std::apply() doesn't work as expansion of the paramater pack is impl defined
+		util::tuple::for_each(subsystems, [this](auto x) {
+			this->invokeTable[typeid(x)] = static_cast<std::function<decltype(x)()>>(
+			        [this]() { return std::get<decltype(x)>(this->subsystems); });
 
-public:
-	inline static Robot& getInstance() {
-		static Robot INSTANCE;
-		return INSTANCE;
+			x->registerTasks();
+		});
+
+		util::tuple::for_each(flags, [this](auto x) {
+			this->invokeTable[typeid(x)] =
+			        static_cast<std::function<decltype(x)()>>([this]() { return std::get<decltype(x)>(this->flags); });
+		});
 	}
 
-	void initialize();
+	~Robot() {
+		util::tuple::for_each(subsystems, [](auto x) { delete x; });
+	}
 
-	//  OpMode
-	OpMode getOpMode();
-	void setOpMode(OpMode op_mode);
-
-	// Auton
-	Auton getAuton();
-	void setAuton(Auton auton);
+	// template<typename T>
+	// inline std::optional<util::reference_wrapper<typename T::flags>> getFlag() {
+	// 	if constexpr (tuple_holds<decltype(flags), typename T::flags>::value) {
+	// 		return std::make_optional(util::reference_wrapper<typename T::flags>(std::get<typename T::flags>(flags)));
+	// 	} else {
+	// 		return std::nullopt;
+	// 	}
+	// }
 };
+
+inline Robot<Odometry, Drive, Controller>* robotInstance = nullptr;
+inline pros::task_t robotTask = nullptr;

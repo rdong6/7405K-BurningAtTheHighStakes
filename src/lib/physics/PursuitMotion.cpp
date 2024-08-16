@@ -1,12 +1,9 @@
 #include "lib/physics/PursuitMotion.h"
 #include "Constants.h"
-#include "Drive.h"
-#include "lib/follower/RAMSETE.h"
-#include "lib/geometry/GeneratedPoint.h"
-#include "lib/physics/MaxAccMotion.h"
-#include "lib/physics/Motion.h"
+#include "Robot.h"
 #include "lib/utils/Math.h"
 #include "pros/rtos.hpp"
+#include "subsystems/Drive.h"
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -23,9 +20,9 @@ namespace {
 }// namespace
 
 
-PursuitMotion::PursuitMotion(std::span<fttbtkjfk::GeneratedPoint>&& path, double lookahead, double maxVel,
+PursuitMotion::PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double lookahead, double maxVel,
                              double maxAccel, bool reversed, double threshold, double k)
-    : path(std::forward<std::span<fttbtkjfk::GeneratedPoint>>(path)), k(k), threshold(threshold), lookahead(lookahead),
+    : path(std::forward<std::span<fttbtkjfk::PursuitPoint>>(path)), k(k), threshold(threshold), lookahead(lookahead),
       prevTime(0), maxVel(maxVel), maxAccel(maxAccel), curVel(0), lastLookaheadIndex(0), lastLookaheadPose(),
       isReversed(reversed ? -1 : 1) {
 	vels = std::make_shared<double[]>(this->path.size());
@@ -164,14 +161,15 @@ double PursuitMotion::curDistFromEnd(kinState state) const {
 
 void PursuitMotion::start() {
 	if (startTime == 0) [[unlikely]] {
-		lastLookaheadIndex = findClosestIndex(sOdom.getCurrentState().position);
+		auto odom = robotInstance->getSubsystem<Odometry>();
+		lastLookaheadIndex = findClosestIndex(odom ? odom.value()->getCurrentState().position : Pose());
 		lastLookaheadPose = *reinterpret_cast<const Pose*>(&path[lastLookaheadIndex].pose);
 		prevTime = pros::millis();
 		IMotion::start();
 	}
 }
 
-IMotion::MotorVoltages PursuitMotion::calculateVoltages(kinState state) {
+IMotion::MotorVoltages PursuitMotion::calculate(const kinState state) {
 	// dt is used for rate limiting of vel of robot
 	double curTime = pros::millis();
 	double dt = (curTime - prevTime) / 1000.0;
@@ -229,6 +227,6 @@ bool PursuitMotion::isVelocityControlled() const {
 	return true;
 }
 
-bool PursuitMotion::isSettled(kinState state) {
+bool PursuitMotion::isSettled(const kinState state) {
 	return curDistFromEnd(state) <= threshold;
 }

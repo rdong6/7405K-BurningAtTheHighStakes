@@ -3,6 +3,7 @@
 #include "lib/utils/is_derived.h"
 #include <any>
 #include <cstdint>
+#include <memory>
 #include <type_traits>
 
 // Base class for every motion that our robot does either during auton or opcontrol
@@ -22,8 +23,8 @@ public:
 	virtual void start();
 	// makes drive use motor's set_velocity instead of set_voltage - defaults to voltage
 	virtual bool isVelocityControlled() const;
-	virtual MotorVoltages calculateVoltages(kinState state) = 0;
-	virtual bool isSettled(kinState state) = 0;
+	virtual MotorVoltages calculate(const kinState state) = 0;
+	virtual bool isSettled(const kinState state) = 0;
 };
 
 
@@ -44,6 +45,6 @@ public:
 	      }} {}
 
 	IMotion* operator->() {
-		return &getter(storage);
+		return std::addressof(getter(storage));
 	}
 };

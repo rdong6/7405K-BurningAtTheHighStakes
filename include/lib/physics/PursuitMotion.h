@@ -1,9 +1,9 @@
 #pragma once
 #include "Logger.h"
 #include "Motion.h"
-#include "lib/geometry/GeneratedPoint.h"
 #include "lib/geometry/Pose.h"
 #include "lib/geometry/kinState.h"
+#include "lib/trajectory/PursuitPoint.h"
 #include <span>
 #include <utility>
 
@@ -11,7 +11,7 @@ class PursuitMotion : public IMotion {
 private:
 	static LoggerPtr logger;
 
-	std::span<fttbtkjfk::GeneratedPoint> path;
+	std::span<fttbtkjfk::PursuitPoint> path;
 	std::shared_ptr<double[]> vels;// stores vels along a path. shared_ptr as unique_ptr is incompatabile w/ std::any as
 	                               // std::any requires objects to be copy constructible
 	const double k;
@@ -61,10 +61,10 @@ private:
 	double curDistFromEnd(kinState state) const;
 
 public:
-	PursuitMotion(std::span<fttbtkjfk::GeneratedPoint>&& path, double lookahead, double maxVel, double maxAccel,
+	PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double lookahead, double maxVel, double maxAccel,
 	              bool reversed = false, double threshold = 1, double k = 2);
 	void start() override;
-	MotorVoltages calculateVoltages(kinState state) override;
+	MotorVoltages calculate(const kinState state) override;
 	bool isVelocityControlled() const override;
-	bool isSettled(kinState state) override;
+	bool isSettled(const kinState state) override;
 };

@@ -1,7 +1,8 @@
 #include "lib/physics/PIDTurn.h"
-#include "Drive.h"
+#include "Robot.h"
 #include "lib/utils/Math.h"
 #include "pros/motors.h"
+#include "subsystems/Drive.h"
 
 // In place turns, controlled by a PID
 
@@ -19,21 +20,20 @@ PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight,
       brakeRight(brakeRight), initialSign(0), forceRight(forceRight), forceRightTerminate(false), forceLeft(forceLeft),
       forceLeftTerminate(false) {}
 
-// PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, bool
-// flipDirection)
-//     : targetHeading(targetHeading), pid(pid), counter(0), threshold(threshold), brakeLeft(brakeLeft),
-//       brakeRight(brakeRight) {}
-
 void PIDTurn::start() {
 	if (startTime == 0) [[unlikely]] {
-		initialSign =
-		        ::sign(util::getShortestAngle(util::toDeg(sOdom.getCurrentState().position.getTheta()), targetHeading));
-		prevBrakeMode = sDrive.getBrakeMode();
+		auto odom = robotInstance->getSubsystem<Odometry>();
+		initialSign = odom ? ::sign(util::getShortestAngle(
+		                             util::toDeg(odom.value()->getCurrentState().position.getTheta()), targetHeading))
+		                   : 1;
+
+		auto drive = robotInstance->getSubsystem<Drive>();
+		prevBrakeMode = drive ? drive.value()->getBrakeMode() : pros::E_MOTOR_BRAKE_BRAKE;
 		IMotion::start();
 	}
 }
 
-IMotion::MotorVoltages PIDTurn::calculateVoltages(kinState state) {
+IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	// Calculates the difference in degrees from our current heading to the target heading
 	double error = util::getShortestAngle(util::toDeg(state.position.getTheta()), targetHeading);
 
@@ -54,8 +54,11 @@ IMotion::MotorVoltages PIDTurn::calculateVoltages(kinState state) {
 
 
 	// this part is for the hacky spline thing
-	if (brakeLeft) { sDrive.setBrakeModeLeft(pros::E_MOTOR_BRAKE_HOLD); }
-	if (brakeRight) { sDrive.setBrakeModeRight(pros::E_MOTOR_BRAKE_HOLD); }
+	auto drive = robotInstance->getSubsystem<Drive>();
+	if (drive) {
+		if (brakeLeft) { drive.value()->setBrakeModeLeft(pros::E_MOTOR_BRAKE_HOLD); }
+		if (brakeRight) { drive.value()->setBrakeModeRight(pros::E_MOTOR_BRAKE_HOLD); }
+	}
 
 	// Every time the error is within the threshold, we add to a counter (see isSettled)
 	// This is so we actually settle and have reached our desired heading
@@ -90,7 +93,7 @@ IMotion::MotorVoltages PIDTurn::calculateVoltages(kinState state) {
 	return {leftPwr, rightPwr};
 }
 
-bool PIDTurn::isSettled(kinState state) {
+bool PIDTurn::isSettled(const kinState state) {
 	// If the counter is above 5 (meaning we have had our error below the threshold for 5 iterations) then return that
 	// it is settled
 	return counter > 5;

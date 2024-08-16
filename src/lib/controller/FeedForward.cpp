@@ -1,4 +1,4 @@
-#include "lib/controllers/FeedForward.h"
+#include "lib/controller/FeedForward.h"
 #include "lib/utils/Math.h"
 
 // initializes class with our 3 constnats

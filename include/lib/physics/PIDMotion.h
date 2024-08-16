@@ -1,6 +1,6 @@
 #pragma once
 #include "Motion.h"
-#include "lib/controllers/PID.h"
+#include "lib/controller/PID.h"
 #include "lib/geometry/Pose.h"
 
 // this entire motion just uses everything in degrees cause its easier
@@ -16,6 +16,6 @@ private:
 public:
 	// turn pid is for heading correction
 	PIDMotion(Pose pose, PID pwrPID, PID trnPID = PID(), bool headingCorrection = false, double threshold = 0.5);
-	MotorVoltages calculateVoltages(kinState state) override;
-	bool isSettled(kinState state) override;
+	MotorVoltages calculate(const kinState state) override;
+	bool isSettled(const kinState state) override;
 };

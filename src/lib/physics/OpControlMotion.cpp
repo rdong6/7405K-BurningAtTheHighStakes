@@ -1,6 +1,6 @@
 #include "lib/physics/OpControlMotion.h"
-#include "Controller.h"
 #include "lib/utils/Math.h"
+#include "subsystems/Controller.h"
 #include <cmath>
 
 namespace {
@@ -9,11 +9,11 @@ namespace {
 	}
 }// namespace
 
-IMotion::MotorVoltages OpControlMotion::calculateVoltages(kinState state) {
+IMotion::MotorVoltages OpControlMotion::calculate(const kinState state) {
 	// Gets analog inputs from controller (analog inputs means that the more the joystick if pushed, the larger the
 	// input we get)
-	int power = sController.getAnalog(Controller::left_y);
-	int turn = sController.getAnalog(Controller::right_x);
+	int power = pros::c::controller_get_analog(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_ANALOG_LEFT_Y);
+	int turn = pros::c::controller_get_analog(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
 	// Calculates the difference in power required in the motors to achieve the desired turn requested by the controller
 	// This part makes it a curved line, instead of linear relationship between controller input and output
@@ -38,6 +38,6 @@ IMotion::MotorVoltages OpControlMotion::calculateVoltages(kinState state) {
 	return {left, right};
 }
 
-bool OpControlMotion::isSettled(kinState state) {
+bool OpControlMotion::isSettled(const kinState state) {
 	return false;
 }

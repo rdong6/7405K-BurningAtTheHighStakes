@@ -12,9 +12,9 @@ private:
 
 public:
 	NullMotion(bool velControl = false);
-	MotorVoltages calculateVoltages(kinState state) override;
+	MotorVoltages calculate(const kinState state) override;
 	bool isVelocityControlled() const override;
-	bool isSettled(kinState state) override;
+	bool isSettled(const kinState state) override;
 };
 
 #endif// INC_7405SPINUP_NULLMOTION_H

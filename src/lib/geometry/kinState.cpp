@@ -1,10 +1,10 @@
 #include "lib/geometry/kinState.h"
 
-kinState::substate kinState::acceleration() {
+kinState::substate kinState::acceleration() const {
 	return accel_state;
 }
 
-kinState::substate kinState::velocity() {
+kinState::substate kinState::velocity() const {
 	return velo_state;
 }
 
@@ -20,7 +20,7 @@ void kinState::setAcceleration(double _x, double _y, double _h) {
 	accel_state.theta = _h;
 }
 
-kinState kinState::predict(double dt) {
+kinState kinState::predict(double dt) const {
 	kinState future = *this;
 
 	future.position.transformBy((velo_state.x * dt) + (accel_state.x * dt * dt * 0.5),

@@ -8,7 +8,7 @@
 // Power is in mV
 TimedMotion::TimedMotion(uint32_t time, double power) : delay(time), power(power) {}
 
-IMotion::MotorVoltages TimedMotion::calculateVoltages(kinState state) {
+IMotion::MotorVoltages TimedMotion::calculate(const kinState state) {
 	return {power, power};
 }
 
@@ -17,6 +17,6 @@ bool TimedMotion::isVelocityControlled() const {
 	return false;
 }
 
-bool TimedMotion::isSettled(kinState state) {
+bool TimedMotion::isSettled(const kinState state) {
 	return pros::millis() >= startTime + delay;
 }

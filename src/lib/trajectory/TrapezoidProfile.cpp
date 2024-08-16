@@ -1,4 +1,4 @@
-#include "lib/geometry/TrapezoidProfile.h"
+#include "lib/trajectory/TrapezoidProfile.h"
 #include <cmath>
 
 TrapezoidProfile::TrapezoidProfile()

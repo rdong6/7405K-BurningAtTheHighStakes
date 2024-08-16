@@ -1,7 +1,7 @@
 #pragma once
 #include "Motion.h"
-#include "lib/controllers/FeedForward.h"
-#include "lib/controllers/PID.h"
+#include "lib/controller/FeedForward.h"
+#include "lib/controller/PID.h"
 
 // WIP (Not really used at the moment)
 
@@ -27,7 +27,6 @@ protected:
 public:
 	VelocityMotion(FeedForward ff, PID fbLeft, PID fbRight);
 	void start() override;
-	MotorVoltages
-	calculateVoltages(kinState state) override final;// calls calculateVelocities, and then outputs voltages
-	virtual bool isSettled(kinState state) override = 0;
+	MotorVoltages calculate(const kinState state) override final;// calls calculateVelocities, and then outputs voltages
+	virtual bool isSettled(const kinState state) override = 0;
 };

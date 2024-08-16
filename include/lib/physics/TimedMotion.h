@@ -14,9 +14,9 @@ private:
 public:
 	// time in ms, power in millivolts for both sides of drive to get
 	TimedMotion(uint32_t time, double power);
-	MotorVoltages calculateVoltages(kinState state) override;
+	MotorVoltages calculate(const kinState state) override;
 	bool isVelocityControlled() const override;
-	bool isSettled(kinState state) override;
+	bool isSettled(const kinState state) override;
 };
 
 #endif// INC_7405SPINUP_TIMEDMOTION_H

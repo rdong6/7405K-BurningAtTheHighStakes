@@ -1,14 +1,11 @@
 #pragma once
-
-#include "pros/misc.hpp"
-#include "pros/rtos.hpp"
+#include "RobotBase.h"
+#include "Subsystem.h"
 #include <functional>
 #include <map>
 #include <utility>
 
-#define sController Controller::getInstance()
-
-class Controller {
+class Controller : public Subsystem {
 public:
 	enum ID { master = 0, partner };
 	enum Analog { left_x = 0, left_y, right_x, right_y };
@@ -18,37 +15,29 @@ public:
 private:
 	using DigitalFunc = std::function<void(void)>;
 
-	pros::task_t task;
-	pros::Mutex mutex;
-
 	// stores callbacks - controller, which button, and on which action to call callback
-	std::map<std::tuple<ID, Digital, ButtonMode>, std::pair<DigitalFunc, DigitalFunc>> buttonBinds;
+	std::map<std::tuple<ID, Digital, ButtonMode>, std::pair<DigitalFunc, DigitalFunc>> buttonBinds{};
 
 	// stores current button state + prevous button state
 	// std::pair<bool, bool> - first stores the current state, second stores the previous state
-	std::map<std::pair<ID, Digital>, std::pair<bool, bool>> buttonStates;
+	std::map<std::pair<ID, Digital>, std::pair<bool, bool>> buttonStates{};
 
-	Controller();
-	Controller(const Controller&) = delete;
-	Controller& operator=(const Controller&) = delete;
-
-	[[noreturn]] void backend();
+	// helper func
 	void callCallback(const std::pair<ID, Digital>& key, ButtonMode mode, bool callDefault = false);
 
+	RobotThread update();
+
 public:
-	inline static Controller& getInstance() {
-		static Controller INSTANCE;
+	struct flags {
+		//
+	};
 
-		return INSTANCE;
-	}
+	explicit Controller(RobotBase* robot);
 
-	void initialize();
+	void registerTasks() override;
 
 	void registerCallback(const DigitalFunc& callback, const DigitalFunc& defaultFunc, ID id, Digital digital,
 	                      ButtonMode mode);
 
 	bool removeCallback(ID id, Digital digital, ButtonMode mode);
-
-	[[nodiscard]] int32_t getDigital(Digital digital, ID id = master) const;
-	[[nodiscard]] int32_t getAnalog(Analog analog, ID id = master) const;
 };

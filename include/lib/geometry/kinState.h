@@ -18,10 +18,10 @@ public:
 	kinState(Pose pos, substate velo, substate accel) : position(pos), velo_state(velo), accel_state(accel){};
 
 	Pose position;
-	substate velocity();
-	substate acceleration();
+	substate velocity() const;
+	substate acceleration() const;
 
 	void setVelocity(double _x, double _y, double _h);
 	void setAcceleration(double _x, double _y, double _h);
-	kinState predict(double dt);
+	kinState predict(double dt) const;
 };
