@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <initializer_list>
 #include <numbers>
+
+
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // numbers indicate ports, negative numbers indicate reversed devices
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -11,22 +13,25 @@
 
 namespace ports {
 	constexpr int frontLeftMotor = -1;
-	constexpr int middleLeftMotor = -11;
-	constexpr int backLeftMotor = -13;
-	constexpr int weakLeftMotor = -12;
+	constexpr int middleLeftMotor = -18;
+	constexpr int backLeftMotor = 29;
+	constexpr int weakLeftMotor = 0;
 
-	constexpr int frontRightMotor = 6;
-	constexpr int middleRightMotor = 20;
-	constexpr int backRightMotor = 18;
-	constexpr int weakRightMotor = 19;
+	constexpr int frontRightMotor = 8;
+	constexpr int middleRightMotor = 12;
+	constexpr int backRightMotor = -13;
+	constexpr int weakRightMotor = 0;
 
-	constexpr std::initializer_list<std::int8_t> intake = {10};
+	constexpr std::initializer_list<std::int8_t> intake = {6};
+
+	constexpr int liftMotor = 14;
+	constexpr int liftRotation = 10;
 
 	constexpr int leftRotation = 0;
 	constexpr int rightRotation = 0;
 
-	constexpr int backRotation = -14;
-	constexpr int imu = 17;
+	constexpr int backRotation = 0;
+	constexpr int imu = 0;
 }// namespace ports
 
 namespace odometers {

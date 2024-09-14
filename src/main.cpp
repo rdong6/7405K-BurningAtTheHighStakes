@@ -1,6 +1,7 @@
 #include "main.h"
 #include "Robot.h"
 #include "RobotBase.h"
+#include "lib/physics/ProfiledMotion.h"
 #include "lib/utils/CoroutineGenerator.h"
 #include "liblvgl/llemu.hpp"
 #include "pros/rtos.h"
@@ -31,8 +32,11 @@ void initialize() {
 }
 
 // USE THIS FUNC FOR AUTON CODING!
+// thread runs after all other threads run
 RobotThread autonomousUser() {
-	co_yield util::coroutine::nextCycle();
+	auto driveOpt = robotInstance->getSubsystem<Drive>();
+
+	auto driveRef = driveOpt.value();
 }
 
 

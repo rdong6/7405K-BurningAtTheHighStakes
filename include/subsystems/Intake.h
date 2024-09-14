@@ -1,12 +1,15 @@
 #pragma once
+#include "Constants.h"
 #include "Logger.h"
 #include "Subsystem.h"
 #include "main.h"
+#include "pros/adi.hpp"
 #include "pros/motors.hpp"
 
 class Intake : public Subsystem {
 private:
-	pros::MotorGroup motors;
+	pros::MotorGroup motors{ports::intake};
+	pros::adi::DigitalOut extender{'A'};
 
 public:
 	struct flags {

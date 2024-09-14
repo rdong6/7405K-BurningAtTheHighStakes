@@ -23,6 +23,7 @@ PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight,
 void PIDTurn::start() {
 	if (startTime == 0) [[unlikely]] {
 		auto odom = robotInstance->getSubsystem<Odometry>();
+
 		initialSign = odom ? ::sign(util::getShortestAngle(
 		                             util::toDeg(odom.value()->getCurrentState().position.getTheta()), targetHeading))
 		                   : 1;

@@ -12,8 +12,10 @@
 #include "pros/rtos.h"
 #include "pros/rtos.hpp"
 #include "subsystems/Controller.h"
+#include "subsystems/Intake.h"
 #include "subsystems/Odometry.h"
 #include <algorithm>
+#include <stdexcept>
 
 Drive::Drive(RobotBase* robot) : Subsystem(robot, this) {
 	leftDrive.set_gearing_all(pros::E_MOTOR_GEAR_600);
@@ -37,6 +39,7 @@ Drive::Drive(RobotBase* robot) : Subsystem(robot, this) {
 }
 
 void Drive::registerTasks() {
+	// Auton thread
 	robot->registerTask(
 	        [this]() {
 		        this->setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
@@ -44,6 +47,7 @@ void Drive::registerTasks() {
 	        },
 	        TaskType::AUTON);
 
+	// Opctrl thread
 	robot->registerTask(
 	        [this]() {
 		        this->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
@@ -91,6 +95,7 @@ RobotThread Drive::runner() {
 // Waits until the bots motion has finished travelling where it wanted to
 RobotFunc Drive::waitUntilSettled(uint32_t timeout) {
 	auto timer = Timeout(timeout);
+
 	auto func = [this, timer]() -> bool {
 		if (timer.timedOut()) {
 			// motion timed out

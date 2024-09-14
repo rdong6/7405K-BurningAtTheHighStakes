@@ -5,6 +5,8 @@
 #include "pros/rtos.h"
 #include "subsystems/Controller.h"
 #include "subsystems/Drive.h"
+#include "subsystems/Intake.h"
+#include "subsystems/Lift.h"
 #include "subsystems/Odometry.h"
 #include "subsystems/Subsystem.h"
 #include <functional>
@@ -41,7 +43,10 @@ public:
 		util::tuple::for_each(subsystems, [this](auto x) {
 			this->invokeTable[typeid(x)] = static_cast<std::function<decltype(x)()>>(
 			        [this]() { return std::get<decltype(x)>(this->subsystems); });
+		});
 
+		util::tuple::for_each(subsystems, [this](auto x) {
+			printf("Registering subsystem\n");
 			x->registerTasks();
 		});
 
@@ -53,6 +58,7 @@ public:
 
 	~Robot() {
 		util::tuple::for_each(subsystems, [](auto x) { delete x; });
+		util::tuple::for_each(flags, [](auto x) { delete x; });
 	}
 
 	// template<typename T>
@@ -65,5 +71,5 @@ public:
 	// }
 };
 
-inline Robot<Odometry, Drive, Controller>* robotInstance = nullptr;
+inline Robot<Intake, Lift, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;

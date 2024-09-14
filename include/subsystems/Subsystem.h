@@ -2,6 +2,7 @@
 #include "Logger.h"
 #include "RobotBase.h"
 #include "lib/utils/is_derived.h"
+#include <arm_neon.h>
 #include <cxxabi.h>
 #include <stdexcept>
 
@@ -39,7 +40,7 @@ public:
 			throw std::runtime_error("Invalid Instantiation of Subsystem!");
 		}
 
-		logger = sLogger.createSource(::typename_from(typeid(*derived)));
+		logger = sLogger.createSource(typename_from(typeid(*derived)));
 	}
 
 	virtual void registerTasks() {}

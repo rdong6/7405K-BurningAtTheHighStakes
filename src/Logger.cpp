@@ -163,6 +163,8 @@ void Logger::terminate() {
 }
 
 std::shared_ptr<LogSource> Logger::createSource(std::string name, uint32_t timeout, const char* color) {
+	if (sources.contains(name)) { return sources.at(name); }
+
 	std::shared_ptr<LogSource> source = std::shared_ptr<LogSource>(new LogSource(name, timeout, color));
 
 	sources.insert_or_assign(name, source);
