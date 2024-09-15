@@ -1,6 +1,8 @@
 #include "subsystems/Intake.h"
 #include "Constants.h"
 #include "Logger.h"
+#include "RobotBase.h"
+#include "lib/utils/CoroutineGenerator.h"
 #include "pros/motors.h"
 #include "subsystems/Controller.h"
 #include <cmath>
@@ -11,6 +13,12 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot, this) {
 
 	// sets the proper cart of the motor incase you ever want to use moveVel
 	motors.set_gearing_all(pros::E_MOTOR_GEAR_200);
+
+	extender.set_value(robot->getFlag<flags>().value()->isExtended);
+}
+
+void Intake::registerTasks() {
+	robot->registerTask([this]() { return this->runner(); }, TaskType::SENTINEL);
 
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
@@ -31,6 +39,27 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot, this) {
 
 	controllerRef->registerCallback([this]() { this->moveVoltage(0); }, []() {}, Controller::master, Controller::r2,
 	                                Controller::falling);
+}
+
+// As of now, running constantly on robot no matter the competition state
+RobotThread Intake::runner() {
+	while (true) {
+		int32_t dist = distance.get();// in mm
+
+		// do whatever with distance value every 10ms
+
+		co_yield util::coroutine::nextCycle();
+	}
+}
+
+void Intake::setExtender(bool extended) {
+	auto intakeFlags = robot->getFlag<flags>().value();
+	intakeFlags->isExtended = extended;
+	extender.set_value(extended);
+}
+
+void Intake::toggleExtender() {
+	setExtender(!robot->getFlag<flags>().value()->isExtended);
 }
 
 void Intake::moveVoltage(int mv) {

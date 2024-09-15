@@ -23,6 +23,7 @@ namespace ports {
 	constexpr int weakRightMotor = 0;
 
 	constexpr std::initializer_list<std::int8_t> intake = {6};
+	constexpr int intakeDistance = 0;
 
 	constexpr int liftMotor = 14;
 	constexpr int liftRotation = 10;

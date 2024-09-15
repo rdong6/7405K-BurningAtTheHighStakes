@@ -14,13 +14,13 @@
 #include <tuple>
 #include <type_traits>
 
-namespace {
+namespace detail {
 	template<typename, typename>
 	struct tuple_holds {};
 
 	template<typename... A, typename B>
 	struct tuple_holds<std::tuple<A...>, B> : std::bool_constant<(std::is_same_v<A, B> || ...)> {};
-}// namespace
+}// namespace detail
 
 template<typename... Args>
 class Robot : public RobotBase {
@@ -45,10 +45,10 @@ public:
 			        [this]() { return std::get<decltype(x)>(this->subsystems); });
 		});
 
-		util::tuple::for_each(subsystems, [this](auto x) {
-			printf("Registering subsystem\n");
-			x->registerTasks();
-		});
+		// have to do this after invoke table is initialized w/ subsystems
+		// as controller callbacks are registered in registerTasks()
+		// issue arises if a subsystem registers tasks before Controller subsystem is inside invoke table
+		util::tuple::for_each(subsystems, [this](auto x) { x->registerTasks(); });
 
 		util::tuple::for_each(flags, [this](auto x) {
 			this->invokeTable[typeid(x)] =

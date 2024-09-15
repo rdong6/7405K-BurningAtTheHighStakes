@@ -1,4 +1,5 @@
 #include "main.h"
+#include "FreeRTOSFuncs.h"
 #include "Robot.h"
 #include "RobotBase.h"
 #include "lib/physics/ProfiledMotion.h"
@@ -13,6 +14,7 @@ RobotThread autonomousUser();
 void robot_init() {
 	robotInstance = new std::decay<decltype(*robotInstance)>::type();
 	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::AUTON);
+
 	robotTask = pros::c::task_create(
 	        [](void* robot) {
 		        if (robot) { static_cast<decltype(robotInstance)>(robot)->run(); }
@@ -37,6 +39,8 @@ RobotThread autonomousUser() {
 	auto driveOpt = robotInstance->getSubsystem<Drive>();
 
 	auto driveRef = driveOpt.value();
+
+	co_yield util::coroutine::nextCycle();
 }
 
 
@@ -50,4 +54,15 @@ void disabled() {}
 
 void autonomous() {}
 
-void opcontrol() {}
+void opcontrol() {
+	static char buffer[2046];
+	static char buffer2[2046];
+	pros::delay(1000);
+	vTaskGetRunTimeStats(buffer);
+	printf("%s\n", buffer);
+	pros::delay(1000);
+	vTaskGetRunTimeStats(buffer2);
+	printf("%s\n", buffer2);
+}
+
+// conversion factor (abs time to ms): ((3/2)/1000000)

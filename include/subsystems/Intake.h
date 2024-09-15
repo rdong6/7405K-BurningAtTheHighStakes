@@ -1,26 +1,37 @@
 #pragma once
 #include "Constants.h"
 #include "Logger.h"
+#include "RobotBase.h"
 #include "Subsystem.h"
 #include "main.h"
 #include "pros/adi.hpp"
+#include "pros/distance.hpp"
 #include "pros/motors.hpp"
 
 class Intake : public Subsystem {
 private:
 	pros::MotorGroup motors{ports::intake};
+	pros::Distance distance{ports::intakeDistance};
 	pros::adi::DigitalOut extender{'A'};
+
+	RobotThread runner();
 
 public:
 	struct flags {
-		bool isMoving = false;
+		bool isExtended{false};
+		bool isMoving{false};
 	};
 
 	explicit Intake(RobotBase* robot);
 
+	void registerTasks() override;
+
 	void moveVoltage(int mv);
 	void moveVel(int vel);
 	void brake();
+
+	void setExtender(bool extended);
+	void toggleExtender();
 };
 
 

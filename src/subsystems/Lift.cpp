@@ -7,6 +7,9 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
+#define UPPER_BOUNDS 181
+#define LOWER_BOUNDS 10
+
 Lift::Lift(RobotBase* robot) : Subsystem(robot, this) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	motor.set_gearing(pros::E_MOTOR_GEAR_100);
@@ -94,22 +97,22 @@ RobotThread Lift::runner() {
 RobotThread Lift::openLiftCoro() {
 	auto liftFlags = robot->getFlag<flags>().value();
 	liftFlags->isMotionRunning = true;
-	liftFlags->targetAngle = 84;
-	// this->pid = PID(150, 5, 50);
+	liftFlags->targetAngle = 84;// tune this
 	liftFlags->errorThresh = 3;
 
 
 	co_yield util::coroutine::nextCycle();
 
-	if (!liftFlags->isMotionRunning) { co_return; }
-
 	// wait to move to place
 	// maybe change this condition to make it faster/more fluid
-	co_yield [this]() -> bool { return !robot->getFlag<flags>().value()->isMoving; };
+	while (liftFlags->curAngle > 80 /* TBD! */ && liftFlags->isMoving) {
+		if (!liftFlags->isMotionRunning) { co_return; }
+		co_yield util::coroutine::nextCycle();
+	}
+	pid.reset();
 
 	claw.set_value(true);
 	liftFlags->targetAngle = 66;
-	// this->pid = PID(50, 0, 50);
 	liftFlags->errorThresh = 3.5;
 
 	co_yield util::coroutine::nextCycle();
@@ -122,18 +125,16 @@ RobotThread Lift::closeLiftCoro() {
 	auto liftFlags = robot->getFlag<flags>().value();
 	liftFlags->isMotionRunning = true;
 	liftFlags->targetAngle = 100;
-	// this->pid = PID(150, 5, 50);
 	liftFlags->errorThresh = 3;
 
 	co_yield util::coroutine::nextCycle();
-	co_yield [this]() -> bool { return !robot->getFlag<flags>().value()->isMoving; };
+	co_yield [=]() -> bool { return !liftFlags->isMoving; };
 
 	claw.set_value(false);
 	co_yield util::coroutine::delay(100);
 
 	liftFlags->isMotionRunning = true;
 	liftFlags->targetAngle = 10;
-	// this->pid = PID(100, 5, 50);
 	liftFlags->errorThresh = 2;
 
 	co_yield util::coroutine::nextCycle();
@@ -156,8 +157,12 @@ void Lift::setState(bool open) {
 }
 
 void Lift::move(int mv) {
-	if (mv > 0 && (rotation.get_position() / 100.0) > 181) { mv = 0; }
-	if (mv < 0 && (rotation.get_position() / 100.0) < 10) { mv = 0; }
+	if (mv > 0 && (rotation.get_position() / 100.0) > UPPER_BOUNDS) { mv = 0; }
+	if (mv < 0 && (rotation.get_position() / 100.0) < LOWER_BOUNDS) { mv = 0; }
 
-	motor.move_voltage(mv);
+	if (mv == 0) {
+		motor.brake();
+	} else {
+		motor.move_voltage(mv);
+	}
 }

@@ -21,15 +21,16 @@ private:
 	RobotThread closeLiftCoro();
 
 	void move(int mv);
+	void hold();
 
 public:
 	struct flags {
 		double curAngle{};
 		double targetAngle{20};
 		double errorThresh{2};
-		bool isMoving{false};// is the lift arm open
-		bool isOpen{false};  // is the lift open
 
+		bool isMoving{false};       // is the lift arm open
+		bool isOpen{false};         // is the lift open
 		bool isMotionRunning{false};// is the lift running a motion (open/close lift coroutine)
 
 		bool kill{false};// moment this is set to true kills entire subsystem
