@@ -2,6 +2,7 @@
 #include "Robot.h"
 #include "RobotBase.h"
 #include "lib/utils/CoroutineGenerator.h"
+#include "lib/utils/Math.h"
 #include "pros/motors.h"
 #include "subsystems/Controller.h"
 #include "subsystems/Subsystem.h"
@@ -51,16 +52,28 @@ void Lift::registerTasks() {
 	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2,
 	                                Controller::falling);
 
-	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::a,
+	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::y,
 	                                Controller::rising);
 }
 
 RobotThread Lift::updateAngle() {
 	auto liftFlags = robot->getFlag<flags>().value();
+	int counter = 0;
+
 	while (true) {
 		int32_t pos = rotation.get_position();
+		double rotationVel = rotation.get_velocity() / 100.0;// deg/s
 
-		if (pos == std::numeric_limits<int32_t>::max()) {
+		// 1:3
+		double motorVel = motor.get_actual_velocity() / 60;
+		if (liftFlags->isMoving && fabs(motorVel) > 0 && util::fpEquality(fabs(rotationVel), 0.0)) {
+			counter++;
+		} else {
+			counter = 0;
+		}
+
+		// kill lift if rotation sensor becomes unplugged (data is max) or if rotation's data freezes
+		if (pos == std::numeric_limits<int32_t>::max() || counter > 20) {
 			liftFlags->kill = true;
 			co_return;
 		}
@@ -97,7 +110,7 @@ RobotThread Lift::runner() {
 RobotThread Lift::openLiftCoro() {
 	auto liftFlags = robot->getFlag<flags>().value();
 	liftFlags->isMotionRunning = true;
-	liftFlags->targetAngle = 105;// tune this
+	liftFlags->targetAngle = 110;// tune this
 	liftFlags->errorThresh = 3;
 
 
@@ -105,17 +118,20 @@ RobotThread Lift::openLiftCoro() {
 
 	// wait to move to place
 	// maybe change this condition to make it faster/more fluid
-	// while (liftFlags->curAngle < 90 /* TBD! */ && liftFlags->isMoving) {
-	// 	if (!liftFlags->isMotionRunning) { co_return; }
-	// 	co_yield util::coroutine::nextCycle();
-	// }
-	co_yield [=]() -> bool { return liftFlags->curAngle > 90; };
+	while (liftFlags->curAngle < 98 /* TBD! */ && liftFlags->isMoving) {
+		if (!liftFlags->isMotionRunning) { co_return; }
+		co_yield util::coroutine::nextCycle();
+	}
 	claw.set_value(true);
-	co_yield [=]() -> bool { return !liftFlags->isMoving; };
-	printf("Done moving up. Angle: %f\n", liftFlags->curAngle);
+	co_yield util::coroutine::delay(100);
+
+	// co_yield [=]() -> bool { return liftFlags->curAngle > 90; };
+	// claw.set_value(true);
+	// co_yield [=]() -> bool { return !liftFlags->isMoving; };
+
 	pid.reset();
-	liftFlags->targetAngle = 66;
-	liftFlags->errorThresh = 3.5;
+	liftFlags->targetAngle = 76.5;
+	liftFlags->errorThresh = 1;
 
 	co_yield util::coroutine::nextCycle();
 	if (!liftFlags->isMotionRunning) { co_return; }
@@ -128,15 +144,13 @@ RobotThread Lift::closeLiftCoro() {
 
 	claw.set_value(false);
 	liftFlags->isMotionRunning = true;
-	liftFlags->targetAngle = 100;
+	liftFlags->targetAngle = 105;
 	liftFlags->errorThresh = 3;
 
 	co_yield util::coroutine::nextCycle();
 	co_yield [=]() -> bool { return !liftFlags->isMoving; };
+	co_yield util::coroutine::delay(300);// give time for the claw to actually close
 
-	co_yield util::coroutine::delay(100);
-
-	liftFlags->isMotionRunning = true;
 	liftFlags->targetAngle = 10;
 	liftFlags->errorThresh = 2;
 

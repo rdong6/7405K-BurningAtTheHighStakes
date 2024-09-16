@@ -72,5 +72,5 @@ public:
 	// }
 };
 
-inline Robot<Intake, Drive, Pnooomatics, Controller>* robotInstance = nullptr;
+inline Robot<Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;

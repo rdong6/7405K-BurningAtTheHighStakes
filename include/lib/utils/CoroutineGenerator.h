@@ -90,6 +90,6 @@ namespace util::coroutine {
 
 	inline std::function<bool(void)> delay(uint32_t ms) {
 		uint32_t curTime = pros::c::millis();
-		return [=]() -> bool { return curTime - pros::c::millis() > ms; };
+		return [=]() -> bool { return pros::c::millis() - curTime > ms; };
 	}
 }// namespace util::coroutine

@@ -46,14 +46,23 @@ RobotThread Intake::runner() {
 	auto intakeFlags = robot->getFlag<flags>().value();
 	while (true) {
 		int32_t dist = distance.get();// in mm
-		printf("Torque: %d", motors.get_torque());
-		if(intakeFlags->torqueStop && motors.get_torque() > 100 /*tune later*/){
-			motors.brake();
+
+		if (intakeFlags->torqueStop && motors.get_torque() > 100 /*tune later*/) { motors.brake(); }
+		if (intakeFlags->distStop && dist < 60 /*tune later*/) { motors.brake(); }
+
+		if (dist <= 80) {
+			intakeFlags->fullyIn = false;
+			intakeFlags->partiallyIn = true;
+
+			if (dist <= 45) {
+				intakeFlags->partiallyIn = false;
+				intakeFlags->fullyIn = true;
+			}
+		} else {
+			intakeFlags->partiallyIn = false;
+			intakeFlags->fullyIn = false;
 		}
-		if(intakeFlags->distStop && dist < 60 /*tune later*/){
-			motors.brake();
-		}
-		// do whatever with distance value every 10ms
+
 
 		co_yield util::coroutine::nextCycle();
 	}

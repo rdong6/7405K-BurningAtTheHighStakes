@@ -1,0 +1,5 @@
+CompileFlags:
+  Remove:
+  - '-std=gnu++20'
+  Add:
+  - '-std=c++20'

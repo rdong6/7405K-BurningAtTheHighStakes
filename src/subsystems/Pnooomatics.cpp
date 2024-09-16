@@ -15,6 +15,8 @@ void Pnooomatics::registerTasks() {
 	auto controllerRef = controller.value();
 
 	// do controller keybinds here
+	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::x,
+	                                Controller::rising);
 }
 
 void Pnooomatics::setHang(bool release) {

@@ -22,6 +22,10 @@ public:
 		bool isMoving{false};
 		bool torqueStop{false};
 		bool distStop{false};
+
+		// ring status
+		bool partiallyIn{false};
+		bool fullyIn{false};
 	};
 
 	explicit Intake(RobotBase* robot);

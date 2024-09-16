@@ -7,6 +7,8 @@
 #include "liblvgl/llemu.hpp"
 #include "pros/rtos.h"
 #include "subsystems/Drive.h"
+#include "subsystems/Intake.h"
+#include "subsystems/Lift.h"
 #include <type_traits>
 
 RobotThread autonomousUser();
@@ -37,8 +39,9 @@ void initialize() {
 // thread runs after all other threads run
 RobotThread autonomousUser() {
 	auto driveOpt = robotInstance->getSubsystem<Drive>();
-
-	auto driveRef = driveOpt.value();
+	auto drive = driveOpt.value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
 
 	co_yield util::coroutine::nextCycle();
 }
