@@ -11,7 +11,7 @@
 #define LOWER_BOUNDS 10
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot, this) {
-	motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	motor.set_gearing(pros::E_MOTOR_GEAR_100);
 
 	rotation.set_data_rate(5);
@@ -97,7 +97,7 @@ RobotThread Lift::runner() {
 RobotThread Lift::openLiftCoro() {
 	auto liftFlags = robot->getFlag<flags>().value();
 	liftFlags->isMotionRunning = true;
-	liftFlags->targetAngle = 84;// tune this
+	liftFlags->targetAngle = 105;// tune this
 	liftFlags->errorThresh = 3;
 
 
@@ -105,13 +105,15 @@ RobotThread Lift::openLiftCoro() {
 
 	// wait to move to place
 	// maybe change this condition to make it faster/more fluid
-	while (liftFlags->curAngle > 80 /* TBD! */ && liftFlags->isMoving) {
-		if (!liftFlags->isMotionRunning) { co_return; }
-		co_yield util::coroutine::nextCycle();
-	}
-	pid.reset();
-
+	// while (liftFlags->curAngle < 90 /* TBD! */ && liftFlags->isMoving) {
+	// 	if (!liftFlags->isMotionRunning) { co_return; }
+	// 	co_yield util::coroutine::nextCycle();
+	// }
+	co_yield [=]() -> bool { return liftFlags->curAngle > 90; };
 	claw.set_value(true);
+	co_yield [=]() -> bool { return !liftFlags->isMoving; };
+	printf("Done moving up. Angle: %f\n", liftFlags->curAngle);
+	pid.reset();
 	liftFlags->targetAngle = 66;
 	liftFlags->errorThresh = 3.5;
 
@@ -123,6 +125,8 @@ RobotThread Lift::openLiftCoro() {
 
 RobotThread Lift::closeLiftCoro() {
 	auto liftFlags = robot->getFlag<flags>().value();
+
+	claw.set_value(false);
 	liftFlags->isMotionRunning = true;
 	liftFlags->targetAngle = 100;
 	liftFlags->errorThresh = 3;
@@ -130,7 +134,6 @@ RobotThread Lift::closeLiftCoro() {
 	co_yield util::coroutine::nextCycle();
 	co_yield [=]() -> bool { return !liftFlags->isMoving; };
 
-	claw.set_value(false);
 	co_yield util::coroutine::delay(100);
 
 	liftFlags->isMotionRunning = true;

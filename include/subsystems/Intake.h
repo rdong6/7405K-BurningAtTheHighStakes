@@ -20,6 +20,8 @@ public:
 	struct flags {
 		bool isExtended{false};
 		bool isMoving{false};
+		bool torqueStop{false};
+		bool distStop{false};
 	};
 
 	explicit Intake(RobotBase* robot);
@@ -32,6 +34,9 @@ public:
 
 	void setExtender(bool extended);
 	void toggleExtender();
+
+	void setTorqueStop(bool val);
+	void setDistStop(bool val);
 };
 
 

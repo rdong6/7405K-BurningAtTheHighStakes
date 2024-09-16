@@ -55,14 +55,14 @@ void disabled() {}
 void autonomous() {}
 
 void opcontrol() {
-	static char buffer[2046];
-	static char buffer2[2046];
-	pros::delay(1000);
-	vTaskGetRunTimeStats(buffer);
-	printf("%s\n", buffer);
-	pros::delay(1000);
-	vTaskGetRunTimeStats(buffer2);
-	printf("%s\n", buffer2);
+	// static char buffer[2046];
+	// static char buffer2[2046];
+	// pros::delay(1000);
+	// vTaskGetRunTimeStats(buffer);
+	// printf("%s\n", buffer);
+	// pros::delay(1000);
+	// vTaskGetRunTimeStats(buffer2);
+	// printf("%s\n", buffer2);
 }
 
 // conversion factor (abs time to ms): ((3/2)/1000000)

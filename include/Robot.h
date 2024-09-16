@@ -8,6 +8,7 @@
 #include "subsystems/Intake.h"
 #include "subsystems/Lift.h"
 #include "subsystems/Odometry.h"
+#include "subsystems/Pnooomatics.h"
 #include "subsystems/Subsystem.h"
 #include <functional>
 #include <optional>
@@ -71,5 +72,5 @@ public:
 	// }
 };
 
-inline Robot<Intake, Lift, Controller>* robotInstance = nullptr;
+inline Robot<Intake, Drive, Pnooomatics, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;

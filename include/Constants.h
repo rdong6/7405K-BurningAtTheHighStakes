@@ -26,7 +26,7 @@ namespace ports {
 	constexpr int intakeDistance = 0;
 
 	constexpr int liftMotor = 14;
-	constexpr int liftRotation = 10;
+	constexpr int liftRotation = 21;
 
 	constexpr int leftRotation = 0;
 	constexpr int rightRotation = 0;

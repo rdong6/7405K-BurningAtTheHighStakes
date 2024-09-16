@@ -14,7 +14,7 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot, this) {
 	// sets the proper cart of the motor incase you ever want to use moveVel
 	motors.set_gearing_all(pros::E_MOTOR_GEAR_200);
 
-	extender.set_value(robot->getFlag<flags>().value()->isExtended);
+	extender.set_value(false);
 }
 
 void Intake::registerTasks() {
@@ -43,9 +43,16 @@ void Intake::registerTasks() {
 
 // As of now, running constantly on robot no matter the competition state
 RobotThread Intake::runner() {
+	auto intakeFlags = robot->getFlag<flags>().value();
 	while (true) {
 		int32_t dist = distance.get();// in mm
-
+		printf("Torque: %d", motors.get_torque());
+		if(intakeFlags->torqueStop && motors.get_torque() > 100 /*tune later*/){
+			motors.brake();
+		}
+		if(intakeFlags->distStop && dist < 60 /*tune later*/){
+			motors.brake();
+		}
 		// do whatever with distance value every 10ms
 
 		co_yield util::coroutine::nextCycle();
@@ -56,6 +63,16 @@ void Intake::setExtender(bool extended) {
 	auto intakeFlags = robot->getFlag<flags>().value();
 	intakeFlags->isExtended = extended;
 	extender.set_value(extended);
+}
+
+void Intake::setTorqueStop(bool val) {
+	auto intakeFlags = robot->getFlag<flags>().value();
+	intakeFlags->torqueStop = val;
+}
+
+void Intake::setDistStop(bool val) {
+	auto intakeFlags = robot->getFlag<flags>().value();
+	intakeFlags->distStop = val;
 }
 
 void Intake::toggleExtender() {

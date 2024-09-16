@@ -1,0 +1,5 @@
+    {
+        "directory": "C:/Users/TZYan/Robotics-Directories/7405K-BurningAtTheHighStakes",
+        "command": "arm-none-eabi-gcc -c -iquote\"./include\" -iquote\"./src\" -iquote\"./extern\" -iquote\"./include ./src ./extern/./src/\" -mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=softfp -Os -g -D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK -I./include -I./src -I./extern -MMD -MP -DFMT_STATIC_THOUSANDS_SEPERATOR=',' -DFMT_USE_LONG_DOUBLE=0 -DFMT_USE_FLOAT128=0 -DFMT_USE_FLOAT=0 -DFMT_USE_USER_DEFINED_LITERALS=0 -DFMT_USE_FULL_CACHE_DRAGONBOX=0 -D_PROS_INCLUDE_LIBLVGL_LLEMU_H -D_PROS_INCLUDE_LIBLVGL_LLEMU_HPP -Wno-psabi -ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables --std=gnu11 -MT bin/./src/lv_font_dejavu_40.c.o -MMD -MP -MF ./.d/./src/lv_font_dejavu_40.d -o bin/./src/lv_font_dejavu_40.c.o src/lv_font_dejavu_40.c",
+        "file": "src/lv_font_dejavu_40.c"
+    }

@@ -11,6 +11,8 @@ private:
 	bool clampEnabled = false;
 
 public:
+	struct flags {};
+	
 	explicit Pnooomatics(RobotBase* robot);
 
 	void registerTasks() override;
