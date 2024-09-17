@@ -55,7 +55,7 @@ RobotThread Odometry::updatePosition() {
 		// otherwise we use motor encoders
 
 		// TODO: clean up code - lots of repeat within the compile time selections
-		if constexpr (ports::leftRotation > 0) {
+		if constexpr (ports::leftRotation != 0) {
 			double LE = leftWheel.get_position();
 			l_dist = ((LE - prev_l) / 36000.0) * M_PI * odometers::leftDeadwheelDiameter;
 			prev_l = LE;
@@ -65,7 +65,7 @@ RobotThread Odometry::updatePosition() {
 			prev_l = LE;
 		}
 
-		if constexpr (ports::rightRotation > 0) {
+		if constexpr (ports::rightRotation != 0) {
 			double RE = rightWheel.get_position();
 			r_dist = ((RE - prev_r) / 36000.0) * M_PI * odometers::rightDeadwheelDiameter;
 			prev_r = RE;
@@ -84,7 +84,7 @@ RobotThread Odometry::updatePosition() {
 			dh = (l_dist - r_dist) / (odometers::trackWidth);
 		}
 
-		if constexpr (ports::backRotation > 0) {
+		if constexpr (ports::backRotation != 0) {
 			double BE = backWheel.get_position();
 			pros::lcd::print(4, "BE: %f", BE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
 			double b_dist = ((BE - prev_b) / 36000.0) * M_PI * odometers::backDeadwheelDiameter;

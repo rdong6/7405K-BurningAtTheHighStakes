@@ -26,6 +26,7 @@ public:
 		// ring status
 		bool partiallyIn{false};
 		bool fullyIn{false};
+		bool storeSecond{false};
 	};
 
 	explicit Intake(RobotBase* robot);

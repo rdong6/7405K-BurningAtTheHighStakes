@@ -17,6 +17,9 @@ void Pnooomatics::registerTasks() {
 	// do controller keybinds here
 	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::x,
 	                                Controller::rising);
+
+	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::down,
+	                                Controller::rising);
 }
 
 void Pnooomatics::setHang(bool release) {
@@ -37,4 +40,14 @@ void Pnooomatics::setClamp(bool enable) {
 void Pnooomatics::toggleClamp() {
 	clampEnabled = !clampEnabled;
 	clamp.set_value(clampEnabled);
+}
+
+void Pnooomatics::setHammer(bool enable) {
+	hammerDeployed = enable;
+	hammer.set_value(enable);
+}
+
+void Pnooomatics::toggleHammer() {
+	hammerDeployed = !hammerDeployed;
+	hammer.set_value(hammerDeployed);
 }

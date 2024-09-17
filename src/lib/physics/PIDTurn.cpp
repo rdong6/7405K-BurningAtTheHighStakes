@@ -88,8 +88,11 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	// 	rightPwr = util::sign(rightPwr) * util::lerp(1400, 12000.0, util::clamp(0.0, 1.0, fabs(rightPwr / 12000.0)));
 	// }
 
-	logger->debug("Error: {:.2f} Counter: {} heading: {} Left Pwr: {} Right Pwr: {}\n", error, counter,
+	printf("Error: %.2f Counter: %d heading: %.2f Left Pwr: %.2f Right Pwr: %.2f\n", error, counter,
 	              util::toDeg(state.position.getTheta()), leftPwr, rightPwr);
+
+	// logger->debug("Error: {:.2f} Counter: {} heading: {} Left Pwr: {} Right Pwr: {}\n", error, counter,
+	//               util::toDeg(state.position.getTheta()), leftPwr, rightPwr);
 
 	return {leftPwr, rightPwr};
 }

@@ -148,7 +148,8 @@ bin/./src/main.cpp.o: src/main.cpp include/main.h include/api.h \
  include/subsystems/Lift.h include/lib/controller/PID.h \
  include/pros/rotation.hpp include/subsystems/Pnooomatics.h \
  include/lib/physics/ProfiledMotion.h \
- include/lib/trajectory/TrapezoidProfile.h
+ include/lib/trajectory/TrapezoidProfile.h include/lib/physics/PIDTurn.h \
+ include/lib/physics/TimedMotion.h
 include/main.h:
 include/api.h:
 include/pros/adi.h:
@@ -403,3 +404,5 @@ include/pros/rotation.hpp:
 include/subsystems/Pnooomatics.h:
 include/lib/physics/ProfiledMotion.h:
 include/lib/trajectory/TrapezoidProfile.h:
+include/lib/physics/PIDTurn.h:
+include/lib/physics/TimedMotion.h:

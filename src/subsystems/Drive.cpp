@@ -65,12 +65,12 @@ RobotThread Drive::runner() {
 		curMotion->start();
 
 		// check if motion has timed out (if it has, set current motion to nullmotion)
-		if (isTimedOut) {
-			logger->warn("MOTION TIMED OUT\n");
+		// if (isTimedOut) {
+		// 	logger->warn("MOTION TIMED OUT\n");
 
-			curMotion = NullMotion();
-			isTimedOut = false;
-		}
+		// 	curMotion = NullMotion();
+		// 	isTimedOut = false;
+		// }
 
 		kinState curState = odom ? odom.value()->getCurrentState() : kinState();
 
@@ -99,10 +99,11 @@ RobotFunc Drive::waitUntilSettled(uint32_t timeout) {
 	auto func = [this, timer]() -> bool {
 		if (timer.timedOut()) {
 			// motion timed out
-			isTimedOut = true;
+			// isTimedOut = true;
 
-			if (!isTimedOut) { return true; }// wait until drive realizes that we timed out
-			return false;
+			// if (!isTimedOut) { return true; }// wait until drive realizes that we timed out
+			this->curMotion = NullMotion();
+			return true;
 		} else {
 			if (isSettled) {
 				// motion finished, reset drive state

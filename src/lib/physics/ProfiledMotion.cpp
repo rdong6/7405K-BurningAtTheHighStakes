@@ -47,12 +47,17 @@ IMotion::MotorVoltages ProfiledMotion::calculate(const kinState state) {
 	double wheelVel = targetState.vel * 60;
 
 	// gear ratio is included in the deadwheel diamater
-	double motorRPM = wheelVel / (odometers::leftDeadwheelDiameter * std::numbers::pi);
+	double motorRPM = wheelVel / (odometers::driveGearRatio * std::numbers::pi);
 
-	logger->debug("TIME: {} tpos: {:.2f} tvel: {:.2f} cvel: {:.2f} tacc: {:.2f} err: {:.2f} dist traveled: {:.2f} "
-	              "curHeading: {} x: {}  motor rpm: {}\n",
-	              time, targetState.pos, targetState.vel, state.velocity().y, targetState.acc, error, distTraveled,
-	              state.position.getTheta() / M_PI * 180, state.position.getX(), motorRPM);
+	// printf("TIME: %.2f tpos: %.2f tvel: %.2f cvel: %.2f tacc: %.2f err: %.2f dist traveled: %.2f "
+	//               "curHeading: %.2f x: %.2f  motor rpm: %.2f\n",
+	//               time, targetState.pos, targetState.vel, state.velocity().y, targetState.acc, error, distTraveled,
+	//               state.position.getTheta() / M_PI * 180, state.position.getX(), motorRPM);
+
+	// logger->debug("TIME: {} tpos: {:.2f} tvel: {:.2f} cvel: {:.2f} tacc: {:.2f} err: {:.2f} dist traveled: {:.2f} "
+	//               "curHeading: {} x: {}  motor rpm: {}\n",
+	//               time, targetState.pos, targetState.vel, state.velocity().y, targetState.acc, error, distTraveled,
+	//               state.position.getTheta() / M_PI * 180, state.position.getX(), motorRPM);
 
 	return {motorRPM, motorRPM};
 }
@@ -62,5 +67,5 @@ bool ProfiledMotion::isSettled(const kinState state) {
 	// threshold of the desired distance
 	auto odom = robotInstance->getSubsystem<Odometry>();
 	double distTraveled = odom ? odom.value()->getCurrentState().position.distanceTo(startPose) : 0;
-	return std::abs(profile.getTargetDist() - distTraveled) < threshold && overtime;
+	return std::abs(profile.getTargetDist() - distTraveled) < threshold || overtime;
 }
