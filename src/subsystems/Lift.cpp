@@ -52,7 +52,7 @@ void Lift::registerTasks() {
 	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2,
 	                                Controller::falling);
 
-	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::y,
+	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::right,
 	                                Controller::rising);
 }
 

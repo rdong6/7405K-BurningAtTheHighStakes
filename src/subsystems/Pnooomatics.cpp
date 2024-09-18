@@ -15,10 +15,13 @@ void Pnooomatics::registerTasks() {
 	auto controllerRef = controller.value();
 
 	// do controller keybinds here
-	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::x,
+	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::b,
 	                                Controller::rising);
 
 	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::down,
+	                                Controller::rising);
+	
+	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::a,
 	                                Controller::rising);
 }
 

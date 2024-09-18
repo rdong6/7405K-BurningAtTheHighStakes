@@ -72,13 +72,59 @@ RobotThread redRingSideAuton() {
 	drive->setCurrentMotion(PIDTurn(4, PID(250, 30, 30, true, 10), true, false));
 	co_yield drive->waitUntilSettled(800);
 	intake->moveVoltage(-12000);
-	drive->setCurrentMotion(ProfiledMotion(8, 50, 60, 60));
+	drive->setCurrentMotion(TimedMotion(500, -6000));
 	co_yield drive->waitUntilSettled(1000);
 	co_yield util::coroutine::nextCycle();
 }
 
+RobotThread skillsAuton() {
+	auto driveOpt = robotInstance->getSubsystem<Drive>();
+	auto drive = driveOpt.value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto pnooomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	drive->setCurrentMotion(ProfiledMotion(-16, 50, 50, 60));
+	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(PIDTurn(90, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(-18, 50, 50, 60));
+	co_yield drive->waitUntilSettled(1000);
+	pnooomatics->setClamp(true);
+	drive->setCurrentMotion(PIDTurn(188, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(20, 50, 50, 60));
+	co_yield util::coroutine::delay(300);
+	intake->moveVoltage(-12000);
+	co_yield drive->waitUntilSettled(1000);
+	//go to wall stake
+	// drive->setCurrentMotion(PIDTurn(240, PID(150, 1, 45, true, 10), false, false));
+	// co_yield drive->waitUntilSettled(1000);
+	// lift -> toggleState();
+	// drive->setCurrentMotion(ProfiledMotion(48, 30, 50, 60));
+	// co_yield drive->waitUntilSettled(1000);
+
+
+	drive->setCurrentMotion(PIDTurn(270, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(24, 30, 50, 60));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(PIDTurn(0, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(36, 25, 50, 50));
+	co_yield drive->waitUntilSettled(2000);
+	drive->setCurrentMotion(PIDTurn(236, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(14, 40, 50, 60));
+	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(PIDTurn(138, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(-8, 40, 50, 60));
+	co_yield drive->waitUntilSettled(1500);
+	pnooomatics->setClamp(false);
+}
+
 RobotThread autonomousUser() {
-	auto coro = redRingSideAuton();
+	auto coro = skillsAuton();
 	while (coro) { co_yield coro(); }
 
 	// auto driveOpt = robotInstance->getSubsystem<Drive>();
