@@ -17,7 +17,7 @@ namespace ports {
 	constexpr int backLeftMotor = 20;
 	constexpr int weakLeftMotor = 0;
 
-	constexpr int frontRightMotor = 8;
+	constexpr int frontRightMotor = 7;
 	constexpr int middleRightMotor = 12;
 	constexpr int backRightMotor = -13;
 	constexpr int weakRightMotor = 0;
@@ -36,7 +36,7 @@ namespace ports {
 }// namespace ports
 
 namespace odometers {
-	constexpr double driveGearRatio = 3.25 / 60.0 * 36; // diameter + gear ratio included
+	constexpr double driveGearRatio = 3.25 / 60.0 * 36;// diameter + gear ratio included
 
 	// distance between left and right wheels of drivetrain/odometry wheels
 	constexpr double trackWidth = 10.4714285483;
@@ -48,5 +48,5 @@ namespace odometers {
 	constexpr double leftDeadwheelDiameter = 2.75; // 48:84 is gear ratio
 	constexpr double rightDeadwheelDiameter = 2.75;// 48:84 is gear ratio
 	constexpr double backDeadwheelDiameter = 2.75; // ignored if backRotation is 0
-	constexpr double backOffset = 2.98188;     // ignored if backRotation is 0
+	constexpr double backOffset = 2.98188;         // ignored if backRotation is 0
 }// namespace odometers
