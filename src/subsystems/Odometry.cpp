@@ -86,7 +86,7 @@ RobotThread Odometry::updatePosition() {
 
 		if constexpr (ports::backRotation != 0) {
 			double BE = backWheel.get_position();
-			pros::lcd::print(4, "BE: %f", BE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
+			// pros::lcd::print(4, "BE: %f", BE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
 			double b_dist = ((BE - prev_b) / 36000.0) * M_PI * odometers::backDeadwheelDiameter;
 			prev_b = BE;
 

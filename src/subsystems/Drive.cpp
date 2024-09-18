@@ -64,14 +64,6 @@ RobotThread Drive::runner() {
 		// marks the time in which we first start to run the motion
 		curMotion->start();
 
-		// check if motion has timed out (if it has, set current motion to nullmotion)
-		// if (isTimedOut) {
-		// 	logger->warn("MOTION TIMED OUT\n");
-
-		// 	curMotion = NullMotion();
-		// 	isTimedOut = false;
-		// }
-
 		kinState curState = odom ? odom.value()->getCurrentState() : kinState();
 
 		// Gets new motor voltages based on calculations related to the specific motion

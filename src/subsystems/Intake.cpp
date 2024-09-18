@@ -47,31 +47,31 @@ RobotThread Intake::runner() {
 	while (true) {
 		int32_t dist = distance.get();// in mm
 		// printf("distance: %d", dist);
-		if (intakeFlags->torqueStop && motors.get_torque() > 100 /*tune later*/) { motors.brake(); this->setTorqueStop(false); }
+		if (intakeFlags->torqueStop && motors.get_torque() > 100 /*tune later*/) {
+			motors.brake();
+			this->setTorqueStop(false);
+		}
 
-		if (intakeFlags->distStop)
-		{
+		if (intakeFlags->distStop) {
 			if (dist <= 55) {
 				intakeFlags->partiallyIn = false;
 				intakeFlags->fullyIn = true;
 			} else if (dist <= 100) {
-				if(intakeFlags->storeSecond){
-					intakeFlags->storeSecond = false;
-				}
+				if (intakeFlags->storeSecond) { intakeFlags->storeSecond = false; }
 				intakeFlags->fullyIn = false;
 				intakeFlags->partiallyIn = true;
 			} else {
-				if(intakeFlags->storeSecond){
-					intakeFlags->storeSecond = false;
-				}
+				if (intakeFlags->storeSecond) { intakeFlags->storeSecond = false; }
 				intakeFlags->partiallyIn = false;
 				intakeFlags->fullyIn = false;
 			}
+
 			if (!intakeFlags->storeSecond && intakeFlags->fullyIn) {
-				motors.brake(); 
-				this->setDistStop(false); 
+				motors.brake();
+				this->setDistStop(false);
 			}
 		}
+
 		co_yield util::coroutine::nextCycle();
 	}
 }
@@ -91,10 +91,7 @@ void Intake::setDistStop(bool val) {
 	auto intakeFlags = robot->getFlag<flags>().value();
 	intakeFlags->distStop = val;
 	int32_t dist = distance.get();
-	if(dist < 55
-	){
-		intakeFlags->storeSecond = true;
-	}
+	if (dist < 55) { intakeFlags->storeSecond = true; }
 }
 
 void Intake::toggleExtender() {

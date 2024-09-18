@@ -2,8 +2,8 @@
 #include "FreeRTOSFuncs.h"
 #include "Robot.h"
 #include "RobotBase.h"
-#include "lib/physics/ProfiledMotion.h"
 #include "lib/physics/PIDTurn.h"
+#include "lib/physics/ProfiledMotion.h"
 #include "lib/physics/TimedMotion.h"
 #include "lib/utils/CoroutineGenerator.h"
 #include "liblvgl/llemu.hpp"
@@ -40,7 +40,7 @@ void initialize() {
 
 // USE THIS FUNC FOR AUTON CODING!
 // thread runs after all other threads run
-RobotThread autonomousUser() {
+RobotThread redRingSideAuton() {
 	auto driveOpt = robotInstance->getSubsystem<Drive>();
 	auto drive = driveOpt.value();
 	auto intake = robotInstance->getSubsystem<Intake>().value();
@@ -56,21 +56,45 @@ RobotThread autonomousUser() {
 	printf("Moving forwards done\n");
 	drive->setCurrentMotion(ProfiledMotion(-6, 50, 60, 60));
 	co_yield drive->waitUntilSettled(500);
-	drive->setCurrentMotion(PIDTurn(286, PID(150,1,50, true, 10), false, true));
+	drive->setCurrentMotion(PIDTurn(286, PID(150, 1, 50, true, 10), false, true));
 	co_yield drive->waitUntilSettled(1000);
 	// drive->setCurrentMotion(ProfiledMotion(-3, 50, 20, 20));
 	drive->setCurrentMotion(TimedMotion(300, -6000));
 	co_yield drive->waitUntilSettled(500);
-	pnooomatics -> setClamp(true);
+	pnooomatics->setClamp(true);
 	co_yield util::coroutine::delay(300);
+	robotInstance->getFlag<Intake::flags>().value()->distStop = false;
 	intake->moveVoltage(-12000);
-	drive->setCurrentMotion(PIDTurn(315, PID(250,30,30, true, 10), false, true));
+	drive->setCurrentMotion(PIDTurn(315, PID(250, 30, 30, true, 10), false, true));
 	co_yield drive->waitUntilSettled(800);
 	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1000);
-	drive->setCurrentMotion(PIDTurn(360, PID(250,30,30, true, 10), true, false));
+	drive->setCurrentMotion(PIDTurn(4, PID(250, 30, 30, true, 10), true, false));
 	co_yield drive->waitUntilSettled(800);
+	intake->moveVoltage(-12000);
+	drive->setCurrentMotion(ProfiledMotion(8, 50, 60, 60));
+	co_yield drive->waitUntilSettled(1000);
 	co_yield util::coroutine::nextCycle();
+}
+
+RobotThread autonomousUser() {
+	auto coro = redRingSideAuton();
+	while (coro) { co_yield coro(); }
+
+	// auto driveOpt = robotInstance->getSubsystem<Drive>();
+	// auto drive = driveOpt.value();
+	// auto intake = robotInstance->getSubsystem<Intake>().value();
+	// auto lift = robotInstance->getSubsystem<Lift>().value();
+	// auto pnooomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+
+	// // move backwards to clamp mogo
+	// drive->setCurrentMotion(TimedMotion(300, -6000));
+	// co_yield drive->waitUntilSettled(300);
+	// pnooomatics->setClamp(true);
+	// co_yield util::coroutine::delay(300);// TBD
+
+	// // turn to intake rings
+	// drive->setCurrentMotion(PIDTurn(0 /* TBD */, PID(250, 30, 30, true, 10)));
 }
 
 

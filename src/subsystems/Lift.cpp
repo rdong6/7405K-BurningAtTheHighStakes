@@ -125,10 +125,6 @@ RobotThread Lift::openLiftCoro() {
 	claw.set_value(true);
 	co_yield util::coroutine::delay(100);
 
-	// co_yield [=]() -> bool { return liftFlags->curAngle > 90; };
-	// claw.set_value(true);
-	// co_yield [=]() -> bool { return !liftFlags->isMoving; };
-
 	pid.reset();
 	liftFlags->targetAngle = 76.5;
 	liftFlags->errorThresh = 1;
