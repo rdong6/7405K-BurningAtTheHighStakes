@@ -8,8 +8,8 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
-#define UPPER_BOUNDS 181
-#define LOWER_BOUNDS 10
+#define UPPER_BOUNDS 190 /*181*/
+#define LOWER_BOUNDS 0
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot, this) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -35,6 +35,7 @@ void Lift::registerTasks() {
 	controllerRef->registerCallback(
 	        [this]() {
 		        robot->getFlag<flags>().value()->isMotionRunning = false;
+		        robot->getFlag<flags>().value()->isHolding = false;
 		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
@@ -42,6 +43,7 @@ void Lift::registerTasks() {
 	controllerRef->registerCallback(
 	        [this]() {
 		        robot->getFlag<flags>().value()->isMotionRunning = false;
+		        robot->getFlag<flags>().value()->isHolding = false;
 		        move(-12000);
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
@@ -86,20 +88,21 @@ RobotThread Lift::updateAngle() {
 RobotThread Lift::runner() {
 	auto liftFlags = robot->getFlag<flags>().value();
 	liftFlags->isMoving = true;
-	pid.reset();
+	liftFlags->pid.reset();
 
 	while (true) {
 		if (liftFlags->kill) { co_return; }
 
 		double error = liftFlags->targetAngle - liftFlags->curAngle;
 
-		if (fabs(error) >= liftFlags->errorThresh && liftFlags->isMotionRunning) {
+		// only have pid control if motion is running or requested to hold
+		if (fabs(error) >= liftFlags->errorThresh && (liftFlags->isMotionRunning || liftFlags->isHolding)) {
 			liftFlags->isMoving = true;
-			double pwr = pid(error);
+			double pwr = liftFlags->pid(error);
 			move(pwr);
 		} else {
 			liftFlags->isMoving = false;
-			pid.reset();
+			liftFlags->pid.reset();
 			motor.brake();
 		}
 
@@ -125,7 +128,7 @@ RobotThread Lift::openLiftCoro() {
 	claw.set_value(true);
 	co_yield util::coroutine::delay(100);
 
-	pid.reset();
+	liftFlags->pid.reset();
 	liftFlags->targetAngle = 76.5;
 	liftFlags->errorThresh = 1;
 
@@ -168,6 +171,11 @@ void Lift::setState(bool open) {
 		robot->registerTask([this]() { return this->closeLiftCoro(); }, TaskType::SENTINEL);
 	}
 }
+
+void Lift::setClaw(double enabled) {
+	claw.set_value(enabled);
+}
+
 
 void Lift::move(int mv) {
 	if (mv > 0 && (rotation.get_position() / 100.0) > UPPER_BOUNDS) { mv = 0; }

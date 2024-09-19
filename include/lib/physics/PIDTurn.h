@@ -9,6 +9,7 @@ class PIDTurn : public IMotion {
 private:
 	double targetHeading;
 	double threshold;
+	double maxPower;
 	PID pid;
 	int counter = 0;// counter for how long we've been at a pos
 	int initialSign = 0;
@@ -26,7 +27,7 @@ private:
 
 public:
 	PIDTurn(double targetHeading, PID pid, bool brakeLeft = false, bool brakeRight = false, double threshold = 0.5,
-	        bool forceRight = false, bool forceLeft = false);
+	        double maxPower = 12000, bool forceRight = false, bool forceLeft = false);
 	void start() override;
 	MotorVoltages calculate(const kinState state) override;
 	bool isSettled(const kinState state) override;

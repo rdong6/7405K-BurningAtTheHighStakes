@@ -44,10 +44,14 @@ void Intake::registerTasks() {
 // As of now, running constantly on robot no matter the competition state
 RobotThread Intake::runner() {
 	auto intakeFlags = robot->getFlag<flags>().value();
+
 	while (true) {
 		int32_t dist = distance.get();// in mm
-		// printf("distance: %d", dist);
-		if (intakeFlags->torqueStop && motors.get_torque() > 100 /*tune later*/) {
+
+		// printf("Torque: %f  Vel: %f\n", motors.get_torque(), motors.get_actual_velocity());
+		if (intakeFlags->torqueStop &&
+		    (motors.get_torque() > 0.97 && fabs(motors.get_actual_velocity()) >= 20) /*tune later*/) {
+			printf("Stopping due to torque\n\n\n\n\n\n\n\n");
 			motors.brake();
 			this->setTorqueStop(false);
 		}

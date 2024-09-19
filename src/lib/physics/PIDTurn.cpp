@@ -3,6 +3,7 @@
 #include "lib/utils/Math.h"
 #include "pros/motors.h"
 #include "subsystems/Drive.h"
+#include "lib/utils/Math.h"
 
 // In place turns, controlled by a PID
 
@@ -14,11 +15,11 @@ namespace {
 
 LoggerPtr PIDTurn::logger = sLogger.createSource("PIDTurn", 0);
 
-PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, bool forceRight,
+PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, double maxPower, bool forceRight,
                  bool forceLeft)
     : targetHeading(targetHeading), pid(pid), counter(0), threshold(threshold), brakeLeft(brakeLeft),
       brakeRight(brakeRight), initialSign(0), forceRight(forceRight), forceRightTerminate(false), forceLeft(forceLeft),
-      forceLeftTerminate(false) {}
+      forceLeftTerminate(false), maxPower(maxPower) {}
 
 void PIDTurn::start() {
 	if (startTime == 0) [[unlikely]] {
@@ -73,6 +74,10 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 
 	// compute motor powers given our heading error
 	double turnPwr = pid(error);
+
+	if (fabs(turnPwr) >= maxPower) {
+		turnPwr = util::sign(turnPwr) * maxPower;
+	}
 
 	// the hacky spline thing again, otherwise calculate motor power for each side
 	double leftPwr = brakeLeft ? 0 : turnPwr;
