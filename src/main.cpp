@@ -111,7 +111,7 @@ RobotThread skillsAuton() {
 	co_yield drive->waitUntilSettled(1000);
 	drive->setCurrentMotion(ProfiledMotion(22, 50, 50, 60));
 	co_yield util::coroutine::delay(300);
-	// intake->moveVoltage(-12000);
+	intake->moveVoltage(-12000);
 	co_yield drive->waitUntilSettled(1250);
 
 	// move to second ring (by wall stake) -> put ring on stake
@@ -126,7 +126,7 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(ProfiledMotion(18, 30, 50, 60));// move towards ring to place on stake
 	co_yield drive->waitUntilSettled(1000);
 	co_yield util::coroutine::delay(1000);// replace this with a torque stop
-	// intake->moveVoltage(0);
+	intake->moveVoltage(0);
 
 	// move lift to score the ring on wall stake
 	liftFlags->targetAngle = 190;
@@ -144,7 +144,7 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(PIDTurn(356, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
 	drive->setCurrentMotion(ProfiledMotion(54, 25, 50, 50));
-	// intake->moveVoltage(-12000);
+	intake->moveVoltage(-12000);
 	co_yield drive->waitUntilSettled(4000);
 	drive->setCurrentMotion(PIDTurn(240, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
@@ -162,9 +162,9 @@ RobotThread skillsAuton() {
 
 	//move to center
 	drive->setCurrentMotion(ProfiledMotion(75, 50, 50, 60));
-	// pros::delay(1200);
-	// intake -> moveVoltage(-12000);
-	// intake->setDistStop(true);
+	co_yield util::coroutine::delay(1200);
+	intake -> moveVoltage(-12000);
+	intake -> setDistStop(true);
 	co_yield drive->waitUntilSettled(3000);
 
 	//turn to second corner
@@ -173,10 +173,81 @@ RobotThread skillsAuton() {
 
 	//ring and setup for mogo
 	drive->setCurrentMotion(ProfiledMotion(38, 50, 50, 60));
-	pros::delay(500);
+	co_yield util::coroutine::delay(500);
 	intake -> moveVoltage(-12000);
-	intake->setDistStop(true);
+	intake -> setDistStop(true);
 	co_yield drive->waitUntilSettled(1000);
+
+	//from this point on is untested
+	//grab mogo
+	drive->setCurrentMotion(PIDTurn(150, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(-6, 50, 50, 60));
+
+	//rings
+	drive->setCurrentMotion(PIDTurn(135, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	intake -> moveVoltage(-12000);
+	drive->setCurrentMotion(ProfiledMotion(12, 50, 50, 60));
+
+	drive->setCurrentMotion(PIDTurn(0, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(32, 50, 50, 60));
+	co_yield drive->waitUntilSettled(1000);
+
+	drive->setCurrentMotion(PIDTurn(120, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(11, 40, 50, 60));
+	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(ProfiledMotion(-3, 40, 50, 60));
+	co_yield drive->waitUntilSettled(1500);
+
+	//dump mogo
+	drive->setCurrentMotion(PIDTurn(218, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(-6, 40, 50, 60));
+	co_yield drive->waitUntilSettled(1500);
+	pnooomatics->setClamp(false);
+
+	//go to second wall stake
+	drive->setCurrentMotion(PIDTurn(180, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(52, 40, 50, 60));
+	lift->toggleState();
+	co_yield drive->waitUntilSettled(2000);
+
+	drive->setCurrentMotion(PIDTurn(90, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	
+	drive->setCurrentMotion(ProfiledMotion(3, 40, 50, 60));
+	intake->moveVoltage(0);
+	co_yield drive->waitUntilSettled(1500);                                                                                                                     
+
+	liftFlags->targetAngle = 190;
+	liftFlags->pid = PID(1000, 10, 0, true, 10);
+	liftFlags->isMotionRunning = true;
+	co_yield util::coroutine::nextCycle();
+	co_yield [=]() -> bool { return !liftFlags->isMoving; };
+	lift->setState(false);
+
+	intake->moveVoltage(12000);
+	intake->setDistStop(true);
+	drive->setCurrentMotion(PIDTurn(200, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(24, 40, 50, 60));
+	co_yield drive->waitUntilSettled(1500); 
+
+	drive->setCurrentMotion(PIDTurn(270, PID(150, 1, 45, true, 10), false, false));
+	co_yield drive->waitUntilSettled(1000);
+	intake->setDistStop(true);
+	drive->setCurrentMotion(ProfiledMotion(20, 40, 50, 60));
+	co_yield drive->waitUntilSettled(1500); 
+
+
+
+
+
+
 
 
 
