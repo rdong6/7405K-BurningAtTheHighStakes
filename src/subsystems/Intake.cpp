@@ -43,7 +43,7 @@ void Intake::registerTasks() {
 
 // As of now, running constantly on robot no matter the competition state
 RobotThread Intake::runner() {
-	auto intakeFlags = robot->getFlag<flags>().value();
+	auto intakeFlags = robot->getFlag<Intake>().value();
 
 	while (true) {
 		int32_t dist = distance.get();// in mm
@@ -81,25 +81,25 @@ RobotThread Intake::runner() {
 }
 
 void Intake::setExtender(bool extended) {
-	auto intakeFlags = robot->getFlag<flags>().value();
+	auto intakeFlags = robot->getFlag<Intake>().value();
 	intakeFlags->isExtended = extended;
 	extender.set_value(extended);
 }
 
 void Intake::setTorqueStop(bool val) {
-	auto intakeFlags = robot->getFlag<flags>().value();
+	auto intakeFlags = robot->getFlag<Intake>().value();
 	intakeFlags->torqueStop = val;
 }
 
 void Intake::setDistStop(bool val) {
-	auto intakeFlags = robot->getFlag<flags>().value();
+	auto intakeFlags = robot->getFlag<Intake>().value();
 	intakeFlags->distStop = val;
 	int32_t dist = distance.get();
 	if (dist < 55) { intakeFlags->storeSecond = true; }
 }
 
 void Intake::toggleExtender() {
-	setExtender(!robot->getFlag<flags>().value()->isExtended);
+	setExtender(!robot->getFlag<Intake>().value()->isExtended);
 }
 
 void Intake::moveVoltage(int mv) {

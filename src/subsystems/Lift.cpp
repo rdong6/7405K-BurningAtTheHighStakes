@@ -34,16 +34,16 @@ void Lift::registerTasks() {
 	// when lift controller inputs set, stop whatever code motion is happening
 	controllerRef->registerCallback(
 	        [this]() {
-		        robot->getFlag<flags>().value()->isMotionRunning = false;
-		        robot->getFlag<flags>().value()->isHolding = false;
+		        robot->getFlag<Lift>().value()->isMotionRunning = false;
+		        robot->getFlag<Lift>().value()->isHolding = false;
 		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
 
 	controllerRef->registerCallback(
 	        [this]() {
-		        robot->getFlag<flags>().value()->isMotionRunning = false;
-		        robot->getFlag<flags>().value()->isHolding = false;
+		        robot->getFlag<Lift>().value()->isMotionRunning = false;
+		        robot->getFlag<Lift>().value()->isHolding = false;
 		        move(-12000);
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
@@ -59,7 +59,7 @@ void Lift::registerTasks() {
 }
 
 RobotThread Lift::updateAngle() {
-	auto liftFlags = robot->getFlag<flags>().value();
+	auto liftFlags = robot->getFlag<Lift>().value();
 	int counter = 0;
 
 	while (true) {
@@ -86,7 +86,7 @@ RobotThread Lift::updateAngle() {
 }
 
 RobotThread Lift::runner() {
-	auto liftFlags = robot->getFlag<flags>().value();
+	auto liftFlags = robot->getFlag<Lift>().value();
 	liftFlags->isMoving = true;
 	liftFlags->pid.reset();
 
@@ -111,7 +111,7 @@ RobotThread Lift::runner() {
 }
 
 RobotThread Lift::openLiftCoro() {
-	auto liftFlags = robot->getFlag<flags>().value();
+	auto liftFlags = robot->getFlag<Lift>().value();
 	liftFlags->isMotionRunning = true;
 	liftFlags->targetAngle = 110;// tune this
 	liftFlags->errorThresh = 3;
@@ -134,12 +134,12 @@ RobotThread Lift::openLiftCoro() {
 
 	co_yield util::coroutine::nextCycle();
 	if (!liftFlags->isMotionRunning) { co_return; }
-	co_yield [this]() -> bool { return !robot->getFlag<flags>().value()->isMoving; };
+	co_yield [this]() -> bool { return !robot->getFlag<Lift>().value()->isMoving; };
 	liftFlags->isMotionRunning = false;
 }
 
 RobotThread Lift::closeLiftCoro() {
-	auto liftFlags = robot->getFlag<flags>().value();
+	auto liftFlags = robot->getFlag<Lift>().value();
 
 	claw.set_value(false);
 	liftFlags->isMotionRunning = true;
@@ -154,16 +154,17 @@ RobotThread Lift::closeLiftCoro() {
 	liftFlags->errorThresh = 2;
 
 	co_yield util::coroutine::nextCycle();
-	co_yield [this]() -> bool { return !robot->getFlag<flags>().value()->isMoving; };
+	co_yield [this]() -> bool { return !robot->getFlag<Lift>().value()->isMoving; };
 	liftFlags->isMotionRunning = false;
 }
 
 void Lift::toggleState() {
-	setState(!robot->getSubsystem<flags>().value()->isOpen);
+	setState(!robot->getFlag<Lift>().value()->isOpen);
 }
 
 void Lift::setState(bool open) {
-	robot->getSubsystem<flags>().value()->isOpen = open;
+	robot->getFlag<Lift>().value()->isOpen = open;
+	robot->getFlag<Lift>().value()->isHolding = false;
 
 	if (open) {
 		robot->registerTask([this]() { return this->openLiftCoro(); }, TaskType::SENTINEL);
