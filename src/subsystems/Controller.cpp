@@ -7,7 +7,7 @@
 #include "pros/rtos.hpp"
 #include <tuple>
 
-Controller::Controller(RobotBase* robot) : Subsystem(robot, this) {}
+Controller::Controller(RobotBase* robot) : Subsystem(robot) {}
 
 void Controller::registerTasks() {
 	robot->registerTask([this]() { return this->update(); }, TaskType::OPCTRL);

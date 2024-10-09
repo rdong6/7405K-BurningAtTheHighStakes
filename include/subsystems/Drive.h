@@ -30,8 +30,8 @@ private:
 	bool isTimedOut = false;
 	Motion curMotion = NullMotion();
 
-	double gearRatioWeak2Normal =
-	        1;// gear ratio between normal and weak motor -> used to scale velocities accordingly for 5.5w
+	// gear ratio between normal and weak motor -> used to scale velocities accordingly for 5.5w
+	double gearRatioWeak2Normal;
 
 	RobotThread runner();
 

@@ -1,6 +1,6 @@
 #include "lib/physics/OpControlMotion.h"
 #include "lib/utils/Math.h"
-#include "subsystems/Controller.h"
+#include "pros/misc.h"
 #include <cmath>
 
 namespace {

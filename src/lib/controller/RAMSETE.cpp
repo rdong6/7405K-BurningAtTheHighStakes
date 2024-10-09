@@ -5,8 +5,6 @@
 #include <cstdio>
 #include <numbers>
 
-LoggerPtr RAMSETE::logger = sLogger.createSource("RAMSETE", 0);
-
 namespace {
 	double sinc(double radians) {
 		if (std::abs(radians) < 1e-9) { return 1.0 - 1.0 / 6.0 * radians * radians; }
@@ -58,9 +56,10 @@ RAMSETE::WheelVelocities RAMSETE::calculate(const Pose& curPose, const Pose& tar
 	double leftWheelVel = linearVel + angularVel * odometers::trackWidth / 2;
 	double rightWheelVel = linearVel - angularVel * odometers::trackWidth / 2;
 
-	logger->debug("Linear Vel: {:2f}  Angular Vel: {:2f}  eY: {:2f}  eX: {:2f}  eTheta: {:2f}  Left Vel: {:2f}  Right "
-	              "Vel: {:2f}\n",
-	              linearVel, angularVel, eY, eX, eTheta, leftWheelVel, rightWheelVel);
+	// logger->debug("Linear Vel: {:2f}  Angular Vel: {:2f}  eY: {:2f}  eX: {:2f}  eTheta: {:2f}  Left Vel: {:2f}  Right
+	// "
+	//               "Vel: {:2f}\n",
+	//               linearVel, angularVel, eY, eX, eTheta, leftWheelVel, rightWheelVel);
 
 	// apply a little differential drive kinematics to convert to wheel speeds
 	return {linearVel - angularVel * odometers::trackWidth / 2, linearVel + angularVel * odometers::trackWidth / 2};

@@ -1,5 +1,21 @@
 #include "lib/physics/PIDMotion.h"
+#include "Robot.h"
 #include "lib/utils/Math.h"
+#include "subsystems/Odometry.h"
+#include <cmath>
+
+PIDMotion::PIDMotion(double dist, PID pwrPID, PID trnPID, bool headingCorrection, double threshold)
+    : PIDMotion(Pose(), pwrPID, trnPID, headingCorrection, threshold) {
+	auto odom = robotInstance->getSubsystem<Odometry>();
+	if (odom) { this->targetPose = odom.value()->getCurrentState().position; }
+	Pose originalPose = odom ? odom.value()->getCurrentState().position : Pose();
+
+	double robotCurvHeading = M_PI_2 - originalPose.getTheta();
+	double deltaX = std::cos(robotCurvHeading) * dist;
+	double deltaY = std::sin(robotCurvHeading) * dist;
+
+	this->targetPose = originalPose.transformBy(deltaX, deltaY, 0);
+}
 
 PIDMotion::PIDMotion(Pose pose, PID pwrPID, PID trnPID, bool headingCorrection, double threshold)
     : threshold(threshold), targetPose(pose), pwrPID(pwrPID), trnPID(trnPID), counter(0),

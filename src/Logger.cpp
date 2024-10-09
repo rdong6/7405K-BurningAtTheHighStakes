@@ -1,10 +1,15 @@
+#define FMT_HEADER_ONLY
 #include "Logger.h"
-#include "fmt/compile.h"
-#include "pros/apix.h"
+#include "fmt/args.h"
+#include "fmt/format.h"
+#include <algorithm>
 #include <array>
-#include <cmath>
-#include <memory>
-#include <string>
+#include <atomic>
+#include <chrono>
+#include <cstdio>
+#include <cstring>
+#include <string_view>
+#include <tuple>
 #include <type_traits>
 
 // ASCII Escape Codes - should be compatible with most Unix terminals, and
@@ -28,240 +33,257 @@
 #define BOLD "\x1B[1m"
 #define RESET "\x1B[0m"
 
-namespace LoggerColor {
-	const char* RED_BG = "\x1B[41m";
-	const char* GREEN_BG = "\x1B[42m";
-	const char* YELLOW_BG = "\x1B[43m";
-	const char* BLUE_BG = "\x1B[44m";
-	const char* MAGENTA_BG = "\x1B[45m";
-	const char* CYAN_BG = "\x1B[46m";
-	const char* WHITE_BG = "\x1B[47m";
-	const char* BRIGHT_RED_BG = "\x1B[101m";
-	const char* BRIGHT_GREEN_BG = "\x1B[102m";
-	const char* BRIGHT_YELLOW_BG = "\x1B[103m";
-	const char* BRIGHT_BLUE_BG = "\x1B[104m";
-	const char* BRIGHT_MAGENTA_BG = "\x1B[105m";
-	const char* BRIGHT_CYAN_BG = "\x1B[106m";
-	const char* BRIGHT_WHITE_BG = "\x1B[107m";
-	const char* NONE = "";
-}// namespace LoggerColor
+namespace {
+	std::string_view level_to_string(quill::LogLevel level) {
+		static constexpr std::array<std::string_view, 6> logLevelsMap = {"TRACE",   "DEBUG", "INFO",
+		                                                                 "WARNING", "ERROR", "UNKNOWN"};
 
-void Logger::backend() {
-	while (true) {
-		// TODO: Do we want to close/flush file everytime we get disabled?
-		// but if we get moved into disabled, we will have to first finish logging
-		// everything in queue before closing file might just have to occasionally
-		// close and reopen the file
+		// this will crash if there is no level set in the argument - it should never happen though - still bad code to
+		// a certain extent?
+		int logLevel = 31 - __builtin_clz(static_cast<int>(level));
 
-		// idk i just put in random value
-		// but loop exists because we want to print more than just 1 message per
-		// 10ms otherwise queues would overflow and loop breaks when there are no
-		// more messages to process
-		for (int i = 0; i < 10; i++) {
-			// info regarding the lowest timestamped message queued to process
+		if (logLevel > logLevelsMap.size() - 1) { return logLevelsMap.back(); }
 
-			pros::c::queue_t consoleQueue = nullptr;
-			uint32_t consoleTimestamp = std::numeric_limits<uint32_t>::max();
+		return logLevelsMap[logLevel];
+	}
 
-			pros::c::queue_t fileQueue = nullptr;
-			uint32_t fileTimestamp = std::numeric_limits<uint32_t>::max();
+	std::string_view level_to_color(quill::LogLevel level) {
+		static constexpr std::array<std::string_view, 6> logLevelsMap = {BOLD BR_MAG, BOLD BR_BLU, BOLD BR_GREEN,
+		                                                                 BOLD BR_YEL, BOLD BR_RED, BOLD BR_WHT};
 
-			// finds next message to print - one whose timestamp is smallest
-			for (auto const& [key, val] : sources) {
-				// part
-				LogSource::Message msg{};
+		// this will crash if there is no level set in the argument - it should never happen though - still bad code to
+		// a certain extent?
+		int logLevel = 31 - __builtin_clz(static_cast<int>(level));
 
-				if (pros::c::queue_get_waiting(val->mailboxConsole)) {
-					pros::c::queue_peek(val->mailboxConsole, &msg, 0);
+		if (logLevel > logLevelsMap.size() - 1) { return logLevelsMap.back(); }
 
-					if (msg.timestamp < consoleTimestamp) {
-						consoleTimestamp = msg.timestamp;
-						consoleQueue = val->mailboxConsole;
-					}
-				}
+		return logLevelsMap[logLevel];
+	}
+}// namespace
 
-				if (logFile && pros::c::queue_get_waiting(val->mailboxFile)) {
-					pros::c::queue_peek(val->mailboxFile, &msg, 0);
+#define GET_TYPE_ID(type) detail::TupleIndex<type, SupportedTypes>::value
 
-					if (msg.timestamp < fileTimestamp) {
-						fileTimestamp = msg.timestamp;
-						fileQueue = val->mailboxFile;
-					}
-				}
-			}
+namespace quill {
+	// LogEntry implementation
 
-			// flag to break out if there is no message to log to either stdout or
-			// file
-			bool messageExists = false;
+	LogEntry::LogEntry() : m_bytes_used(0), m_buffer_size(0), m_heap_buffer() {}
 
-			if (consoleQueue) {
-				messageExists = true;
-				LogSource::Message msg{};
+	void LogEntry::encode_c_string(const char* const str, std::size_t len) {
+		if (len == 0) { return; }
 
-				pros::c::queue_recv(consoleQueue, &msg, 0);
-				fwrite(msg.msg, 1, msg.len, stdout);
+		resize_buffer_if_needed(len + 2 /* null terminating & id */);
+		char* buf = buffer();
+		*reinterpret_cast<uint8_t*>(buf++) = GET_TYPE_ID(char*);
+		memcpy(buf, str, len + 1);
+		m_bytes_used += len + 2 /* null terminating & id */;
+	}
 
-				// free string buffer so we don't have memory leak
-				delete msg.msg;
-			}
+	char* LogEntry::buffer() {
+		return !m_heap_buffer ? &m_stack_buffer[m_bytes_used] : &(m_heap_buffer.get())[m_bytes_used];
+	}
 
-			if (fileQueue) {
-				messageExists = true;
-				LogSource::Message msg{};
+	void LogEntry::resize_buffer_if_needed(std::size_t additional_bytes) {
+		const std::size_t requiredSize = m_bytes_used + additional_bytes;
 
-				pros::c::queue_recv(fileQueue, &msg, 0);
-				fwrite(msg.msg, 1, msg.len, logFile);
+		if (requiredSize <= m_buffer_size) { return; }
 
-				// free string buffer
-				delete msg.msg;
-			}
+		m_buffer_size = std::max(static_cast<std::size_t>(512), requiredSize);
 
-			if (!messageExists) { break; }
+		if (!m_heap_buffer) {
+			// move data from stack buffer onto newly allocated heap buffer
+			m_heap_buffer.reset(new char[m_buffer_size]);
+			memcpy(m_heap_buffer.get(), &m_stack_buffer, sizeof(m_stack_buffer));
+			return;
 		}
 
-		fflush(stdout);
-		pros::delay(10);
-	}
-}
-
-void Logger::initialize(std::string filename) {
-	// probably should set the prioirty to be TASK_PRIORITY_DEFAULT - 1
-	task = pros::c::task_create([](void* ign) { sLogger.backend(); }, nullptr, TASK_PRIORITY_DEFAULT,
-	                            TASK_STACK_DEPTH_DEFAULT, "Logger");
-
-	this->filename = fmt::format(FMT_COMPILE("/usd/{}"), filename);
-	logFile = fopen(this->filename.c_str(), "w");
-}
-
-// still need to actually test
-void Logger::flush() {
-	if (logFile) {
-		fclose(logFile);
-		logFile = nullptr;
+		// a heap buffer is already allocated -> resize heap buffer
+		std::unique_ptr<char[]> new_heap_buffer(new char[m_buffer_size]);
+		memcpy(new_heap_buffer.get(), m_heap_buffer.get(), m_bytes_used);
+		m_heap_buffer.swap(new_heap_buffer);
 	}
 
-	logFile = fopen(filename.c_str(), "a+");
-}
+	std::string LogEntry::stringify() {
+		// Debug/Info/Warn/Error:
+		// 1) "[TIME LEVEL] MESSAGE"
+		// 2) "[TIME NAME LEVEL] MESSAGE"
+		// Trace:
+		// 3) "[TIME NAME LEVEL] [__file__(__line__): __func__] MESSAGE"
+		// 4) "[TIME LEVEL] [__file__(__line__): __func__] MESSAGE"
+		static constexpr std::array<std::string_view, 4> headerFormats = {
+		        "[{}{:2f}{} {}{}{}] {}\n", "[{}{:2f} {}{} {}{}{}] {}\n", "[{}{:2f}{} {}{}{}] [{}({}): {}] {}\n",
+		        "[{}{:2f} {}{} {}{}{}] [{}({}): {}] {}\n"};
 
-void Logger::close() {
-	if (logFile) {
-		fclose(logFile);
-		logFile = nullptr;
+		char* start = !m_heap_buffer ? m_stack_buffer : m_heap_buffer.get();
+		const char* const end = start + m_bytes_used;
+
+		// decode header of entry
+		// clang-format off
+		uint64_t timestamp = *reinterpret_cast<uint64_t*>(start); start += sizeof(uint64_t);
+		string_literal_t file = *reinterpret_cast<string_literal_t*>(start); start += sizeof(string_literal_t);
+		string_literal_t func = *reinterpret_cast<string_literal_t*>(start); start += sizeof(string_literal_t);
+		string_literal_t name = *reinterpret_cast<string_literal_t*>(start); start += sizeof(string_literal_t);
+		uint32_t line = *reinterpret_cast<uint32_t*>(start); start += sizeof(uint32_t);
+		LogLevel level = *reinterpret_cast<LogLevel*>(start); start += sizeof(LogLevel);
+		// clang-format on
+
+		// decode user params and format user str
+		fmt::dynamic_format_arg_store<fmt::format_context> user_args;
+
+		// gets the user fmt string
+		std::string_view user_fmt(start);
+		start += strlen(start) + 1 /* null terminating character */;
+
+		// decodes user params
+		while (start != end) {
+			uint8_t type_id = *reinterpret_cast<uint8_t*>(start);
+			start++;
+			// there's better ways to do w/o using a switch statement (better flexibility when changing supported types)
+			// -> but requires template metaprogramming because of std::tuple_element<>
+
+#define GET_ARG(id)                                                                                                    \
+	user_args.push_back(*reinterpret_cast<std::tuple_element<id, SupportedTypes>::type*>(start));                      \
+	start += sizeof(std::tuple_element<id, SupportedTypes>::type);
+
+			switch (type_id) {
+				case 0:
+					user_args.push_back(std::string_view(reinterpret_cast<string_literal_t*>(start)->m_str));
+					start += sizeof(string_literal_t);
+					break;
+				case 1:
+					// string implementation
+					user_args.push_back(std::string_view(start));
+					start += strlen(start);
+					break;
+				case 2:
+					GET_ARG(2)
+					break;
+				case 3:
+					GET_ARG(3)
+					break;
+				case 4:
+					GET_ARG(4)
+					break;
+				case 5:
+					GET_ARG(5)
+					break;
+				case 6:
+					GET_ARG(6)
+					break;
+				case 7:
+					GET_ARG(7)
+					break;
+			}
+		}
+
+		std::string user_output = fmt::vformat(user_fmt, user_args);
+
+
+		// used to select which header format to use
+		int header_index = 0;
+
+		fmt::dynamic_format_arg_store<fmt::format_context> header_args;
+		header_args.push_back(std::string_view(BOLD BR_WHT));
+		header_args.push_back(timestamp * 0.000001);
+		if (name.m_str) {
+			header_args.push_back(std::string_view(name.m_str));
+			header_index++;
+		}
+		header_args.push_back(std::string_view(RESET));
+		header_args.push_back(level_to_color(level));
+		header_args.push_back(level_to_string(level));
+		header_args.push_back(std::string_view(RESET));
+		if (file.m_str) {
+			header_args.push_back(std::string_view(file.m_str));
+			header_args.push_back(line);
+			header_index++;
+		}
+		if (func.m_str) {
+			header_args.push_back(std::string_view(func.m_str));
+			header_index++;
+		}
+
+		header_args.push_back(std::string_view(user_output));
+
+		return fmt::vformat(headerFormats[header_index], header_args);
 	}
-}
 
-void Logger::terminate() {
-	if (task) {
-		pros::c::task_delete(task);
-		task = nullptr;
+
+	// Logger implementation
+	Logger::Logger(std::string_view log_filename, std::size_t buffer_size)
+	    : m_buffer(buffer_size), m_state(State::INIT),
+	      m_thread([](void* ptr) { static_cast<Logger*>(ptr)->writeEntries(); }, this, "Logger"),
+	      m_level(LogLevel::TRACE /* by default all log levels enabled*/) {
+		m_file = std::fopen("/usd/log.txt", "w");
+		m_state.store(State::RUN, std::memory_order_release);
 	}
 
-	if (logFile) {
-		fclose(logFile);
-		logFile = nullptr;
-	}
-}
-
-std::shared_ptr<LogSource> Logger::createSource(std::string name, uint32_t timeout, const char* color) {
-	if (sources.contains(name)) { return sources.at(name); }
-
-	std::shared_ptr<LogSource> source = std::shared_ptr<LogSource>(new LogSource(name, timeout, color));
-
-	sources.insert_or_assign(name, source);
-
-	return source;
-}
-
-void Logger::deleteSource(std::string name) {
-	sources.erase(name);
-}
-
-LogSource::LogSource(std::string sourceName, uint32_t timeout, const char* color)
-    : loggerColor(color), name(sourceName), timeout(timeout), logLevels(0),
-      outputSources(static_cast<Source>(CONSOLE | FILE)) {
-
-	mailboxConsole = pros::c::queue_create(100, sizeof(Message));
-	mailboxFile = pros::c::queue_create(100, sizeof(Message));
-}
-
-std::string_view LogSource::levelToString(LogLevel level) {
-	static constexpr std::array<std::string_view, 5> logLevelsMap = {"DEBUG", "INFO", "WARNING", "ERROR", "UNKNOWN"};
-
-	using LogLevelType = std::underlying_type<LogLevel>::type;
-
-	// this will crash if there is no level set in the arguent - it should never happen though - still bad code to a
-	// certain extent?
-	int logLevel = 31 - __builtin_clz(static_cast<int>(level));
-
-	if (logLevel > logLevelsMap.size() - 1) {
-		log(ERROR, pros::micros(),
-		    "Logger {} encountered an error in LogSource::levelToString. logLevel "
-		    "specified is not proper log level: "
-		    "{}",
-		    fmt::make_format_args(this->name, logLevel));// check if this gives what we want
-		return logLevelsMap.back();
+	Logger::~Logger() {
+		m_state.store(State::SHUTDOWN);
+		m_thread.join();
+		std::fclose(m_file);
 	}
 
-	return logLevelsMap[logLevel];
-}
-
-const char* levelToColor(LogSource::LogLevel level) {
-	switch (level) {
-		case LogSource::DEBUG:
-			return BOLD BR_BLU;
-		case LogSource::INFO:
-			return BOLD BR_GREEN;
-		case LogSource::WARNING:
-			return BOLD BR_YEL;
-		case LogSource::ERROR:
-			return BOLD BR_RED;
-		default:
-			return BOLD BR_MAG;
-	}
-}
-
-void LogSource::log(LogLevel level, uint32_t timestamp, std::string_view fmt, fmt::format_args args) {
-	// clean up this code
-	std::string_view levelName = levelToString(level);
-	const char* levelColor = levelToColor(level);
-
-	std::string formattedLogMessage = fmt::vformat(fmt, args);
-
-	if (outputSources & CONSOLE) {
-		// AHHHHHHHH! WE FORMAT TO ANOTHER FORMAT
-		std::string formatted =
-		        fmt::format("[{:.2F} {}{}{}{} {}{}{}] {}", timestamp / 1000.0 / 1000.0, BOLD BR_WHT, loggerColor, name,
-		                    RESET, levelColor, levelName, RESET, formattedLogMessage);
-
-		// allocates # of chars + 1 for \0
-		Message msg = {.timestamp = timestamp, .len = formatted.length(), .msg = new char[formatted.length() + 1]};
-		strcpy(msg.msg, formatted.data());
-
-		pros::c::queue_append(mailboxConsole, &msg, timeout);
+	void Logger::set_log_level(LogLevel level) {
+		this->m_level = level;
 	}
 
-	// don't even want to flood queue if a file isn't even open yet
-	if (outputSources & LogSource::FILE && sLogger.logFile) {
-		// only difference is we get rid of color formatting
-		std::string formatted =
-		        fmt::format("[{:.2F} {} {}] {}", timestamp / 1000.0 / 1000.0, name, levelName, formattedLogMessage);
-
-		// allocates # of chars + 1 for \0
-		Message msg = {.timestamp = timestamp, .len = formatted.length(), .msg = new char[formatted.length() + 1]};
-		strcpy(msg.msg, formatted.data());
-
-		pros::c::queue_append(mailboxFile, &msg, timeout);
+	LogLevel Logger::get_log_level() const {
+		return this->m_level;
 	}
-}
 
-void LogSource::toggleLevel(LogLevel level) {
-	logLevels ^= static_cast<uint8_t>(level);
-}
+	void Logger::writeEntries() {
+		while (m_state.load(std::memory_order_acquire) == State::INIT) { pros::delay(10); }
 
-void LogSource::setOutput(Source sources) {
-	outputSources = sources;
-}
+		LogEntry entry;
+		while (m_state.load() == State::RUN) {
+			bool succeeded = m_buffer.try_dequeue(entry);
+			if (!succeeded) {
+				pros::delay(10);
+				continue;
+			}
 
-void LogSource::setTimeout(uint32_t timeout) {
-	this->timeout = timeout;
-}
+			// decoded back into a formatted string
+			std::string formatted_output = entry.stringify();
+
+			// Write string to console & file
+			std::fwrite(formatted_output.c_str(), sizeof(char), formatted_output.length(), stdout);
+
+			if (m_file) { std::fwrite(formatted_output.c_str(), sizeof(char), formatted_output.length, m_file); }
+		}
+
+		while (m_buffer.try_dequeue(entry)) {
+			std::string formatted_output = entry.stringify();
+			std::fwrite(formatted_output.c_str(), sizeof(char), formatted_output.length(), stdout);
+		}
+	}
+
+	// General Functions
+	static std::unique_ptr<quill::Logger> logger_instance;
+
+	bool Logger::log(LogEntry entry) {
+		if (!logger_instance) { return true; }
+
+		logger_instance->m_buffer.try_enqueue(std::move(entry));
+		return true;
+	}
+
+	void initialize(std::string_view log_filename, std::size_t buffer_size) {
+		logger_instance.reset(new Logger(log_filename, buffer_size));
+	}
+
+	void stop() {
+		logger_instance.reset();
+	}
+
+	void set_log_level(LogLevel level) {
+		if (logger_instance) { logger_instance->set_log_level(level); }
+	}
+
+	bool is_logged(LogLevel level) {
+		if (!logger_instance) { return false; }
+
+		using Type = std::underlying_type<LogLevel>::type;
+
+		return static_cast<Type>(level) >= static_cast<Type>(logger_instance->get_log_level());
+	}
+}// namespace quill

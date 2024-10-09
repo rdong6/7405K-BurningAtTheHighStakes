@@ -9,8 +9,6 @@
 #include <memory>
 #include <numbers>
 
-LoggerPtr PursuitMotion::logger = sLogger.createSource("PursuitMotion", 0);
-
 namespace {
 	// careful! sgn(0) = 0
 	template<typename T>

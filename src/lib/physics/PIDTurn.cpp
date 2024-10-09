@@ -3,9 +3,6 @@
 #include "lib/utils/Math.h"
 #include "pros/motors.h"
 #include "subsystems/Drive.h"
-#include "lib/utils/Math.h"
-
-// In place turns, controlled by a PID
 
 namespace {
 	int sign(double val) {
@@ -13,10 +10,8 @@ namespace {
 	}
 }// namespace
 
-LoggerPtr PIDTurn::logger = sLogger.createSource("PIDTurn", 0);
-
-PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, double maxPower, bool forceRight,
-                 bool forceLeft)
+PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, double maxPower,
+                 bool forceRight, bool forceLeft)
     : targetHeading(targetHeading), pid(pid), counter(0), threshold(threshold), brakeLeft(brakeLeft),
       brakeRight(brakeRight), initialSign(0), forceRight(forceRight), forceRightTerminate(false), forceLeft(forceLeft),
       forceLeftTerminate(false), maxPower(maxPower) {}
@@ -75,9 +70,7 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	// compute motor powers given our heading error
 	double turnPwr = pid(error);
 
-	if (fabs(turnPwr) >= maxPower) {
-		turnPwr = util::sign(turnPwr) * maxPower;
-	}
+	if (fabs(turnPwr) >= maxPower) { turnPwr = util::sign(turnPwr) * maxPower; }
 
 	// the hacky spline thing again, otherwise calculate motor power for each side
 	double leftPwr = brakeLeft ? 0 : turnPwr;
@@ -92,9 +85,6 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	// if ((!brakeRight)) {
 	// 	rightPwr = util::sign(rightPwr) * util::lerp(1400, 12000.0, util::clamp(0.0, 1.0, fabs(rightPwr / 12000.0)));
 	// }
-
-	printf("Error: %.2f Counter: %d heading: %.2f Left Pwr: %.2f Right Pwr: %.2f\n", error, counter,
-	              util::toDeg(state.position.getTheta()), leftPwr, rightPwr);
 
 	// logger->debug("Error: {:.2f} Counter: {} heading: {} Left Pwr: {} Right Pwr: {}\n", error, counter,
 	//               util::toDeg(state.position.getTheta()), leftPwr, rightPwr);

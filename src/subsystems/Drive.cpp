@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-Drive::Drive(RobotBase* robot) : Subsystem(robot, this) {
+Drive::Drive(RobotBase* robot) : Subsystem(robot) {
 	leftDrive.set_gearing_all(pros::E_MOTOR_GEAR_600);
 	rightDrive.set_gearing_all(pros::E_MOTOR_GEAR_600);
 	weakLeft.set_gearing(pros::E_MOTOR_GEAR_200);
@@ -33,6 +33,8 @@ Drive::Drive(RobotBase* robot) : Subsystem(robot, this) {
 			gearRatioWeak2Normal = 2;
 		case pros::MotorGears::rpm_600:
 			gearRatioWeak2Normal = 1.0 / 3.0;
+		default:
+			gearRatioWeak2Normal = 1;
 	}
 
 	resetPosition();

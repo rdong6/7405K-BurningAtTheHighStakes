@@ -1,227 +1,207 @@
 #pragma once
-// clang-format off
-#include "fmt/format.h"
-// clang-format on
-#include "pros/apix.h"
 #include "pros/rtos.hpp"
+#include "readerwritercircularbuffer.h"
+#include <atomic>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
 #include <memory>
 #include <string_view>
-#include <unordered_map>
+#include <type_traits>
 
-#define sLogger Logger::getInstance()
-
-class LogSource;
-using LoggerPtr = std::shared_ptr<LogSource>;
-
-// To add extra 🌶️ to the logger
-// Naming convention is a little off but whatever
-namespace LoggerColor {
-	// extern const char* RED;
-	// extern const char* GREEN;
-	// extern const char* YELLOW;
-	// extern const char* BLUE;
-	// extern const char* MAGENTA;
-	// extern const char* CYAN;
-	// extern const char* WHITE;
-	// extern const char* BRIGHT_RED;
-	// extern const char* BRIGHT_GREEN;
-	// extern const char* BRIGHT_YELLOW;
-	// extern const char* BRIGHT_BLUE;
-	// extern const char* BRIGHT_MAGENTA;
-	// extern const char* BRIGHT_CYAN;
-	// extern const char* BRIGHT_WHITE;
-
-	extern const char* RED_BG;
-	extern const char* GREEN_BG;
-	extern const char* YELLOW_BG;
-	extern const char* BLUE_BG;
-	extern const char* MAGENTA_BG;
-	extern const char* CYAN_BG;
-	extern const char* WHITE_BG;
-	extern const char* BRIGHT_RED_BG;
-	extern const char* BRIGHT_GREEN_BG;
-	extern const char* BRIGHT_YELLOW_BG;
-	extern const char* BRIGHT_BLUE_BG;
-	extern const char* BRIGHT_MAGENTA_BG;
-	extern const char* BRIGHT_CYAN_BG;
-	extern const char* BRIGHT_WHITE_BG;
-	extern const char* NONE;
-}// namespace LoggerColor
-
-
-// Overarching logging manager
-// Sink for the logging sources
-class Logger {
-	friend class LogSource;
-
-private:
-	pros::task_t task = nullptr;
-	FILE* logFile = nullptr;
-	std::string filename = std::string("");
-	std::unordered_map<std::string, std::shared_ptr<LogSource>> sources =
-	        std::unordered_map<std::string, std::shared_ptr<LogSource>>();
-
-	Logger() = default;
-	Logger(const Logger&) = delete;
-	Logger& operator=(const Logger&) = delete;
-
-	// thread that runs in backend, logging to file/handler
-	[[noreturn]] void backend();
-
-public:
-	inline static Logger& getInstance() {
-		static Logger INSTANCE;
-
-		return INSTANCE;
-	}
-
-	/**
-	 * @brief Initializes the logger.
-	 * Starts the internal worker thread
-	 * and opens the file.
-	 *
-	 * For now: Everytime logger gets initialized, contents of the specified file
-	 * get wiped. And the different modes that we are logging in are demarked by
-	 * either AUTON or OPCONTROl within the file. Maybe split it into two files in
-	 * the future
-	 *
-	 * @param filename - Name of file. Don't need to include "/usd/"
-	 */
-	void initialize(std::string filename);
-
-	// literally just closes and reopens the file
-	// because vex
-	void flush();
-
-	/**
-	 * @brief Just closes the output file of the logger.
-	 * Depending on what we decide to do with handling closing the file, when the
-	 * robot switches to opctrl or auton, the file may be reopened again.
-	 */
-	void close();
-
-	/**
-	 * @brief Kills the logger from running and closes any opened file.
-	 * Must call initialize to restart logger.
-	 */
-	void terminate();
-
-	std::shared_ptr<LogSource> createSource(std::string name, uint32_t timeout = 0,
-	                                        const char* color = LoggerColor::NONE);
-
-	/**
-	 * @brief Get the Source object
-	 *
-	 * @param name
-	 * @return std::shared_ptr<LogSource>
-	 */
-	std::shared_ptr<LogSource> getSource(std::string name);
-
-	/**
-	 * @brief Removes a LogSource from the list of LogSources that the Logger
-	 * logs. Thereby stopping any output from this source from being logged at
-	 * all.
-	 *
-	 * @param name - Name of the LogSource to delete.
-	 */
-	void deleteSource(std::string name);
-};
-
-class LogSource {
-	friend class Logger;
-
-public:
-	enum LogLevel : uint8_t { DEBUG = 1, INFO = 2, WARNING = 4, ERROR = 8 };
-	enum Source : uint8_t { CONSOLE = 1, FILE = 2 };
-
-private:
-	struct Message {
-		// in ms - might have to do μs to sort out contentions on synchronization of
-		// messages from multiple sinks
-		uint32_t timestamp;
-		uint32_t len;// num of chars - excludes the \0
-
-		// this must be a pointer due to  how the RTOS's queue implementation is
-		// done because it's copied, the RTOS does a memcpy. memcpying the contents
-		// of a string would result in interesting behavior especially if it is no
-		// longer doing a short string optimization because you'd just be copying a
-		// ptr which will be dangling when the dtor of the string gets called God i
-		// love the risk of memory leaks
-		char* msg;
+namespace detail {
+	template<typename... TTypes>
+	struct PackSize {
+		consteval std::size_t get_size_in_bytes() const {
+			return ((sizeof(TTypes) + 1) + ... + 0);
+		}
 	};
 
-	pros::c::queue_t mailboxConsole;
-	pros::c::queue_t mailboxFile;
+	// Get index of element type T in Tuple
+	template<typename T, typename Tuple>
+	struct TupleIndex;
 
-	const char* loggerColor;
-	std::string name;
+	template<typename T, typename... Types>
+	struct TupleIndex<T, std::tuple<T, Types...>> {
+		static constexpr const std::size_t value = 0;
+	};
 
-	uint32_t timeout;
+	template<typename T, typename U, typename... Types>
+	struct TupleIndex<T, std::tuple<U, Types...>> {
+		static constexpr const std::size_t value = 1 + TupleIndex<T, std::tuple<Types...>>::value;
+	};
 
-	// which log levels we should ignore - bitmask of which ones to exclude from logging
-	uint8_t logLevels;
+	// check if tuple contains a type
+	template<typename, typename>
+	struct TupleHolds {};
 
-	// To which sinks are we outputting
-	Source outputSources;
+	template<typename... A, typename B>
+	struct TupleHolds<std::tuple<A...>, B> : std::bool_constant<(std::is_same_v<A, B> || ...)> {};
 
-	/**
-	 * @brief Construct a new Log Source object
-	 * By default enables all log levels, and logs to all sources.
-	 *
-	 * We only want logger to be able to create these log sources as it manages
-	 * these objects and we don't want people to willy nilly do these things.
-	 */
-	LogSource(std::string sourceName, uint32_t timeout = 0, const char* color = LoggerColor::NONE);
+	template<typename A, typename B>
+	concept TupleContains = TupleHolds<A, B>::value;
+}// namespace detail
 
-	std::string_view levelToString(LogLevel level);
+#define GET_TYPE_ID(type) detail::TupleIndex<type, SupportedTypes>::value
 
-	void log(LogLevel level, uint32_t timestamp, std::string_view fmt, fmt::format_args args);
+namespace quill {
+	enum class LogLevel : uint8_t { TRACE = 1, DEBUG = 2, INFO = 4, WARNING = 8, ERROR = 16 };
 
-public:
-	/**
-	 * @brief Sets which levels of logging will actually be logged and which will
-	 * be ignroed.
-	 *
-	 * @param level - Set level via bit operations. ex: DEBUG | INFO | WARNING
-	 */
+	class Logger;// fwd to use for friend in LogEntry
 
-	void toggleLevel(LogLevel level);
 
-	/**
-	 * @brief Sets which levels of logging will actually be logged and which will
-	 * be ignored.
-	 *
-	 * @param sources - Which output sources this log source will log to.
-	 */
-	void setOutput(Source sources);
+	// one entry which contains format, stack params, and info like timestamp
+	// entry by producer thread, where the main logger thread will then do heavy work of formatting later on
+	class LogEntry {
+	private:
+		struct string_literal_t {
+			explicit string_literal_t(const char* str) : m_str(str) {}
 
-	void setTimeout(uint32_t timeout);
+			const char* m_str;
+		};
 
-	// Can be treated sortof like a printf
-	// but formatting must follow fmtlib's specs
-	// https://fmt.dev/10.0.0/syntax.html
+		typedef std::tuple<LogEntry::string_literal_t, char*, char, uint32_t, int32_t, uint64_t, int64_t, double>
+		        SupportedTypes;
 
-	template<class... Args>
-	void debug(std::string fmt, Args&&... args) {
-		if ((logLevels & DEBUG) != 0) { return; }
-		log(DEBUG, pros::micros(), fmt, fmt::make_format_args(args...));
-	}
+		LogEntry();// only to use in Logger::writeEntries() when we need to default construct obj
 
-	template<class... Args>
-	void info(std::string fmt, Args&&... args) {
-		if ((logLevels & INFO) != 0) { return; }
-		log(INFO, pros::micros(), fmt, fmt::make_format_args(args...));
-	}
 
-	template<class... Args>
-	void warn(std::string fmt, Args&&... args) {
-		if ((logLevels & WARNING) != 0) { return; }
-		log(WARNING, pros::micros(), fmt, fmt::make_format_args(args...));
-	}
+	public:
+		LogEntry(LogLevel level, const char* const file, const char* const func, unsigned int line,
+		         const char* const name, const char* const fmt)
+		    : m_bytes_used(0), m_buffer_size(sizeof(m_stack_buffer)), m_heap_buffer() {
+			uint64_t timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
+			                             std::chrono::high_resolution_clock::now().time_since_epoch())
+			                             .count();
 
-	template<class... Args>
-	void error(std::string fmt, Args&&... args) {
-		if ((logLevels & ERROR) != 0) { return; }
-		log(ERROR, pros::micros(), fmt, fmt::make_format_args(args...));
-	}
-};
+			// TODO: Convert this into static struct for each log entry (filename, func name, opt name, log level, line
+			// number, user fmt args)
+
+			// 29 bytes used to store start of log
+			encode_raw<uint64_t>(timestamp);
+			encode_raw<string_literal_t>(string_literal_t(file));// encodes ptr to strng
+			encode_raw<string_literal_t>(string_literal_t(func));// encodes ptr to string
+			encode_raw<string_literal_t>(string_literal_t(name));
+			encode_raw<uint32_t>(line);
+			encode_raw<LogLevel>(level);
+
+			encode_c_string(fmt, std::strlen(fmt));
+		}
+
+		template<typename... Args>
+		LogEntry(LogLevel level, const char* const file, const char* const func, unsigned int line,
+		         const char* const name, const char* const fmt, Args&&... args)
+		    : LogEntry(level, file, func, line, name, fmt) {
+			// encode the params into the stack
+
+			// HAVE TO MORE EFFICIENTLY ENCODE PARAMS!
+			resize_buffer_if_needed(detail::PackSize<Args...>().get_size_in_bytes());
+			(void(encode(std::forward<Args>(args))), ...);
+		}
+
+		~LogEntry() = default;
+
+		LogEntry(LogEntry&&) = default;
+		LogEntry& operator=(LogEntry&&) = default;
+
+		// decodes data back into string
+		std::string stringify();
+
+	private:
+		template<typename Arg>
+		void encode(Arg arg)
+		/*requires(TupleContains<SupportedTypes, Arg>)*/// TODO: Readd in constraint
+		{
+			static_assert(detail::TupleHolds<SupportedTypes, Arg>::value,
+			              "Unsupported type attempting to be encoded in log entry!");
+
+			encode_raw<uint8_t>(GET_TYPE_ID(Arg));// encode type id in order to recover type later
+			encode_raw<Arg>(arg);
+		}
+
+		template<typename Arg>
+		void encode_raw(Arg arg) {
+			*reinterpret_cast<Arg*>(buffer()) = arg;
+			m_bytes_used += sizeof(Arg);
+		}
+
+		void encode(const char* str) {
+			if (str) { encode_c_string(str, std::strlen(str)); }
+		}
+
+		void encode(char* str) {
+			if (str) { encode_c_string(str, std::strlen(str)); }
+		}
+
+		void encode_c_string(const char* const str, std::size_t len);
+
+		// returns access to underlying buffer of entry -> either heap or stack
+		// pointer points to next free byte in buffer
+		char* buffer();
+
+		// assumes null terminated string -> maybe change so it isn't
+
+		// resizes buffer -> moves to heap buffer if size exceeds heap buffer
+		void resize_buffer_if_needed(std::size_t additional_bytes);
+
+		// decode entry into formatted string to output
+
+	private:
+		std::size_t m_bytes_used;
+		std::size_t m_buffer_size;
+		std::unique_ptr<char[]> m_heap_buffer;// by default stack buffer is used unless it overflows
+		char m_stack_buffer[256 - 2 * sizeof(std::size_t) -
+		                    sizeof(decltype(m_heap_buffer))];// makes class 256 bytes large
+
+		friend Logger;
+	};
+
+	class Logger {
+	private:
+		Logger(std::string_view log_filename, std::size_t buffer_size);
+
+	public:
+		~Logger();
+
+		void set_log_level(LogLevel level);
+
+		LogLevel get_log_level() const;
+
+		static bool log(LogEntry entry);
+
+
+	private:
+		void writeEntries();
+
+	private:
+		enum class State : uint8_t { INIT, RUN, SHUTDOWN };
+		// moodycamel::ReaderWriterQueue<LogEntry> m_buffer;
+		moodycamel::BlockingReaderWriterCircularBuffer<LogEntry> m_buffer;
+		std::atomic<State> m_state;
+		pros::Task m_thread;
+		std::FILE* m_file;
+		LogLevel m_level;// level at which to log -> anything below is ignored
+
+		friend void initialize(std::string_view log_filename, std::size_t buffer_size);
+	};
+
+	void initialize(std::string_view log_filename, std::size_t buffer_size);
+
+	void stop();
+
+	void set_log_level(LogLevel level);
+
+	bool is_logged(LogLevel level);
+}// namespace quill
+
+#undef GET_TYPE_ID
+
+#define QUILL_LOG(LEVEL, fmt, ...)                                                                                     \
+	quill::Logger::log(std::move(                                                                                      \
+	        quill::LogEntry(quill::LogLevel::LEVEL, __FILE__, __func__, __LINE__, nullptr, fmt, ##__VA_ARGS__)));
+
+#define LOG_TRACE(fmt, ...) quill::is_logged(quill::LogLevel::TRACE) && QUILL_LOG(TRACE, fmt, ##__VA_ARGS__)
+#define LOG_DEBUG(fmt, ...) quill::is_logged(quill::LogLevel::DEBUG) && QUILL_LOG(DEBUG, fmt, ##__VA_ARGS__)
+#define LOG_INFO(fmt, ...) quill::is_logged(quill::LogLevel::INFO) && QUILL_LOG(INFO, fmt, ##__VA_ARGS__)
+#define LOG_WARN(fmt, ...) quill::is_logged(quill::LogLevel::WARNING) && QUILL_LOG(WARNING, fmt, ##__VA_ARGS__)
+#define LOG_ERROR(fmt, ...) quill::is_logged(quill::LogLevel::ERROR) && QUILL_LOG(ERROR, fmt, ##__VA_ARGS__)

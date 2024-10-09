@@ -9,8 +9,6 @@
 
 class PursuitMotion : public IMotion {
 private:
-	static LoggerPtr logger;
-
 	std::span<fttbtkjfk::PursuitPoint> path;
 	std::shared_ptr<double[]> vels;// stores vels along a path. shared_ptr as unique_ptr is incompatabile w/ std::any as
 	                               // std::any requires objects to be copy constructible

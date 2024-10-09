@@ -1,6 +1,5 @@
 #pragma once
 #include "Constants.h"
-#include "Logger.h"
 #include "Motion.h"
 #include "lib/controller/PID.h"
 #include "lib/geometry/Pose.h"
@@ -15,8 +14,6 @@ private:
 	int prevSign;
 
 	bool overtime;
-
-	static LoggerPtr logger;
 
 public:
 	// units are in terms of inches

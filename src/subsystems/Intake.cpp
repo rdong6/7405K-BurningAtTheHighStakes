@@ -7,7 +7,7 @@
 #include "subsystems/Controller.h"
 #include <cmath>
 
-Intake::Intake(RobotBase* robot) : Subsystem(robot, this) {
+Intake::Intake(RobotBase* robot) : Subsystem(robot) {
 	// sets to coast to avoid motor burnout
 	motors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 

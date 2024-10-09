@@ -11,7 +11,7 @@
 #define UPPER_BOUNDS 190 /*181*/
 #define LOWER_BOUNDS 0
 
-Lift::Lift(RobotBase* robot) : Subsystem(robot, this) {
+Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	motor.set_gearing(pros::E_MOTOR_GEAR_100);
 

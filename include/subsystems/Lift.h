@@ -4,6 +4,7 @@
 #include "Subsystem.h"
 #include "lib/controller/PID.h"
 #include "pros/adi.hpp"
+#include "pros/motors.hpp"
 #include "pros/rotation.hpp"
 
 class Lift : public Subsystem {

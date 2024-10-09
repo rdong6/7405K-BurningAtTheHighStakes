@@ -6,6 +6,7 @@
 #include "lib/physics/ProfiledMotion.h"
 #include "lib/physics/TimedMotion.h"
 #include "lib/utils/CoroutineGenerator.h"
+#include "lib/utils/Timeout.h"
 #include "liblvgl/llemu.hpp"
 #include "pros/rtos.h"
 #include "subsystems/Drive.h"
@@ -14,7 +15,8 @@
 #include "subsystems/Odometry.h"
 #include "subsystems/Pnooomatics.h"
 #include <type_traits>
-#include "lib/utils/Timeout.h"
+
+#include "atomicops.h"
 
 RobotThread autonomousUser();
 
@@ -65,7 +67,7 @@ RobotThread redRingSideAuton() {
 	drive->setCurrentMotion(ProfiledMotion(-16, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1000);
 	pnooomatics->setClamp(true);
-	
+
 	drive->setCurrentMotion(PIDTurn(30, PID(190, 1, 50, true, 10), false, true));
 	co_yield drive->waitUntilSettled(800);
 	intake->moveVoltage(-12000);
@@ -194,7 +196,7 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(ProfiledMotion(-3, 40, 50, 60));
 	co_yield drive->waitUntilSettled(1500);
 
-	//dump mogo
+	// dump mogo
 	drive->setCurrentMotion(PIDTurn(135, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(800);
 	drive->setCurrentMotion(ProfiledMotion(-8, 40, 50, 60));
@@ -202,35 +204,35 @@ RobotThread skillsAuton() {
 	pnooomatics->setClamp(false);
 	intake->moveVoltage(0);
 
-	//move to center
+	// move to center
 	drive->setCurrentMotion(ProfiledMotion(78, 50, 50, 60));
 	co_yield util::coroutine::delay(1800);
 	intake->setDistStop(true);
 	intake->moveVoltage(-12000);
 	co_yield drive->waitUntilSettled(3000);
 
-	//turn to second corner
+	// turn to second corner
 	drive->setCurrentMotion(PIDTurn(50, PID(153, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(800);
 
-	//ring and setup for mogo
+	// ring and setup for mogo
 	drive->setCurrentMotion(ProfiledMotion(45, 50, 50, 60));
 	co_yield util::coroutine::delay(1000);
 	intake->moveVoltage(-5000);
 	intake->setDistStop(true);
 	co_yield drive->waitUntilSettled(1500);
 
-	//grab mogo
+	// grab mogo
 	drive->setCurrentMotion(PIDTurn(150, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(800);
 	drive->setCurrentMotion(ProfiledMotion(-15.5, 50, 50, 60));
 	co_yield drive->waitUntilSettled(1000);
 	pnooomatics->setClamp(true);
 
-	//rings
+	// rings
 	drive->setCurrentMotion(PIDTurn(123, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
-	intake -> moveVoltage(-12000);
+	intake->moveVoltage(-12000);
 	drive->setCurrentMotion(ProfiledMotion(30.5, 50, 50, 60));
 	co_yield drive->waitUntilSettled(1500);
 
@@ -246,14 +248,14 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(ProfiledMotion(-3, 40, 50, 60));
 	co_yield drive->waitUntilSettled(1500);
 
-	//dump mogo
+	// dump mogo
 	drive->setCurrentMotion(PIDTurn(218, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(800);
 	drive->setCurrentMotion(ProfiledMotion(-8, 40, 50, 60));
 	co_yield drive->waitUntilSettled(1500);
 	pnooomatics->setClamp(false);
 
-	//go to second wall stake
+	// go to second wall stake
 	drive->setCurrentMotion(ProfiledMotion(6, 40, 50, 60));
 	co_yield drive->waitUntilSettled(1500);
 	drive->setCurrentMotion(PIDTurn(167, PID(150, 1, 45, true, 10), false, false));
@@ -265,10 +267,10 @@ RobotThread skillsAuton() {
 
 	drive->setCurrentMotion(PIDTurn(90, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
-	
+
 	drive->setCurrentMotion(ProfiledMotion(3, 40, 50, 60));
 	intake->moveVoltage(0);
-	co_yield drive->waitUntilSettled(1500);                                                                                                                     
+	co_yield drive->waitUntilSettled(1500);
 
 	liftFlags->targetAngle = 190;
 	liftFlags->pid = PID(1000, 10, 0, true, 10);
@@ -282,7 +284,7 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(PIDTurn(200, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
 	drive->setCurrentMotion(ProfiledMotion(24, 40, 50, 60));
-	co_yield drive->waitUntilSettled(1500); 
+	co_yield drive->waitUntilSettled(1500);
 
 	drive->setCurrentMotion(PIDTurn(270, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
@@ -314,7 +316,7 @@ RobotThread blueRingSideAuton() {
 	drive->setCurrentMotion(ProfiledMotion(-16, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1000);
 	pnooomatics->setClamp(true);
-	
+
 	drive->setCurrentMotion(PIDTurn(330, PID(190, 1, 50, true, 10), true, false));
 	co_yield drive->waitUntilSettled(800);
 	intake->moveVoltage(-12000);
@@ -358,7 +360,6 @@ RobotThread blueRingSideAuton() {
 	co_yield util::coroutine::delay(1000);
 	intake->moveVoltage(0);
 	co_yield util::coroutine::nextCycle();
-	
 }
 
 RobotThread blueMogoRush() {
@@ -376,7 +377,7 @@ RobotThread blueMogoRush() {
 	liftFlags->isHolding = true;
 
 	// rush to center
-	drive->setCurrentMotion(ProfiledMotion(43 , 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(43, 50, 60, 60));
 	co_yield drive->waitUntilDist(37);
 	lift->setClaw(true);
 	pnooomatics->setHammer(true);// set hammer down
@@ -418,7 +419,7 @@ RobotThread blueMogoRush() {
 	// drive->setCurrentMotion(ProfiledMotion(-3, 20, 30, 30));
 	// intake->setExtender(false);
 	// co_yield drive->waitUntilSettled(1500);
-	
+
 	// // co_yield []() -> bool { return !robotInstance->getFlag<Intake::flags>().value()->distStop; };
 
 	// drive->setCurrentMotion(ProfiledMotion(2, 20, 30, 30));
@@ -448,7 +449,7 @@ RobotThread redMogoRush() {
 	liftFlags->isHolding = true;
 
 	// rush to center
-	drive->setCurrentMotion(ProfiledMotion(43 , 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(43, 50, 60, 60));
 	co_yield drive->waitUntilDist(37);
 	lift->setClaw(true);
 	pnooomatics->setHammer(true);// set hammer down
@@ -485,7 +486,7 @@ RobotThread redMogoRush() {
 	drive->setCurrentMotion(ProfiledMotion(-3, 20, 30, 30));
 	intake->setExtender(false);
 	co_yield drive->waitUntilSettled(1500);
-	
+
 	// // co_yield []() -> bool { return !robotInstance->getFlag<Intake::flags>().value()->distStop; };
 
 	// drive->setCurrentMotion(ProfiledMotion(2, 20, 30, 30));

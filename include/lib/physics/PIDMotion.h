@@ -15,6 +15,7 @@ private:
 
 public:
 	// turn pid is for heading correction
+	PIDMotion(double dist, PID pwrPID, PID trnPID = PID(), bool headingCorrection = false, double threshold = 0.5);
 	PIDMotion(Pose pose, PID pwrPID, PID trnPID = PID(), bool headingCorrection = false, double threshold = 0.5);
 	MotorVoltages calculate(const kinState state) override;
 	bool isSettled(const kinState state) override;

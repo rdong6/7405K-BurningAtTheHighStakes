@@ -7,8 +7,6 @@
 
 // Motion based on the trapezoidal profile
 
-LoggerPtr ProfiledMotion::logger = sLogger.createSource("ProfiledMotion", 0);
-
 ProfiledMotion::ProfiledMotion(double dist, double maxVel, double accel, double decel, double threshold)
     : threshold(threshold), errorSum(0), startPose(), profile(dist, accel, decel, maxVel), prevSign(dist >= 0),
       overtime(false) {
@@ -18,7 +16,7 @@ ProfiledMotion::ProfiledMotion(double dist, double maxVel, double accel, double 
 
 void ProfiledMotion::start() {
 	if (startTime == 0) [[unlikely]] {
-		logger->debug("Motion start. Total Time: {}\n", profile.getTotalTime());
+		// logger->debug("Motion start. Total Time: {}\n", profile.getTotalTime());
 		auto odom = robotInstance->getSubsystem<Odometry>();
 		if (odom) { startPose = odom.value()->getCurrentState().position; }
 		IMotion::start();

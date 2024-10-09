@@ -9,8 +9,6 @@
 #include "pros/rtos.hpp"
 #include <numbers>
 
-LoggerPtr RAMSETEMotion::logger = sLogger.createSource("RAMSETEMotion", 0);
-
 RAMSETEMotion::RAMSETEMotion(std::span<fttbtkjfk::GeneratedPoint>&& path, RAMSETE ramsete)
     : path(std::forward<std::span<fttbtkjfk::GeneratedPoint>>(path)), ramsete(ramsete), counter(0) {}
 
@@ -35,10 +33,10 @@ IMotion::MotorVoltages RAMSETEMotion::calculate(const kinState state) {
 	double rightMotorRPM = wheelVels.right * 60.0;
 	rightMotorRPM /= (odometers::rightDeadwheelDiameter * std::numbers::pi);
 
-	logger->info("Left RPM: {}  Right RPM: {}  Target: ({}, {}, {})  Cur: ({}, {}, {})  Vel: {}  Ang Vel: {}\n",
-	             leftMotorRPM, rightMotorRPM, targetPose.getX(), targetPose.getY(), util::toDeg(targetPose.getTheta()),
-	             state.position.getX(), state.position.getY(), util::toDeg(state.position.getTheta()), point.vel,
-	             point.vel * point.curv);
+	// logger->info("Left RPM: {}  Right RPM: {}  Target: ({}, {}, {})  Cur: ({}, {}, {})  Vel: {}  Ang Vel: {}\n",
+	//              leftMotorRPM, rightMotorRPM, targetPose.getX(), targetPose.getY(),
+	//              util::toDeg(targetPose.getTheta()), state.position.getX(), state.position.getY(),
+	//              util::toDeg(state.position.getTheta()), point.vel, point.vel * point.curv);
 
 	return {leftMotorRPM, rightMotorRPM};
 }

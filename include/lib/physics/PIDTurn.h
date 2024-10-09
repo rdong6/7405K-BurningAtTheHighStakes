@@ -1,5 +1,4 @@
 #pragma once
-#include "Logger.h"
 #include "Motion.h"
 #include "lib/controller/PID.h"
 #include "pros/motors.h"
@@ -21,8 +20,6 @@ private:
 	bool forceRightTerminate = false;
 	bool forceLeft;
 	bool forceLeftTerminate = false;
-
-	static LoggerPtr logger;
 
 
 public:

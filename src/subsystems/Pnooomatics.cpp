@@ -2,7 +2,7 @@
 #include "subsystems/Controller.h"
 #include "subsystems/Subsystem.h"
 
-Pnooomatics::Pnooomatics(RobotBase* robot) : Subsystem(robot, this) {
+Pnooomatics::Pnooomatics(RobotBase* robot) : Subsystem(robot) {
 	hang.set_value(hangReleased);
 	clamp.set_value(clampEnabled);
 }
@@ -20,7 +20,7 @@ void Pnooomatics::registerTasks() {
 
 	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::down,
 	                                Controller::rising);
-	
+
 	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::a,
 	                                Controller::rising);
 }
