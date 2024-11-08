@@ -42,8 +42,8 @@ public:
 		// we need to apply this custom for_each func to the tuple
 		// std::apply() doesn't work as expansion of the paramater pack is impl defined
 		util::tuple::for_each(subsystems, [this](auto x) {
-			this->invokeTable[typeid(x)] = static_cast<std::function<decltype(x)()>>(
-			        [this]() { return std::get<decltype(x)>(this->subsystems); });
+			this->invokeTable[typeid(x)] =
+			        static_cast<std::function<decltype(x)()>>([this]() { return std::get<decltype(x)>(this->subsystems); });
 		});
 
 		// have to do this after invoke table is initialized w/ subsystems

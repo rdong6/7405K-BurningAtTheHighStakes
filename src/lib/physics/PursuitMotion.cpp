@@ -18,8 +18,8 @@ namespace {
 }// namespace
 
 
-PursuitMotion::PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double lookahead, double maxVel,
-                             double maxAccel, bool reversed, double threshold, double k)
+PursuitMotion::PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double lookahead, double maxVel, double maxAccel,
+                             bool reversed, double threshold, double k)
     : path(std::forward<std::span<fttbtkjfk::PursuitPoint>>(path)), k(k), threshold(threshold), lookahead(lookahead),
       prevTime(0), maxVel(maxVel), maxAccel(maxAccel), curVel(0), lastLookaheadIndex(0), lastLookaheadPose(),
       isReversed(reversed ? -1 : 1) {
@@ -52,8 +52,8 @@ PursuitMotion::PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double l
 	// vf = √(vi^2 + 2 * a * d)
 	vels[path.size() - 1] = 0;// ending will always be 0 vel
 	for (int i = path.size() - 2; i >= 0; i--) {
-		double dist = std::sqrt(std::pow(path[i].pose.x - path[i + 1].pose.x, 2) +
-		                        std::pow(path[i].pose.y - path[i + 1].pose.y, 2));
+		double dist =
+		        std::sqrt(std::pow(path[i].pose.x - path[i + 1].pose.x, 2) + std::pow(path[i].pose.y - path[i + 1].pose.y, 2));
 
 		vels[i] = std::min(vels[i], std::sqrt(std::pow(vels[i + 1], 2) + 2 * maxAccel * dist));
 	}
@@ -64,7 +64,7 @@ int PursuitMotion::findClosestIndex(const Pose& pos) const {
 	int closestIndex = -1;
 
 	for (int i = 0; i < path.size(); ++i) {
-		double dist = std::sqrt(std::pow(path[i].pose.x - pos.getX(), 2) + std::pow(path[i].pose.y - pos.getY(), 2));
+		double dist = std::sqrt(std::pow(path[i].pose.x - pos.X(), 2) + std::pow(path[i].pose.y - pos.X(), 2));
 
 		if (dist < minDist) {
 			minDist = dist;
@@ -76,9 +76,10 @@ int PursuitMotion::findClosestIndex(const Pose& pos) const {
 }
 
 // https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm/1084899#1084899
-double PursuitMotion::circleIntersect(const Pose& p1, const Pose& p2, const Pose& pos) const {
-	Pose d = Pose(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-	Pose f = Pose(p1.getX() - pos.getX(), p1.getY() - pos.getY());
+[[deprecated("NEED TO FIX THIS FOR NEW COORDINATE SYSTEM")]] double
+PursuitMotion::circleIntersect(const Pose& p1, const Pose& p2, const Pose& pos) const {
+	Translation2D d = p2.translation() - p1.translation();
+	Translation2D f = p1.translation() - pos.translation();
 	double a = d.dot(d);
 	double b = 2 * f.dot(d);
 	double c = f.dot(f) - lookahead * lookahead;
@@ -128,15 +129,15 @@ Pose PursuitMotion::getLookaheadPoint(const Pose& pos) const {
 	return lastLookaheadPose;
 }
 
-double PursuitMotion::calcCurv(const Pose& pos, double heading, const Pose& lookahead) const {
+[[deprecated("NEED TO FIX THIS FOR NEW COORDINATE SYSTEM")]] double PursuitMotion::calcCurv(const Pose& pos, double heading,
+                                                                                            const Pose& lookahead) const {
 	// side = left or right
-	int side = sgn(std::sin(heading) * (lookahead.getX() - pos.getX()) -
-	               std::cos(heading) * (lookahead.getY() - pos.getY()));
+	int side = sgn(std::sin(heading) * (lookahead.X() - pos.X()) - std::cos(heading) * (lookahead.X() - pos.X()));
 
 	double a = -std::tan(heading);
-	double c = std::tan(heading) * pos.getX() - pos.getY();
-	double x = std::fabs(a * lookahead.getX() + lookahead.getY() + c) / std::sqrt((a * a) + 1);
-	double d = std::hypot(lookahead.getX() - pos.getX(), lookahead.getY() - pos.getY());
+	double c = std::tan(heading) * pos.X() - pos.X();
+	double x = std::fabs(a * lookahead.X() + lookahead.X() + c) / std::sqrt((a * a) + 1);
+	double d = std::hypot(lookahead.X() - pos.X(), lookahead.X() - pos.X());
 
 	return side * ((2 * x) / (d * d));
 }
@@ -146,8 +147,8 @@ double PursuitMotion::curDistFromEnd(kinState state) const {
 	int closest = findClosestIndex(state.position);
 
 	for (int i = path.size() - 1; i > closest; --i) {
-		totalDist += std::sqrt(std::pow(path[i].pose.x - path[i - 1].pose.x, 2) +
-		                       std::pow(path[i].pose.y - path[i - 1].pose.y, 2));
+		totalDist +=
+		        std::sqrt(std::pow(path[i].pose.x - path[i - 1].pose.x, 2) + std::pow(path[i].pose.y - path[i - 1].pose.y, 2));
 	}
 
 	totalDist += (1.0 - (closest - std::floor(closest))) *
@@ -167,7 +168,9 @@ void PursuitMotion::start() {
 	}
 }
 
-IMotion::MotorVoltages PursuitMotion::calculate(const kinState state) {
+[[deprecated("NEED TO FIX THE DIFFERENTIAL DRIVE KINEMATICS CONVERTING CHASSIS SPEEDS TO WHEEL SPEEDS-> FLIP SIGNS")]] IMotion::
+        MotorVoltages
+        PursuitMotion::calculate(const kinState state) {
 	// dt is used for rate limiting of vel of robot
 	double curTime = pros::millis();
 	double dt = (curTime - prevTime) / 1000.0;
@@ -178,8 +181,7 @@ IMotion::MotorVoltages PursuitMotion::calculate(const kinState state) {
 	Pose lookaheadPose = getLookaheadPoint(state.position);
 	lastLookaheadPose = lookaheadPose;
 
-	double robotCurvHeading = M_PI_2 - state.position.getTheta();
-	double curv = calcCurv(state.position, robotCurvHeading, lookaheadPose);
+	double curv = calcCurv(state.position, state.position.theta(), lookaheadPose);
 
 	// target vel of the robot is based on the closest point to the robot after rate limiting acceleration
 	// rate limit velocity - because we assumed infinite accel but that's not true earlier so that robot would move
@@ -203,8 +205,8 @@ IMotion::MotorVoltages PursuitMotion::calculate(const kinState state) {
 	// logger->info(
 	//         "TVel: {:2f} LVel: {:2f}  RVel: {:2f} Curv: {:2f} Look: ({:2f}, {:2f}) Cur: ({:2f}, {:2f}, {:2f}) Dist: "
 	//         "{:2f} dLVel: {:2f} dRVel: {:2f}\n",
-	//         curVel, targetLeftVel, targetRightVel, curv, lookaheadPose.getX(), lookaheadPose.getY(),
-	//         state.position.getX(), state.position.getY(), util::toDeg(state.position.getTheta()),
+	//         curVel, targetLeftVel, targetRightVel, curv, lookaheadPose.X(), lookaheadPose.X(),
+	//         state.position.X(), state.position.X(), util::toDeg(state.position.theta()),
 	//         curDistFromEnd(state), sDrive.getLeftVelocity() * (odometers::leftDeadwheelDiameter * std::numbers::pi)
 	//         / 60.0, sDrive.getRightVelocity() * (odometers::rightDeadwheelDiameter * std::numbers::pi) / 60.0);
 

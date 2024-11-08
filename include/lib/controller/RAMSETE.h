@@ -9,13 +9,12 @@ private:
 public:
 	struct WheelVelocities {
 		// units are whatever the reference linear and angular vels are
-		// which should be in in/s
+		// which should be in/s
 		double left;
 		double right;
 	};
 
 	RAMSETE(double beta, double zeta);
 
-	WheelVelocities calculate(const Pose& curPose, const Pose& targetPose, double linearVelRef,
-	                          double angularVelRef) const;
+	WheelVelocities calculate(const Pose& curPose, const Pose& targetPose, double linearVelRef, double angularVelRef) const;
 };

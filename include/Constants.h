@@ -41,8 +41,8 @@ namespace odometers {
 	// distance between left and right wheels of drivetrain/odometry wheels
 	constexpr double trackWidth = 10.4714285483;
 
-	constexpr double leftDeadwheelDiameter = 2.75; // 48:84 is gear ratio
-	constexpr double rightDeadwheelDiameter = 2.75;// 48:84 is gear ratio
-	constexpr double backDeadwheelDiameter = 2.75; // ignored if backRotation is 0
-	constexpr double backOffset = 2.98188;         // ignored if backRotation is 0
+	constexpr double leftDeadwheelDiameter = 2.75;
+	constexpr double rightDeadwheelDiameter = 2.75;
+	constexpr double backDeadwheelDiameter = 2.75;// ignored if backRotation is 0
+	constexpr double backOffset = 2.98188;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
 }// namespace odometers

@@ -20,23 +20,20 @@ IMotion::MotorVoltages RAMSETEMotion::calculate(const kinState state) {
 	Pose targetPose = Pose(point.pose.x, point.pose.y, util::toRad(point.pose.heading));
 	counter++;
 
-	RAMSETE::WheelVelocities wheelVels =
-	        ramsete.calculate(state.position, targetPose, point.vel, point.vel * point.curv);
-
-	// RAMSETE::WheelVelocities wheelVels{.left = point.wheelVels.left, .right = point.wheelVels.right};
+	RAMSETE::WheelVelocities wheelVels = ramsete.calculate(state.position, targetPose, point.vel, point.vel * point.curv);
 
 	double leftMotorRPM = wheelVels.left * 60.0;
 	// left deadwheel diameter is used only because we used motor encoders
 	// HAVE TO CHANGE WHEN WE USE DEADWHEELS IN THE SEASON
-	leftMotorRPM /= (odometers::leftDeadwheelDiameter * std::numbers::pi);
+	leftMotorRPM /= (odometers::driveGearRatio * std::numbers::pi);
 
 	double rightMotorRPM = wheelVels.right * 60.0;
-	rightMotorRPM /= (odometers::rightDeadwheelDiameter * std::numbers::pi);
+	rightMotorRPM /= (odometers::driveGearRatio * std::numbers::pi);
 
 	// logger->info("Left RPM: {}  Right RPM: {}  Target: ({}, {}, {})  Cur: ({}, {}, {})  Vel: {}  Ang Vel: {}\n",
-	//              leftMotorRPM, rightMotorRPM, targetPose.getX(), targetPose.getY(),
-	//              util::toDeg(targetPose.getTheta()), state.position.getX(), state.position.getY(),
-	//              util::toDeg(state.position.getTheta()), point.vel, point.vel * point.curv);
+	//              leftMotorRPM, rightMotorRPM, targetPose.X(), targetPose.X(),
+	//              util::toDeg(targetPose.theta()), state.position.X(), state.position.X(),
+	//              util::toDeg(state.position.theta()), point.vel, point.vel * point.curv);
 
 	return {leftMotorRPM, rightMotorRPM};
 }

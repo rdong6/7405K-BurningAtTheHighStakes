@@ -23,5 +23,4 @@ public:
 
 	void setVelocity(double _x, double _y, double _h);
 	void setAcceleration(double _x, double _y, double _h);
-	kinState predict(double dt) const;
 };

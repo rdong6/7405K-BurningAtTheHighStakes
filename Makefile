@@ -112,6 +112,9 @@ DEPS:=$(patsubst $(SRCDIR)/%,$(DEPDIR)/%.d,$(SRCS))
 ARCHIVE_TEXT_LIST=$(subst $(SPACE),$(COMMA),$(notdir $(basename $(LIBRARIES))))
 LDTIMEOBJ:=$(BINDIR)/_pros_ld_timestamp.o
 
+MONOLITH_BIN:=$(BINDIR)/monolith.bin
+MONOLITH_ELF:=$(basename $(MONOLITH_BIN)).elf
+
 HOT_BIN:=$(BINDIR)/hot.package.bin
 HOT_ELF:=$(basename $(HOT_BIN)).elf
 COLD_BIN:=$(BINDIR)/cold.package.bin
@@ -132,8 +135,11 @@ ABSPATH:=$(abspath $(dir $(ROOT)))
 
 .PHONY: all clean quick
 
+-include $(wildcard $(FWDIR)/*.mk)
+
 quick: $(DEFAULT_BIN)
 
+monolith: $(MONOLITH_BIN)
 
 all: clean $(DEFAULT_BIN)
 
@@ -145,6 +151,18 @@ clean:
 
 makeDirectory: $(DEPDIR)
 	@$(call mkdir,$(DEPDIR))
+
+$(MONOLITH_BIN): $(MONOLITH_ELF) $(BINDIR)
+	@echo Creating monolith elf for $(DEVICE)
+	@$(OBJCOPY) $< -O binary -R .hot_init $@
+
+$(MONOLITH_ELF): $(OBJS) $(LIBRARIES)
+	@$(call createCompileCommands)
+	@$(call _pros_ld_timestamp)
+	@echo Linking project with $(ARCHIVE_TEXT_LIST)
+	@$(LD) $(LDFLAGS) $(LDFLAGS) $(OBJS) $(LDTIMEOBJ) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS) -o $@)
+	@echo Section sizes:
+	@$(SIZETOOL) $(SIZEFLAGS) $@ $(SIZES_NUMFMT)
 
 $(COLD_BIN): $(COLD_ELF)
 	@echo Creating cold package binary for $(DEVICE)

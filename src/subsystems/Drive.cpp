@@ -119,7 +119,8 @@ RobotFunc Drive::waitUntilDist(double dist) {
 	Pose startingPos = odom ? odom.value()->getCurrentState().position : Pose();
 
 	auto func = [dist, startingPos, odom]() -> bool {
-		return dist <= startingPos.distanceTo(odom ? odom.value()->getCurrentState().position : Pose());
+		return dist <= startingPos.translation().distanceTo(
+		                       (odom ? odom.value()->getCurrentState().position.translation() : Translation2D()));
 	};
 
 	return func;

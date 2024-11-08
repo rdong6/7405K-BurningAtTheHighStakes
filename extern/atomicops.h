@@ -319,9 +319,7 @@ namespace moodycamel {
 #pragma warning(pop)
 #endif
 
-		AE_FORCEINLINE operator T() const AE_NO_TSAN {
-			return load();
-		}
+		AE_FORCEINLINE operator T() const AE_NO_TSAN { return load(); }
 
 
 #ifndef AE_USE_STD_ATOMIC_FOR_WEAK_ATOMIC
@@ -335,9 +333,7 @@ namespace moodycamel {
 			return *this;
 		}
 
-		AE_FORCEINLINE T load() const AE_NO_TSAN {
-			return value;
-		}
+		AE_FORCEINLINE T load() const AE_NO_TSAN { return value; }
 
 		AE_FORCEINLINE T fetch_add_acquire(T increment) AE_NO_TSAN {
 #if defined(AE_ARCH_X64) || defined(AE_ARCH_X86)
@@ -378,9 +374,7 @@ namespace moodycamel {
 			return *this;
 		}
 
-		AE_FORCEINLINE T load() const AE_NO_TSAN {
-			return value.load(std::memory_order_relaxed);
-		}
+		AE_FORCEINLINE T load() const AE_NO_TSAN { return value.load(std::memory_order_relaxed); }
 
 		AE_FORCEINLINE T fetch_add_acquire(T increment) AE_NO_TSAN {
 			return value.fetch_add(increment, std::memory_order_acquire);
@@ -486,27 +480,20 @@ namespace moodycamel {
 				assert(m_hSema);
 			}
 
-			AE_NO_TSAN ~Semaphore() {
-				CloseHandle(m_hSema);
-			}
+			AE_NO_TSAN ~Semaphore() { CloseHandle(m_hSema); }
 
 			bool wait() AE_NO_TSAN {
 				const unsigned long infinite = 0xffffffff;
 				return WaitForSingleObject(m_hSema, infinite) == 0;
 			}
 
-			bool try_wait() AE_NO_TSAN {
-				return WaitForSingleObject(m_hSema, 0) == 0;
-			}
+			bool try_wait() AE_NO_TSAN { return WaitForSingleObject(m_hSema, 0) == 0; }
 
 			bool timed_wait(std::uint64_t usecs) AE_NO_TSAN {
 				return WaitForSingleObject(m_hSema, (unsigned long) (usecs / 1000)) == 0;
 			}
 
-			void signal(int count = 1) AE_NO_TSAN {
-				while (!ReleaseSemaphore(m_hSema, count, nullptr))
-					;
-			}
+			void signal(int count = 1) AE_NO_TSAN { while (!ReleaseSemaphore(m_hSema, count, nullptr)); }
 		};
 #elif defined(__MACH__)
 		//---------------------------------------------------------
@@ -528,17 +515,11 @@ namespace moodycamel {
 				AE_UNUSED(rc);
 			}
 
-			AE_NO_TSAN ~Semaphore() {
-				semaphore_destroy(mach_task_self(), m_sema);
-			}
+			AE_NO_TSAN ~Semaphore() { semaphore_destroy(mach_task_self(), m_sema); }
 
-			bool wait() AE_NO_TSAN {
-				return semaphore_wait(m_sema) == KERN_SUCCESS;
-			}
+			bool wait() AE_NO_TSAN { return semaphore_wait(m_sema) == KERN_SUCCESS; }
 
-			bool try_wait() AE_NO_TSAN {
-				return timed_wait(0);
-			}
+			bool try_wait() AE_NO_TSAN { return timed_wait(0); }
 
 			bool timed_wait(std::uint64_t timeout_usecs) AE_NO_TSAN {
 				mach_timespec_t ts;
@@ -551,16 +532,10 @@ namespace moodycamel {
 				return rc == KERN_SUCCESS;
 			}
 
-			void signal() AE_NO_TSAN {
-				while (semaphore_signal(m_sema) != KERN_SUCCESS)
-					;
-			}
+			void signal() AE_NO_TSAN { while (semaphore_signal(m_sema) != KERN_SUCCESS); }
 
 			void signal(int count) AE_NO_TSAN {
-				while (count-- > 0) {
-					while (semaphore_signal(m_sema) != KERN_SUCCESS)
-						;
-				}
+				while (count-- > 0) { while (semaphore_signal(m_sema) != KERN_SUCCESS); }
 			}
 		};
 #elif defined(__unix__)
@@ -582,9 +557,7 @@ namespace moodycamel {
 				AE_UNUSED(rc);
 			}
 
-			AE_NO_TSAN ~Semaphore() {
-				sem_destroy(&m_sema);
-			}
+			AE_NO_TSAN ~Semaphore() { sem_destroy(&m_sema); }
 
 			bool wait() AE_NO_TSAN {
 				// http://stackoverflow.com/questions/2013181/gdb-causes-sem-wait-to-fail-with-eintr-error
@@ -618,16 +591,10 @@ namespace moodycamel {
 				return rc == 0;
 			}
 
-			void signal() AE_NO_TSAN {
-				while (sem_post(&m_sema) == -1)
-					;
-			}
+			void signal() AE_NO_TSAN { while (sem_post(&m_sema) == -1); }
 
 			void signal(int count) AE_NO_TSAN {
-				while (count-- > 0) {
-					while (sem_post(&m_sema) == -1)
-						;
-				}
+				while (count-- > 0) { while (sem_post(&m_sema) == -1); }
 			}
 		};
 #elif defined(FREERTOS)
@@ -756,13 +723,9 @@ namespace moodycamel {
 				return false;
 			}
 
-			bool wait() AE_NO_TSAN {
-				return tryWait() || waitWithPartialSpinning();
-			}
+			bool wait() AE_NO_TSAN { return tryWait() || waitWithPartialSpinning(); }
 
-			bool wait(std::int64_t timeout_usecs) AE_NO_TSAN {
-				return tryWait() || waitWithPartialSpinning(timeout_usecs);
-			}
+			bool wait(std::int64_t timeout_usecs) AE_NO_TSAN { return tryWait() || waitWithPartialSpinning(timeout_usecs); }
 
 			void signal(ssize_t count = 1) AE_NO_TSAN {
 				assert(count >= 0);

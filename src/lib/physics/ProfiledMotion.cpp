@@ -38,7 +38,7 @@ IMotion::MotorVoltages ProfiledMotion::calculate(const kinState state) {
 	auto targetState = profile.getState(time);
 
 	// error just to log
-	double distTraveled = state.position.distanceTo(startPose) * util::sign(targetState.pos);
+	double distTraveled = state.position.translation().distanceTo(startPose.translation()) * util::sign(targetState.pos);
 	double error = -1 * (distTraveled - targetState.pos);
 
 	// convert from in/s to in/min
@@ -50,12 +50,12 @@ IMotion::MotorVoltages ProfiledMotion::calculate(const kinState state) {
 	// printf("TIME: %.2f tpos: %.2f tvel: %.2f cvel: %.2f tacc: %.2f err: %.2f dist traveled: %.2f "
 	//               "curHeading: %.2f x: %.2f  motor rpm: %.2f\n",
 	//               time, targetState.pos, targetState.vel, state.velocity().y, targetState.acc, error, distTraveled,
-	//               state.position.getTheta() / M_PI * 180, state.position.getX(), motorRPM);
+	//               state.position.theta() / M_PI * 180, state.position.X(), motorRPM);
 
 	// logger->debug("TIME: {} tpos: {:.2f} tvel: {:.2f} cvel: {:.2f} tacc: {:.2f} err: {:.2f} dist traveled: {:.2f} "
 	//               "curHeading: {} x: {}  motor rpm: {}\n",
 	//               time, targetState.pos, targetState.vel, state.velocity().y, targetState.acc, error, distTraveled,
-	//               state.position.getTheta() / M_PI * 180, state.position.getX(), motorRPM);
+	//               state.position.theta() / M_PI * 180, state.position.X(), motorRPM);
 
 	return {motorRPM, motorRPM};
 }
@@ -64,6 +64,6 @@ bool ProfiledMotion::isSettled(const kinState state) {
 	// Considers the bot settled if the total distance travelled during the motion of the bot is within a certain
 	// threshold of the desired distance
 	auto odom = robotInstance->getSubsystem<Odometry>();
-	double distTraveled = odom ? odom.value()->getCurrentState().position.distanceTo(startPose) : 0;
+	double distTraveled = odom ? odom.value()->getCurrentState().position.translation().distanceTo(startPose.translation()) : 0;
 	return std::abs(profile.getTargetDist() - distTraveled) < threshold || overtime;
 }

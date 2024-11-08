@@ -2,10 +2,13 @@
 #include "FreeRTOSFuncs.h"
 #include "Robot.h"
 #include "RobotBase.h"
+#include "lib/controller/RAMSETE.h"
+#include "lib/geometry/kinState.h"
 #include "lib/physics/PIDTurn.h"
 #include "lib/physics/ProfiledMotion.h"
 #include "lib/physics/TimedMotion.h"
 #include "lib/utils/CoroutineGenerator.h"
+#include "lib/utils/Math.h"
 #include "lib/utils/Timeout.h"
 #include "liblvgl/llemu.hpp"
 #include "pros/rtos.h"
@@ -16,7 +19,12 @@
 #include "subsystems/Pnooomatics.h"
 #include <type_traits>
 
-#include "atomicops.h"
+
+#include "Logger.h"
+#include "lib/geometry/Rotation2D.h"
+#include "lib/geometry/Transform2D.h"
+#include "lib/geometry/Translation2D.h"
+#include "lib/geometry/Twist2D.h"
 
 RobotThread autonomousUser();
 
@@ -39,7 +47,75 @@ void robot_init() {
  */
 void initialize() {
 	pros::lcd::initialize();
+	logger_initialize("test.txt", 100);
 	robot_init();
+
+	// Transformation Test:
+	// Transform2D transform(1, 0, util::toRad(5));
+	// for (int i = 0; i <= 4; i++) {
+	// 	Pose origin(0, 0, std::numbers::pi * (i / 2.0));
+	// 	Pose after = origin + transform;
+
+	// 	printf("Transformed Pose: (%f, %f, %f)\n", after.X(), after.Y(), util::toDeg(after.theta()));
+	// }
+
+
+	// Pose relative Test:
+
+	printf("\n\n\n------------------------------Pose TESTING------------------------------\n");
+	Pose origin = Pose(0, 0, 0);
+	// Pose origin = Pose(0, 0, std::numbers::pi / 2.0);
+	for (int i = 0; i <= 8; i++) {
+		double original = std::numbers::pi * (i / 4.0);
+		Pose testPose(1, 2, original);
+		Pose error = testPose.relativeTo(origin);
+		printf("Error Pose: (%f, %f, %f)\n", error.X(), error.Y(), util::toDeg(error.theta()));
+		// printf("eTheta: %f\n", error.theta());
+
+		// 	// printf("Original (deg): %f  Clamped (deg): %f\n", util::toDeg(original),
+		// util::toDeg(util::clampRadians(original)));
+	}
+
+
+	// Rotation test:
+
+	printf("\n\n\n------------------------------Rotation2D TESTING------------------------------\n");
+	Rotation2D originRot = Rotation2D(0);
+	for (int i = 0; i <= 8; i++) {
+		Rotation2D test = Rotation2D(std::numbers::pi * (i / 4.0));
+
+		printf("Test: %f  ∆theta: %f\n", test.degrees(), (test + originRot).degrees());
+	}
+
+
+	// MOTIONS TESTING!!
+
+	printf("\n\n\n------------------------------MOTION TESTING------------------------------\n");
+	kinState defaultState;
+	for (int i = 0; i <= 8; i++) {
+		double heading = std::numbers::pi * (i / 4.0);
+		printf("\nPID Turn To: %.2f\n", util::toDeg(heading));
+		PIDTurn motion(util::toDeg(heading), PID(100, 0, 0));
+		motion.start();
+		(void) motion.calculate(defaultState);
+	}
+
+
+	printf("\n\n\n------------------------------RAMSETE TESTING------------------------------\n");
+	RAMSETE ramsete(2, 0.7);
+	// Pose targetPose(5, 2, std::numbers::pi / 4.0);
+	Pose targetPose(0.2, -0.02, std::numbers::pi / 4.0);
+	Pose originRamsete;
+	RAMSETE::WheelVelocities wheelVels = ramsete.calculate(originRamsete, targetPose, 2, 0.00001);
+	printf("Wheel Vels: %f %f\n", wheelVels.left, wheelVels.right);
+
+	printf("\n\n\n------------------------------Pose Exp TESTING------------------------------\n");
+	Pose originPose = Pose();
+	Pose finalPose = originPose.exp(Twist2D{1, 0.5, util::toRad(5)});
+	printf("Final Pose: (%f, %f, %f)\n", finalPose.X(), finalPose.Y(), util::toDeg(finalPose.theta()));
+
+	pros::delay(100);
+	exit(0);
 }
 
 // USE THIS FUNC FOR AUTON CODING!

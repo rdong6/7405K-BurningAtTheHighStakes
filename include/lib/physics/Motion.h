@@ -9,14 +9,17 @@
 // Base class for every motion that our robot does either during auton or opcontrol
 // Basically a command that the drivetrain uses to do a certain thing
 class IMotion {
-protected:
-	// in ms
-	uint32_t startTime = 0;
-
 public:
-	// in mv
+	// unit: mv
 	struct MotorVoltages {
 		double left, right;
+	};
+
+	// Global timeout for motion is done through Drive::waitUntilSettled()
+	//
+	// Exit condition used for motion chaining or for steady state err (small & large values)
+	struct ExitCondition {
+		//
 	};
 
 	IMotion() = default;
@@ -25,6 +28,12 @@ public:
 	virtual bool isVelocityControlled() const;
 	virtual MotorVoltages calculate(const kinState state) = 0;
 	virtual bool isSettled(const kinState state) = 0;
+
+protected:
+	// in ms
+	uint32_t startTime = 0;
+
+	std::optional<ExitCondition> exitCondition = std::nullopt;
 };
 
 
@@ -44,7 +53,5 @@ public:
 		      return std::any_cast<ConcreteMotion&>(storage);
 	      }} {}
 
-	IMotion* operator->() {
-		return std::addressof(getter(storage));
-	}
+	IMotion* operator->() { return std::addressof(getter(storage)); }
 };

@@ -27,7 +27,9 @@ namespace util {
 		return a + (b - a) * t;
 	}
 
-
+	// normalizes value to be within a certain range (0-range)
+	// ex: clamp angle to between 0˚-360˚ instead of angle being continous
+	//	- normalize(angle, 2π) -> restrict to [0, 2π]
 	template<class T>
 	T normalize(T val, T range) {
 		return std::fmod((std::fmod(val, range) + range), range);
@@ -48,6 +50,18 @@ namespace util {
 		return rad * (180 / std::numbers::pi);
 	}
 
+	// normalize degrees to +-180
+	constexpr double clampDegrees(double deg) {
+		deg = std::fmod(deg + 180, 360.0);
+		return deg < 0 ? deg + 360 : deg - 180;
+	}
+
+	// normalize radians to +-π
+	constexpr double clampRadians(double rads) {
+		rads = std::fmod(rads + std::numbers::pi, 2.0 * std::numbers::pi);
+		return rads < 0 ? rads + 2.0 * std::numbers::pi : rads - std::numbers::pi;
+	}
+
 	// all values are in degrees
 	constexpr double getShortestAngle(double curHeading, double targetHeading) {
 		curHeading = std::fmod(curHeading, 180) - 180.0 * std::round(curHeading / 360);
@@ -55,11 +69,6 @@ namespace util {
 		if (std::fabs(headingErr) > 180) { headingErr = headingErr > 0 ? headingErr - 360 : headingErr + 360; }
 
 		return headingErr;
-	}
-
-	// clamps degrees to +-180
-	constexpr double clampDegrees(double deg) {
-		return std::fmod(deg, 180.0) - 180.0 * std::round(deg / (360.0));
 	}
 
 	template<class T>

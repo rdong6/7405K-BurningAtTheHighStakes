@@ -2,7 +2,6 @@
 #include "Robot.h"
 #include "lib/utils/Math.h"
 #include "pros/motors.h"
-#include "subsystems/Drive.h"
 
 namespace {
 	int sign(double val) {
@@ -12,16 +11,16 @@ namespace {
 
 PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, double maxPower,
                  bool forceRight, bool forceLeft)
-    : targetHeading(targetHeading), pid(pid), counter(0), threshold(threshold), brakeLeft(brakeLeft),
-      brakeRight(brakeRight), initialSign(0), forceRight(forceRight), forceRightTerminate(false), forceLeft(forceLeft),
-      forceLeftTerminate(false), maxPower(maxPower) {}
+    : targetHeading(targetHeading), pid(pid), counter(0), threshold(threshold), brakeLeft(brakeLeft), brakeRight(brakeRight),
+      initialSign(0), forceRight(forceRight), forceRightTerminate(false), forceLeft(forceLeft), forceLeftTerminate(false),
+      maxPower(maxPower) {}
 
 void PIDTurn::start() {
 	if (startTime == 0) [[unlikely]] {
 		auto odom = robotInstance->getSubsystem<Odometry>();
 
-		initialSign = odom ? ::sign(util::getShortestAngle(
-		                             util::toDeg(odom.value()->getCurrentState().position.getTheta()), targetHeading))
+		initialSign = odom ? ::sign(util::getShortestAngle(util::toDeg(odom.value()->getCurrentState().position.theta()),
+		                                                   targetHeading))
 		                   : 1;
 
 		auto drive = robotInstance->getSubsystem<Drive>();
@@ -32,7 +31,7 @@ void PIDTurn::start() {
 
 IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	// Calculates the difference in degrees from our current heading to the target heading
-	double error = util::getShortestAngle(util::toDeg(state.position.getTheta()), targetHeading);
+	double error = util::getShortestAngle(util::toDeg(state.position.theta()), targetHeading);
 
 	if (forceRight && initialSign == -1 && !forceRightTerminate) {
 		if (::sign(error) != initialSign) {
@@ -50,7 +49,7 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	}
 
 
-	// this part is for the hacky spline thing
+	// this part is for the hacky spline turn thing
 	auto drive = robotInstance->getSubsystem<Drive>();
 	if (drive) {
 		if (brakeLeft) { drive.value()->setBrakeModeLeft(pros::E_MOTOR_BRAKE_HOLD); }
@@ -73,21 +72,13 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	if (fabs(turnPwr) >= maxPower) { turnPwr = util::sign(turnPwr) * maxPower; }
 
 	// the hacky spline thing again, otherwise calculate motor power for each side
-	double leftPwr = brakeLeft ? 0 : turnPwr;
-	double rightPwr = brakeRight ? 0 : -turnPwr;
+	double leftPwr = brakeLeft ? 0 : -turnPwr;
+	double rightPwr = brakeRight ? 0 : turnPwr;
 
-	//  artifact: use if you want a lower bounds on voltage - this was here from worlds, where we had a min voltage
-	//  of 1.4V given to our motors
 
-	// if ((!brakeLeft)) {
-	// 	leftPwr = util::sign(leftPwr) * util::lerp(1400, 12000.0, util::clamp(0.0, 1.0, fabs(leftPwr / 12000.0)));
-	// }
-	// if ((!brakeRight)) {
-	// 	rightPwr = util::sign(rightPwr) * util::lerp(1400, 12000.0, util::clamp(0.0, 1.0, fabs(rightPwr / 12000.0)));
-	// }
-
+	printf("Error: %.2f Left Pwr: %.2f  Right Pwr: %.2f\n", error, leftPwr, rightPwr);
 	// logger->debug("Error: {:.2f} Counter: {} heading: {} Left Pwr: {} Right Pwr: {}\n", error, counter,
-	//               util::toDeg(state.position.getTheta()), leftPwr, rightPwr);
+	//               util::toDeg(state.position.theta()), leftPwr, rightPwr);
 
 	return {leftPwr, rightPwr};
 }
