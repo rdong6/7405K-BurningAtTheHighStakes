@@ -7,6 +7,7 @@
 #include "lib/physics/ProfiledMotion.h"
 #include "lib/physics/TimedMotion.h"
 #include "lib/utils/CoroutineGenerator.h"
+#include "lib/utils/DelayedBool.h"
 #include "lib/utils/Math.h"
 #include "lib/utils/Timeout.h"
 #include "liblvgl/llemu.hpp"
@@ -135,11 +136,11 @@ RobotThread redRingSideAuton() {
 	co_yield drive->waitUntilSettled(3000);
 	drive->setCurrentMotion(PIDTurn(120, PID(150, 1, 50, true, 10), false, false));
 	co_yield drive->waitUntilSettled(800);
-	intake->setExtender(true);
+	// intake->setExtender(true);
 	intake->setDistStop(true);
 	drive->setCurrentMotion(ProfiledMotion(12, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1000);
-	intake->setExtender(false);
+	// intake->setExtender(false);
 	drive->setCurrentMotion(ProfiledMotion(-8, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1000);
 	drive->setCurrentMotion(PIDTurn(137, PID(250, 1, 50, true, 10), false, false));
@@ -384,11 +385,11 @@ RobotThread blueRingSideAuton() {
 	co_yield drive->waitUntilSettled(3000);
 	drive->setCurrentMotion(PIDTurn(215, PID(250, 1, 50, true, 10), false, false));
 	co_yield drive->waitUntilSettled(800);
-	intake->setExtender(true);
+	// intake->setExtender(true);
 	intake->setDistStop(true);
 	drive->setCurrentMotion(ProfiledMotion(13, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1000);
-	intake->setExtender(false);
+	// intake->setExtender(false);
 	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1000);
 	drive->setCurrentMotion(PIDTurn(234, PID(250, 1, 50, true, 10), false, false));
@@ -525,7 +526,7 @@ RobotThread redMogoRush() {
 	drive->setCurrentMotion(PIDTurn(240, PID(150, 1, 45, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
-	intake->setExtender(true);
+	// intake->setExtender(true);
 	robotInstance->getFlag<Intake>().value()->distStop = true;
 	// intake->moveVoltage(-12000);
 
@@ -534,7 +535,7 @@ RobotThread redMogoRush() {
 
 
 	drive->setCurrentMotion(ProfiledMotion(-3, 20, 30, 30));
-	intake->setExtender(false);
+	// intake->setExtender(false);
 	co_yield drive->waitUntilSettled(1500);
 
 	// // co_yield []() -> bool { return !robotInstance->getFlag<Intake::flags>().value()->distStop; };

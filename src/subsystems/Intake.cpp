@@ -3,6 +3,7 @@
 #include "Logger.h"
 #include "RobotBase.h"
 #include "lib/utils/CoroutineGenerator.h"
+#include "lib/utils/DelayedBool.h"
 #include "lib/utils/Timeout.h"
 #include "pros/motors.h"
 #include "subsystems/Controller.h"
@@ -15,7 +16,6 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot) {
 	// sets the proper cart of the motor incase you ever want to use moveVel
 	motors.set_gearing_all(pros::E_MOTOR_GEAR_600);
 
-	extender.set_value(false);
 	color.set_led_pwm(100);
 }
 
@@ -43,31 +43,58 @@ void Intake::registerTasks() {
 	                                Controller::falling);
 }
 
+bool Intake::redRingDetector() {
+	return color.get_hue() < 25;
+}
+
+bool Intake::blueRingDetector() {
+	return color.get_hue() >= 75;
+}
+
 // As of now, running constantly on robot no matter the competition state
 RobotThread Intake::runner() {
 	auto intakeFlags = robot->getFlag<Intake>().value();
 
+	// switch (robot->curAlliance) {
+	// 	case Alliance::BLUE:
+	// 		blueismDetector = &Intake::redRingDetector;
+	// 	case Alliance::RED:
+	// 		blueismDetector = &Intake::blueRingDetector;
+	// }
+
+	blueismDetector = &Intake::blueRingDetector;
+
+	// anti-jam vars
 	unsigned int timestamp = 0;// timestamp since last time intake was moving
 	bool runAntiJam = false;
 	Timeout antiJamTimeout;
 
-	bool firstOne = false;
+
+	// bluism plan
 	bool blueistPlanOne = false;
-	bool blueistPlanTwo = false;
+	util::DelayedBool enableBlueist;
+	util::DelayedBool resetBlueist;
 	Timeout blueistTimeout;
+
+	// old blueist code
+	bool firstOne = false;
+	bool blueistPlanTwo = false;
 	Timeout blueistStartTimeout;
+
+	// lady-brown mech detector
+	bool enableLadyBrownDetector = false;
 
 	while (true) {
 		// antijam code
 		// keep updating timestamp since last time intake motor was moving
-		if (motors.get_actual_velocity() >= 10) { timestamp = pros::millis(); }
+		if (motors.get_actual_velocity() >= 20) { timestamp = pros::millis(); }
 
 		// temp disables antijam
-		// if (intakeFlags->antiJam && state == AntiJamState::IDLE && pros::millis() - timestamp > 250) {
-		// 	// enable antijam code -> unwind the intake rq
-		// 	state = AntiJamState::UNWIND;
-		// 	antiJamTimeout = Timeout(333);
-		// }
+		if (intakeFlags->antiJam && state == AntiJamState::IDLE && pros::millis() - timestamp > 250) {
+			// enable antijam code -> unwind the intake rq
+			state = AntiJamState::UNWIND;
+			antiJamTimeout = Timeout(333);
+		}
 
 		if (state == AntiJamState::UNWIND) {
 			motors.move_voltage(-12000);
@@ -82,39 +109,81 @@ RobotThread Intake::runner() {
 
 		// ring ejector (Proof of concept)
 
-		// double hue = color.get_hue();
-		// if (hue >= 75) {
-		// 	printf("BLUE ONE DETECTED\n");
-		// 	firstOne = true;
-		// 	blueistPlanOne = true;
-		// 	blueistStartTimeout = Timeout(0);
-		// }
+		// short circuiting prevents calling a nullptr
+		// check if we already engaged blueism plan -> don't wanna reset timeout
+		/*if (blueismDetector && (this->*blueismDetector)() && !blueistPlanOne) {
+		    blueistPlanOne = true;
+		    // enableBlueist = util::DelayedBool(225);
+		    enableBlueist = util::DelayedBool(300);
+		    blueistTimeout = Timeout(1000);// TUNE
+		    printf("BLUEISM SHALL COMMENCE\n");
+		}
 
-		// if (0 < hue && hue < 25) {
-		// 	printf("RED ONE DETECTED\n");
-		// 	firstOne = true;
-		// }
+		if (enableBlueist()) {
+		    printf("\nACTIVATING BLUEISM\n");
+		    motors.brake();
+		    codeOverride = true;
 
-		// printf("%d  %f\n", color.get_proximity(), color.get_hue());
+		    if (blueistTimeout.timedOut()) {
+		        printf("\nSTOPPING BLUEISM\n");
+		        codeOverride = false;
+		        enableBlueist = util::DelayedBool();
+		        resetBlueist = util::DelayedBool(250);
+		    }
+		}
 
-		// if (blueistPlanOne && blueistStartTimeout.timedOut()) {
-		// 	blueistPlanOne = false;
-		// 	blueistPlanTwo = true;
-		// 	blueistTimeout = Timeout(200);
-		// }
+		if (resetBlueist()) {
+		    resetBlueist = util::DelayedBool();
+		    blueistPlanOne = false;
+		}*/
 
-		// if (blueistPlanTwo) {
-		// 	codeOverride = true;
-		// 	// motors.move_voltage(12000);
-		// 	motors.brake();
-		// 	printf("BLUEISM SHALL COMMENCE\n\n\n\n");
+		double hue = color.get_hue();
+		if (hue >= 75) {
+			printf("BLUE ONE DETECTED\n");
+			firstOne = true;
+			blueistPlanOne = true;
+			blueistStartTimeout = Timeout(0);
+		}
 
-		// 	if (blueistTimeout.timedOut()) {
-		// 		codeOverride = false;
-		// 		blueistPlanTwo = false;
-		// 		firstOne = false;
-		// 	}
-		// }
+		if (0 < hue && hue < 25) {
+			printf("RED ONE DETECTED\n");
+			firstOne = true;
+		}
+
+		printf("%d  %f\n", color.get_proximity(), color.get_hue());
+
+		if (blueistPlanOne && blueistStartTimeout.timedOut()) {
+			blueistPlanOne = false;
+			blueistPlanTwo = true;
+			blueistTimeout = Timeout(200);
+		}
+
+		if (blueistPlanTwo) {
+			codeOverride = true;
+			// motors.move_voltage(12000);
+			motors.brake();
+			printf("BLUEISM SHALL COMMENCE\n\n\n\n");
+
+			if (blueistTimeout.timedOut()) {
+				codeOverride = false;
+				blueistPlanTwo = false;
+				firstOne = false;
+			}
+		}
+
+
+		// lady brown loaded detector
+		// detect ring exists
+		// then for a bit, actively check if
+		if (blueRingDetector() || redRingDetector()) {
+			// enable loader detection
+			enableLadyBrownDetector = true;
+		}
+
+		if (enableLadyBrownDetector) {
+			// check the torque -> if motor doesn't move
+			// torque counter
+		}
 
 
 		// dist & torque stop
@@ -155,12 +224,6 @@ RobotThread Intake::runner() {
 	}
 }
 
-void Intake::setExtender(bool extended) {
-	auto intakeFlags = robot->getFlag<Intake>().value();
-	intakeFlags->isExtended = extended;
-	extender.set_value(extended);
-}
-
 void Intake::setTorqueStop(bool val) {
 	auto intakeFlags = robot->getFlag<Intake>().value();
 	intakeFlags->torqueStop = val;
@@ -171,10 +234,6 @@ void Intake::setDistStop(bool val) {
 	intakeFlags->distStop = val;
 	int32_t dist = distance.get();
 	if (dist < 55) { intakeFlags->storeSecond = true; }
-}
-
-void Intake::toggleExtender() {
-	setExtender(!robot->getFlag<Intake>().value()->isExtended);
 }
 
 void Intake::moveVoltage(int mv) {

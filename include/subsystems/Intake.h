@@ -15,17 +15,20 @@ private:
 	pros::MotorGroup motors{ports::intake};
 	pros::Distance distance{ports::intakeDistance};
 	pros::Optical color{ports::intakeColor};
-	pros::adi::DigitalOut extender{'A'};
 
 	AntiJamState state = AntiJamState::IDLE;
-	bool codeOverride = false;
+	bool codeOverride = false;// code takes control of intake
+
+	bool redRingDetector();
+	bool blueRingDetector();
+
+	bool (Intake::*blueismDetector)(void) = nullptr;
 
 	RobotThread runner();
 
 public:
 	struct flags {
-		bool antiJam{true};
-		bool isExtended{false};
+		bool antiJam{false}; // enable or disable antijam
 		bool isMoving{false};// is intake commanded to move?
 		bool torqueStop{false};
 		bool distStop{false};
@@ -43,9 +46,6 @@ public:
 	void moveVoltage(int mv);
 	void moveVel(int vel);
 	void brake();
-
-	void setExtender(bool extended);
-	void toggleExtender();
 
 	void setTorqueStop(bool val);
 	void setDistStop(bool val);
