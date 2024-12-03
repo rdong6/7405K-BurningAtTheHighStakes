@@ -75,7 +75,7 @@ RobotThread Odometry::updatePosition() {
 
 		double dh = 0;
 		if constexpr (ports::imu > 0) {
-			double curRotation = imu.get_rotation();
+			double curRotation = -imu.get_rotation();
 			dh = util::toRad(curRotation - prevRotation);
 			prevRotation = curRotation;
 		} else {
@@ -84,7 +84,7 @@ RobotThread Odometry::updatePosition() {
 
 		if constexpr (ports::backRotation != 0) {
 			double BE = backWheel.get_position();
-			// pros::lcd::print(4, "BE: %f", BE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
+			pros::lcd::print(5, "BE: %f", BE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
 			b_dist = ((BE - prev_b) / 36000.0) * M_PI * odometers::backDeadwheelDiameter;
 			prev_b = BE;
 
@@ -95,24 +95,12 @@ RobotThread Odometry::updatePosition() {
 
 
 		// testing pose exponential
-		double deltaY = (l_dist + r_dist) / 2.0;// figure out what this should be
-		double deltaX = b_dist;
+		double deltaX = (l_dist + r_dist) / 2.0;// figure out what this should be
+		double deltaY = b_dist;
 
-		double localX = 0;
-		double localY = 0;
-		if (util::fpEquality(dh, 0.0)) {
-			localX = deltaX;
-			localY = deltaY;
-		} else {
-			localX = 2 * std::sin(dh / 2) * (deltaX / dh + odometers::backOffset);
-			localY = 2 * std::sin(dh / 2) * (deltaY / dh);
-		}
-
-		double avgHeading = curState.position.theta() + dh / 2.0;
-		double dx = (localY * std::sin(avgHeading)) + (localX * -std::cos(avgHeading));
-		double dy = (localY * std::cos(avgHeading)) + (localX * std::sin(avgHeading));
-		double dt = 10.0 / 1000.0;
-
+		Rotation2D newHeading = curState.position.rotation() + Rotation2D(dh);
+		Pose newPose = curState.position.exp(Twist2D{deltaX, perp_offset, dh});
+		curState.position = Pose(newPose.translation(), newHeading);
 
 		// original odom calculation (euler integration)
 		// calculate our pos & heading
@@ -128,15 +116,15 @@ RobotThread Odometry::updatePosition() {
 
 
 		// update odom's state w/ new calculations
-		curState.setAcceleration((curState.velocity().x - (dx / dt)) / dt, (curState.velocity().y - (dy / dt)) / dt,
-		                         (curState.velocity().theta - (dh / dt)) / dt);
-		curState.setVelocity(dx / dt, dy / dt, dh / dt);
+		// curState.setAcceleration((curState.velocity().x - (dx / dt)) / dt, (curState.velocity().y - (dy / dt)) / dt,
+		//                          (curState.velocity().theta - (dh / dt)) / dt);
+		// curState.setVelocity(dx / dt, dy / dt, dh / dt);
 
-		curState.position = {curState.position.X() + dx, curState.position.X() + dy,
-		                     util::normalize(curState.position.theta() + dh, 2 * std::numbers::pi)};
+		// curState.position = {curState.position.X() + dx, curState.position.X() + dy,
+		//                      util::normalize(curState.position.theta() + dh, 2 * std::numbers::pi)};
 
-		leftVel = l_dist / dt;
-		rightVel = r_dist / dt;
+		// leftVel = l_dist / dt;
+		// rightVel = r_dist / dt;
 
 		// maybe move this to separate thread
 		printOdom(curState);
@@ -176,7 +164,7 @@ double Odometry::getRightPos() const {
 void Odometry::printOdom(kinState state) {
 	pros::lcd::set_text(1, "gH: " + std::to_string((180 / M_PI) * state.position.theta()));
 	pros::lcd::set_text(2, "gX: " + std::to_string(state.position.X()));
-	pros::lcd::set_text(3, "gY: " + std::to_string(state.position.X()));
+	pros::lcd::set_text(3, "gY: " + std::to_string(state.position.Y()));
 	// logger->debug("X: {:2f} Y: {:2f} H: {:2f}\n", state.position.X(), state.position.X(),
 	//               util::toDeg(state.position.theta()));
 }

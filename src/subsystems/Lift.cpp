@@ -8,8 +8,8 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
-#define UPPER_BOUNDS 190 /*181*/
-#define LOWER_BOUNDS 0
+#define UPPER_BOUNDS 358
+#define LOWER_BOUNDS 96
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -18,7 +18,7 @@ Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	rotation.set_data_rate(5);
 	pros::delay(20);// needed so get_angle() isn't 0
 	int32_t curPosition = rotation.get_angle();
-	rotation.set_position(curPosition > 34500 ? curPosition - 36000 : curPosition);
+	rotation.set_position(curPosition < 1000 ? 36000 + curPosition : curPosition);
 	pros::delay(20);
 }
 
@@ -34,28 +34,24 @@ void Lift::registerTasks() {
 	// when lift controller inputs set, stop whatever code motion is happening
 	controllerRef->registerCallback(
 	        [this]() {
-		        robot->getFlag<Lift>().value()->isMotionRunning = false;
-		        robot->getFlag<Lift>().value()->isHolding = false;
-		        move(12000);
+		        robot->getFlag<Lift>().value()->state = State::IDLE;
+		        move(-12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
 
 	controllerRef->registerCallback(
 	        [this]() {
-		        robot->getFlag<Lift>().value()->isMotionRunning = false;
-		        robot->getFlag<Lift>().value()->isHolding = false;
-		        move(-12000);
+		        robot->getFlag<Lift>().value()->state = State::IDLE;
+		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
 
-	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l1,
-	                                Controller::falling);
+	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l1, Controller::falling);
 
-	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2,
-	                                Controller::falling);
+	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2, Controller::falling);
 
-	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::right,
-	                                Controller::rising);
+	// controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::right,
+	//                                 Controller::rising);
 }
 
 RobotThread Lift::updateAngle() {
@@ -93,17 +89,24 @@ RobotThread Lift::runner() {
 	while (true) {
 		if (liftFlags->kill) { co_return; }
 
-		double error = liftFlags->targetAngle - liftFlags->curAngle;
+		if (liftFlags->state == State::IDLE) {
+			co_yield util::coroutine::nextCycle();
+			continue;
+		}
 
-		// only have pid control if motion is running or requested to hold
-		if (fabs(error) >= liftFlags->errorThresh && (liftFlags->isMotionRunning || liftFlags->isHolding)) {
-			liftFlags->isMoving = true;
+		double error = liftFlags->targetAngle - liftFlags->curAngle;
+		if (fabs(error) >= liftFlags->errorThresh) {
 			double pwr = liftFlags->pid(error);
 			move(pwr);
+			printf("Running. Error: %f  CurAngle: %f\n", error, liftFlags->curAngle);
 		} else {
-			liftFlags->isMoving = false;
+			if (liftFlags->state == State::STOW) {
+				motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+				liftFlags->state = State::IDLE;
+			}
+
 			liftFlags->pid.reset();
-			motor.brake();
+			move(0);
 		}
 
 		co_yield util::coroutine::nextCycle();
@@ -158,19 +161,38 @@ RobotThread Lift::closeLiftCoro() {
 	liftFlags->isMotionRunning = false;
 }
 
-void Lift::toggleState() {
-	setState(!robot->getFlag<Lift>().value()->isOpen);
-}
+void Lift::setState(State state) {
+	robot->getFlag<Lift>().value()->state = state;
 
-void Lift::setState(bool open) {
-	robot->getFlag<Lift>().value()->isOpen = open;
-	robot->getFlag<Lift>().value()->isHolding = false;
-
-	if (open) {
-		robot->registerTask([this]() { return this->openLiftCoro(); }, TaskType::SENTINEL);
-	} else {
-		robot->registerTask([this]() { return this->closeLiftCoro(); }, TaskType::SENTINEL);
+	switch (state) {
+		case State::LEVEL_1:
+			robot->getFlag<Lift>().value()->targetAngle = 311;
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+			break;
+		case State::LEVEL_2:
+			robot->getFlag<Lift>().value()->targetAngle = 329.3;
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+			break;
+		case State::STOW:
+			robot->getFlag<Lift>().value()->targetAngle = 356;
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+			break;
+		case State::IDLE:
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			break;
+		case State::HOLD:
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+			break;
 	}
+
+	// robot->getFlag<Lift>().value()->isOpen = open;
+	// robot->getFlag<Lift>().value()->isHolding = false;
+
+	// if (open) {
+	// 	robot->registerTask([this]() { return this->openLiftCoro(); }, TaskType::SENTINEL);
+	// } else {
+	// 	robot->registerTask([this]() { return this->closeLiftCoro(); }, TaskType::SENTINEL);
+	// }
 }
 
 void Lift::setClaw(double enabled) {
@@ -179,8 +201,8 @@ void Lift::setClaw(double enabled) {
 
 
 void Lift::move(int mv) {
-	if (mv > 0 && (rotation.get_position() / 100.0) > UPPER_BOUNDS) { mv = 0; }
-	if (mv < 0 && (rotation.get_position() / 100.0) < LOWER_BOUNDS) { mv = 0; }
+	if (mv < 0 && (rotation.get_position() / 100.0) > UPPER_BOUNDS) { mv = 0; }
+	if (mv > 0 && (rotation.get_position() / 100.0) < LOWER_BOUNDS) { mv = 0; }
 
 	if (mv == 0) {
 		motor.brake();

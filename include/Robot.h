@@ -72,5 +72,13 @@ public:
 	// }
 };
 
+// Odom = SENT
+// Lift = SENT & AUTON/OPCTRL
+// Intake = SENT
+// Pnoomatics = SENT
+// Drive = AUTON/OPCTRL
+// Controller = OPCTRL
+
+// ODOM, LIFT, INTAKE, PNOOMATICS, LIFT, DRIVE, CONTROLLER
 inline Robot<Odometry, Lift, Intake, Pnooomatics, Drive, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;

@@ -16,6 +16,7 @@ using TaskFunc = std::function<util::coroutine::Generator<RobotFunc>(void)>;// f
 using RobotThread = util::coroutine::Generator<RobotFunc>;
 
 enum class Auton : uint32_t { NONE = 0, LEFT, RIGHT };
+enum class Alliance : uint32_t { BLUE, RED, INVALID };
 enum class TaskType { AUTON, OPCTRL, DISABLED, SENTINEL };
 
 class RobotBase {
@@ -53,8 +54,7 @@ public:
 
 	// registers a task to be run by scheduler
 	// tasks are ran in the order they are registered in (sentinel tasks get priority)
-	void registerTask(
-	        TaskFunc func, TaskType type, const RobotFunc& pred = []() -> bool { return true; });
+	void registerTask(TaskFunc func, TaskType type, const RobotFunc& pred = []() -> bool { return true; });
 
 	// gets access to each subsystem
 	template<typename T>
@@ -68,4 +68,5 @@ public:
 	}
 
 	Auton curAuton = Auton::NONE;
+	Alliance curAlliance = Alliance::INVALID;
 };

@@ -1,5 +1,4 @@
 #include "main.h"
-#include "FreeRTOSFuncs.h"
 #include "Robot.h"
 #include "RobotBase.h"
 #include "lib/controller/RAMSETE.h"
@@ -49,73 +48,48 @@ void initialize() {
 	pros::lcd::initialize();
 	logger_initialize("test.txt", 100);
 	robot_init();
+	pros::delay(250);
+	robotInstance->getSubsystem<Odometry>().value()->reset();
+}
 
-	// Transformation Test:
-	// Transform2D transform(1, 0, util::toRad(5));
-	// for (int i = 0; i <= 4; i++) {
-	// 	Pose origin(0, 0, std::numbers::pi * (i / 2.0));
-	// 	Pose after = origin + transform;
+RobotThread testAuton() {
+	auto driveOpt = robotInstance->getSubsystem<Drive>();
+	auto drive = driveOpt.value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto pnooomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	auto liftFlags = robotInstance->getFlag<Lift>().value();
+	auto pnoomaticsFlags = robotInstance->getFlag<Pnooomatics>().value();
 
-	// 	printf("Transformed Pose: (%f, %f, %f)\n", after.X(), after.Y(), util::toDeg(after.theta()));
-	// }
+	//
+	pnoomaticsFlags->clampMogo = true;
+	drive->setCurrentMotion(ProfiledMotion(24, 50, 60, 60));
+	co_yield drive->waitUntilSettled(1500);
 
+	drive->setCurrentMotion(PIDTurn(90, PID(24, 50, 60)));
+	co_yield drive->waitUntilSettled(1500);
+	intake->moveVoltage(12000);
+	intake->setDistStop(true);
+	drive->setCurrentMotion(ProfiledMotion(30, 50, 60, 60));
+	co_yield drive->waitUntilSettled(1500);
+	intake->moveVoltage(0);
 
-	// Pose relative Test:
+	drive->setCurrentMotion(PIDTurn(0, PID(24, 50, 60)));
+	co_yield drive->waitUntilSettled(1500);
+	intake->moveVoltage(12000);
+	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 60));
+	co_yield drive->waitUntilSettled(1500);
+	intake->moveVoltage(0);
 
-	printf("\n\n\n------------------------------Pose TESTING------------------------------\n");
-	Pose origin = Pose(0, 0, 0);
-	// Pose origin = Pose(0, 0, std::numbers::pi / 2.0);
-	for (int i = 0; i <= 8; i++) {
-		double original = std::numbers::pi * (i / 4.0);
-		Pose testPose(1, 2, original);
-		Pose error = testPose.relativeTo(origin);
-		printf("Error Pose: (%f, %f, %f)\n", error.X(), error.Y(), util::toDeg(error.theta()));
-		// printf("eTheta: %f\n", error.theta());
-
-		// 	// printf("Original (deg): %f  Clamped (deg): %f\n", util::toDeg(original),
-		// util::toDeg(util::clampRadians(original)));
-	}
-
-
-	// Rotation test:
-
-	printf("\n\n\n------------------------------Rotation2D TESTING------------------------------\n");
-	Rotation2D originRot = Rotation2D(0);
-	for (int i = 0; i <= 8; i++) {
-		Rotation2D test = Rotation2D(std::numbers::pi * (i / 4.0));
-
-		printf("Test: %f  ∆theta: %f\n", test.degrees(), (test + originRot).degrees());
-	}
-
-
-	// MOTIONS TESTING!!
-
-	printf("\n\n\n------------------------------MOTION TESTING------------------------------\n");
-	kinState defaultState;
-	for (int i = 0; i <= 8; i++) {
-		double heading = std::numbers::pi * (i / 4.0);
-		printf("\nPID Turn To: %.2f\n", util::toDeg(heading));
-		PIDTurn motion(util::toDeg(heading), PID(100, 0, 0));
-		motion.start();
-		(void) motion.calculate(defaultState);
-	}
-
-
-	printf("\n\n\n------------------------------RAMSETE TESTING------------------------------\n");
-	RAMSETE ramsete(2, 0.7);
-	// Pose targetPose(5, 2, std::numbers::pi / 4.0);
-	Pose targetPose(0.2, -0.02, std::numbers::pi / 4.0);
-	Pose originRamsete;
-	RAMSETE::WheelVelocities wheelVels = ramsete.calculate(originRamsete, targetPose, 2, 0.00001);
-	printf("Wheel Vels: %f %f\n", wheelVels.left, wheelVels.right);
-
-	printf("\n\n\n------------------------------Pose Exp TESTING------------------------------\n");
-	Pose originPose = Pose();
-	Pose finalPose = originPose.exp(Twist2D{1, 0.5, util::toRad(5)});
-	printf("Final Pose: (%f, %f, %f)\n", finalPose.X(), finalPose.Y(), util::toDeg(finalPose.theta()));
-
-	pros::delay(100);
-	exit(0);
+	drive->setCurrentMotion(PIDTurn(270, PID(24, 50, 60)));
+	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(ProfiledMotion(10, 50, 60, 60));
+	co_yield drive->waitUntilSettled(1500);
+	intake->moveVoltage(12000);
+	intake->setDistStop(true);
+	drive->setCurrentMotion(ProfiledMotion(10, 50, 60, 60));
+	co_yield drive->waitUntilSettled(1500);
+	intake->moveVoltage(0);
 }
 
 // USE THIS FUNC FOR AUTON CODING!
@@ -235,7 +209,7 @@ RobotThread skillsAuton() {
 	co_yield drive->waitUntilSettled(600);
 	drive->setCurrentMotion(ProfiledMotion(30, 30, 50, 60));// move towards ring to place on stake
 	co_yield util::coroutine::delay(300);
-	lift->toggleState();
+	// lift->toggleState();
 	co_yield drive->waitUntilSettled(2000);
 	// turn towards wall stake
 	drive->setCurrentMotion(PIDTurn(265.5, PID(150, 1, 45, true, 10), false, false));
@@ -252,7 +226,7 @@ RobotThread skillsAuton() {
 	co_yield util::coroutine::nextCycle();
 	Timeout liftScoreTimeout(2000);
 	co_yield [=]() -> bool { return !liftFlags->isMoving || liftScoreTimeout.timedOut(); };
-	lift->setState(false);
+	// lift->setState(false);
 
 	// lift pid
 
@@ -337,7 +311,7 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(PIDTurn(167, PID(150, 1, 45, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
 	drive->setCurrentMotion(ProfiledMotion(50, 40, 50, 60));
-	lift->toggleState();
+	// lift->toggleState();
 	intake->moveVoltage(-12000);
 	co_yield drive->waitUntilSettled(2000);
 
@@ -353,7 +327,7 @@ RobotThread skillsAuton() {
 	liftFlags->isMotionRunning = true;
 	co_yield util::coroutine::nextCycle();
 	co_yield [=]() -> bool { return !liftFlags->isMoving; };
-	lift->setState(false);
+	// lift->setState(false);
 
 	/*intake->moveVoltage(12000);
 	intake->setDistStop(true);

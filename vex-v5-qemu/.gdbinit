@@ -7,5 +7,6 @@ layout asm
 set print asm-demangle on
 
 add-symbol-file target/armv7a-none-eabi/debug/kernel
+add-symbol-file ../bin/monolith.elf
 
 target remote localhost:1234

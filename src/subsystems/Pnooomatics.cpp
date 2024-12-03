@@ -23,6 +23,19 @@ void Pnooomatics::registerTasks() {
 
 	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::a,
 	                                Controller::rising);
+
+	robot->registerTask([this]() { return this->runner(); }, TaskType::SENTINEL);
+}
+
+RobotThread Pnooomatics::runner() {
+	while (true) {
+		if (dist.get_distance() <= 73 && robot->getFlag<Pnooomatics>().value()->clampMogo) {
+			setClamp(true);
+			robot->getFlag<Pnooomatics>().value()->clampMogo = false;
+		}
+
+		co_yield util::coroutine::nextCycle();
+	}
 }
 
 void Pnooomatics::setHang(bool release) {

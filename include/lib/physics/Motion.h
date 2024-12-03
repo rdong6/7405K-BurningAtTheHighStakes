@@ -17,7 +17,7 @@ public:
 
 	// Global timeout for motion is done through Drive::waitUntilSettled()
 	//
-	// Exit condition used for motion chaining or for steady state err (small & large values)
+	// Exit condition used for motion chaining
 	struct ExitCondition {
 		//
 	};
