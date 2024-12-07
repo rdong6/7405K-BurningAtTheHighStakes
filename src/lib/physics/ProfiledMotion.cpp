@@ -63,7 +63,10 @@ IMotion::MotorVoltages ProfiledMotion::calculate(const kinState state) {
 bool ProfiledMotion::isSettled(const kinState state) {
 	// Considers the bot settled if the total distance travelled during the motion of the bot is within a certain
 	// threshold of the desired distance
-	auto odom = robotInstance->getSubsystem<Odometry>();
-	double distTraveled = odom ? odom.value()->getCurrentState().position.translation().distanceTo(startPose.translation()) : 0;
+	// auto odom = robotInstance->getSubsystem<Odometry>();
+	// double distTraveled = odom ? odom.value()->getCurrentState().position.translation().distanceTo(startPose.translation()) :
+	// 0;
+
+	double distTraveled = state.position.translation().distanceTo(startPose.translation());
 	return std::abs(profile.getTargetDist() - distTraveled) < threshold || overtime;
 }

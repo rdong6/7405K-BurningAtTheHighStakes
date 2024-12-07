@@ -41,10 +41,11 @@ public:
 		double targetAngle{5};// TBD - Angle lift should move to if code's controlling
 		double errorThresh{2};
 
+		bool isMoving{false};// is the lift currently moving by code to a place
+
 		bool kill{false};// set to true to kill entire lift subsystem
 
 		// IGNORE THESE -> will be deleted
-		bool isMoving{false};       // is the lift arm open
 		bool isOpen{false};         // is the lift open
 		bool isMotionRunning{false};// is the lift running a motion (open/close lift coroutine)
 		bool isHolding{false};

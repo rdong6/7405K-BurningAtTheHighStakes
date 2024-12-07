@@ -90,16 +90,20 @@ RobotThread Lift::runner() {
 		if (liftFlags->kill) { co_return; }
 
 		if (liftFlags->state == State::IDLE) {
+			liftFlags->isMoving = false;
 			co_yield util::coroutine::nextCycle();
 			continue;
 		}
 
 		double error = liftFlags->targetAngle - liftFlags->curAngle;
 		if (fabs(error) >= liftFlags->errorThresh) {
+			liftFlags->isMoving = true;
 			double pwr = liftFlags->pid(error);
 			move(pwr);
 			printf("Running. Error: %f  CurAngle: %f\n", error, liftFlags->curAngle);
 		} else {
+			liftFlags->isMoving = false;
+
 			if (liftFlags->state == State::STOW) {
 				motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 				liftFlags->state = State::IDLE;
@@ -201,8 +205,8 @@ void Lift::setClaw(double enabled) {
 
 
 void Lift::move(int mv) {
-	if (mv < 0 && (rotation.get_position() / 100.0) > UPPER_BOUNDS) { mv = 0; }
-	if (mv > 0 && (rotation.get_position() / 100.0) < LOWER_BOUNDS) { mv = 0; }
+	if (mv > 0 && (rotation.get_position() / 100.0) > UPPER_BOUNDS) { mv = 0; }
+	if (mv < 0 && (rotation.get_position() / 100.0) < LOWER_BOUNDS) { mv = 0; }
 
 	if (mv == 0) {
 		motor.brake();

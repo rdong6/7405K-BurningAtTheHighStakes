@@ -1,4 +1,5 @@
 #include "subsystems/Pnooomatics.h"
+#include "lib/utils/DelayedBool.h"
 #include "subsystems/Controller.h"
 #include "subsystems/Subsystem.h"
 
@@ -28,11 +29,20 @@ void Pnooomatics::registerTasks() {
 }
 
 RobotThread Pnooomatics::runner() {
+
+	util::DelayedBool enableClamp;
+
 	while (true) {
-		if (dist.get_distance() <= 73 && robot->getFlag<Pnooomatics>().value()->clampMogo) {
-			setClamp(true);
+		if (dist.get_distance() <= 40 && robot->getFlag<Pnooomatics>().value()->clampMogo) {
+			enableClamp = util::DelayedBool(50);
 			robot->getFlag<Pnooomatics>().value()->clampMogo = false;
+			setClamp(true);
 		}
+
+		// if (enableClamp()) {
+		// 	setClamp(true);
+		// 	enableClamp = util::DelayedBool();
+		// }
 
 		co_yield util::coroutine::nextCycle();
 	}

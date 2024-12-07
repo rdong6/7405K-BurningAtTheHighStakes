@@ -13,7 +13,7 @@ public:
 	constexpr Pose(Translation2D translation, Rotation2D rotation) : m_translation(translation), m_rotation(rotation) {}
 
 	// theta in rads
-	constexpr Pose(double x, double y, double theta) : m_translation(x, y), m_rotation(theta) {}
+	constexpr Pose(double x, double y, double theta = 0) : m_translation(x, y), m_rotation(theta) {}
 
 	/// GETTER FUNCTIONS
 
@@ -30,8 +30,8 @@ public:
 	}
 
 	// what angle to face from current point to face other point
-	constexpr Rotation2D headingTo(const Pose& other) const {
-		Translation2D deltaTranslation = other.translation() - translation();
+	constexpr Rotation2D headingTo(const Pose& target) const {
+		Translation2D deltaTranslation = target.translation() - translation();
 		return Rotation2D{std::atan2(deltaTranslation.Y(), deltaTranslation.X())};
 	}
 

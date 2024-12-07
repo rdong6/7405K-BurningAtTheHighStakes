@@ -9,7 +9,6 @@
 #include <typeindex>
 #include <utility>
 
-
 using RobotFunc = std::function<bool(void)>;// lambda from each coro, indicating if it's ready to run or not
 using TaskFunc = std::function<util::coroutine::Generator<RobotFunc>(void)>;// function which serves as the "thread"
 

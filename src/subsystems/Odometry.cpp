@@ -29,9 +29,6 @@ void Odometry::registerTasks() {
 
 void Odometry::reset() {
 	curState = kinState({0, 0, 0}, {0, 0, 0}, {0, 0, 0});
-
-	// leftWheel.reset();
-	// rightWheel.reset();
 }
 
 void Odometry::setPose(Pose pose) {
@@ -84,7 +81,7 @@ RobotThread Odometry::updatePosition() {
 
 		if constexpr (ports::backRotation != 0) {
 			double BE = backWheel.get_position();
-			pros::lcd::print(5, "BE: %f", BE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
+			pros::lcd::print(3, "BE: %f", BE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
 			b_dist = ((BE - prev_b) / 36000.0) * M_PI * odometers::backDeadwheelDiameter;
 			prev_b = BE;
 
@@ -162,9 +159,9 @@ double Odometry::getRightPos() const {
 }
 
 void Odometry::printOdom(kinState state) {
-	pros::lcd::set_text(1, "gH: " + std::to_string((180 / M_PI) * state.position.theta()));
-	pros::lcd::set_text(2, "gX: " + std::to_string(state.position.X()));
-	pros::lcd::set_text(3, "gY: " + std::to_string(state.position.Y()));
+	pros::lcd::set_text(0, "gH: " + std::to_string((180 / M_PI) * state.position.theta()));
+	pros::lcd::set_text(1, "gX: " + std::to_string(state.position.X()));
+	pros::lcd::set_text(2, "gY: " + std::to_string(state.position.Y()));
 	// logger->debug("X: {:2f} Y: {:2f} H: {:2f}\n", state.position.X(), state.position.X(),
 	//               util::toDeg(state.position.theta()));
 }

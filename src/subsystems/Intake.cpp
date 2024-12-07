@@ -62,7 +62,7 @@ RobotThread Intake::runner() {
 	// 		blueismDetector = &Intake::blueRingDetector;
 	// }
 
-	blueismDetector = &Intake::blueRingDetector;
+	blueismDetector = &Intake::redRingDetector;
 
 	// anti-jam vars
 	unsigned int timestamp = 0;// timestamp since last time intake was moving
@@ -137,20 +137,29 @@ RobotThread Intake::runner() {
 		    blueistPlanOne = false;
 		}*/
 
-		double hue = color.get_hue();
+
+		//
+		/*double hue = color.get_hue();
 		if (hue >= 75) {
+		    printf("BLUE ONE DETECTED\n");
+		    firstOne = true;
+		    blueistPlanOne = true;
+		    blueistStartTimeout = Timeout(0);
+		}
+
+		if (0 < hue && hue < 25) {
+		    printf("RED ONE DETECTED\n");
+		    firstOne = true;
+		}*/
+
+		if (blueismDetector && (this->*blueismDetector)() && color.get_proximity() >= 80) {
+			printf("%d  %f\n", color.get_proximity(), color.get_hue());
 			printf("BLUE ONE DETECTED\n");
 			firstOne = true;
 			blueistPlanOne = true;
 			blueistStartTimeout = Timeout(0);
 		}
 
-		if (0 < hue && hue < 25) {
-			printf("RED ONE DETECTED\n");
-			firstOne = true;
-		}
-
-		printf("%d  %f\n", color.get_proximity(), color.get_hue());
 
 		if (blueistPlanOne && blueistStartTimeout.timedOut()) {
 			blueistPlanOne = false;
@@ -198,10 +207,10 @@ RobotThread Intake::runner() {
 		}
 
 		if (intakeFlags->distStop) {
-			if (dist <= 55) {
+			if (dist <= 20) {
 				intakeFlags->partiallyIn = false;
 				intakeFlags->fullyIn = true;
-			} else if (dist <= 100) {
+			} else if (dist <= 60) {
 				if (intakeFlags->storeSecond) { intakeFlags->storeSecond = false; }
 				intakeFlags->fullyIn = false;
 				intakeFlags->partiallyIn = true;
