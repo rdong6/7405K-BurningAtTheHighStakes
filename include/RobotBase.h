@@ -14,8 +14,8 @@ using TaskFunc = std::function<util::coroutine::Generator<RobotFunc>(void)>;// f
 
 using RobotThread = util::coroutine::Generator<RobotFunc>;
 
-enum class Auton : uint32_t { NONE = 0, LEFT, RIGHT };
-enum class Alliance : uint32_t { BLUE, RED, INVALID };
+enum class Auton : uint16_t { NONE = 0, QUAL, ELIM };
+enum class Alliance : uint16_t { INVALID = 0, BLUE, RED };
 enum class TaskType { AUTON, OPCTRL, DISABLED, SENTINEL };
 
 class RobotBase {
