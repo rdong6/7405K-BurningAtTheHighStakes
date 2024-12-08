@@ -3,10 +3,7 @@
 
 extern lv_font_t lv_font_dejavu_40;
 
-lv_style_t bTGL_Pr;
-lv_style_t bTGL_PrRED;
-lv_style_t bTGL_PrBLUE;
-lv_style_t bTGL_PrGREEN;
+static lv_style_t btnRedStyle;
 
 
 inline lv_coord_t percentX(double percent) {
@@ -39,7 +36,7 @@ AutonSelector::Button::Button(lv_obj_t* parent, const char* name, Auton auton, A
 		        robotInstance->curAlliance = static_cast<Alliance>(decodedData.first);
 		        robotInstance->curAuton = static_cast<Auton>(decodedData.second);
 	        },
-	        LV_EVENT_ALL, (void*) combine(static_cast<uint16_t>(auton), static_cast<uint16_t>(alliance)));
+	        LV_EVENT_PRESSED, (void*) combine(static_cast<uint16_t>(auton), static_cast<uint16_t>(alliance)));
 }
 
 void AutonSelector::Button::setPos(lv_coord_t x, lv_coord_t y) {
@@ -50,6 +47,10 @@ void AutonSelector::Button::setSize(lv_coord_t w, lv_coord_t h) {
 	lv_obj_set_size(btn, w, h);
 }
 
+void AutonSelector::Button::setStyle(lv_style_t* style) {
+	lv_obj_add_style(btn, style, 0);
+}
+
 AutonSelector::AutonSelector() {
 	pros::lcd::initialize();
 	lcdScreen = lv_scr_act();
@@ -57,6 +58,10 @@ AutonSelector::AutonSelector() {
 
 void AutonSelector::run() {
 	selectorScreen = lv_obj_create(NULL);
+
+	lv_style_init(&btnRedStyle);
+	lv_style_set_bg_color(&btnRedStyle, lv_color_hex(0xf21e0f));
+	lv_style_set_bg_opa(&btnRedStyle, LV_OPA_COVER);
 
 
 	// create buttons
@@ -67,12 +72,23 @@ void AutonSelector::run() {
 	// R -> ringisde qual
 
 	blueRingsideElim = Button(selectorScreen, "Blue Elim", Auton::ELIM, Alliance::BLUE);
+	blueRingsideElim.setPos(percentX(10), percentY(5));
+	blueRingsideElim.setSize(150, 100);
 	blueRingsideQual = Button(selectorScreen, "Blue Qual", Auton::QUAL, Alliance::BLUE);
-	redRingsideElim = Button(selectorScreen, "Blue Elim", Auton::ELIM, Alliance::RED);
-	redRingsideQual = Button(selectorScreen, "Blue Qual", Auton::QUAL, Alliance::RED);
+	blueRingsideQual.setPos(percentX(65), percentY(5));
+	blueRingsideQual.setSize(150, 100);
+	redRingsideElim = Button(selectorScreen, "Red Elim", Auton::ELIM, Alliance::RED);
+	redRingsideElim.setPos(percentX(10), percentY(50));
+	redRingsideElim.setSize(150, 100);
+	redRingsideElim.setStyle(&btnRedStyle);
+	redRingsideQual = Button(selectorScreen, "Red Qual", Auton::QUAL, Alliance::RED);
+	redRingsideQual.setPos(percentX(65), percentY(50));
+	redRingsideQual.setSize(150, 100);
+	redRingsideQual.setStyle(&btnRedStyle);
 
 	lv_scr_load(selectorScreen);
 
 	// unstalls the entire pipeline incase someone forgets to select an auton
 	while (robotInstance->curAuton == Auton::NONE && pros::competition::is_disabled()) { pros::delay(10); }
+	lv_scr_load(lcdScreen);
 }
