@@ -19,13 +19,13 @@ void Pnooomatics::registerTasks() {
 	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::b,
 	                                Controller::rising);
 
-	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::down,
-	                                Controller::rising);
-
 	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::a,
 	                                Controller::rising);
 
-	robot->registerTask([this]() { return this->runner(); }, TaskType::SENTINEL);
+	controllerRef->registerCallback([this]() { toggleClaw(); }, []() {}, Controller::master, Controller::y,
+	                                Controller::rising);
+
+	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
 }
 
 RobotThread Pnooomatics::runner() {
@@ -76,4 +76,14 @@ void Pnooomatics::setHammer(bool enable) {
 void Pnooomatics::toggleHammer() {
 	hammerDeployed = !hammerDeployed;
 	hammer.set_value(hammerDeployed);
+}
+
+void Pnooomatics::setClaw(bool enable) {
+	clawEnabled = enable;
+	claw.set_value(enable);
+}
+
+void Pnooomatics::toggleClaw() {
+	clawEnabled = !clawEnabled;
+	claw.set_value(clawEnabled);
 }

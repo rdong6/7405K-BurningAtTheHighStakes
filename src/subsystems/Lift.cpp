@@ -9,7 +9,7 @@
 #include <limits>
 
 #define UPPER_BOUNDS 358
-#define LOWER_BOUNDS 96
+#define LOWER_BOUNDS 98
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -50,8 +50,8 @@ void Lift::registerTasks() {
 
 	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2, Controller::falling);
 
-	// controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::right,
-	//                                 Controller::rising);
+	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::right,
+	                                Controller::rising);
 }
 
 RobotThread Lift::updateAngle() {
@@ -89,8 +89,24 @@ RobotThread Lift::runner() {
 	while (true) {
 		if (liftFlags->kill) { co_return; }
 
+		if (liftFlags->curAngle <= 300) {
+			robot->getSubsystem<Intake>().value()->setExtender(true);
+		}
+
+		//  lower intake extender -> lift was last to touch it and move it up
+		if (liftFlags->curAngle > 300) {
+			robot->getSubsystem<Intake>().value()->setExtender(false);
+		}
+
+		// test this hard clamp
+		if (liftFlags->curAngle <= 210) {
+			liftFlags->targetAngle = 220;
+			liftFlags->state = Lift::HOLD;
+		}
+
 		if (liftFlags->state == State::IDLE) {
 			liftFlags->isMoving = false;
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			co_yield util::coroutine::nextCycle();
 			continue;
 		}
@@ -165,16 +181,37 @@ RobotThread Lift::closeLiftCoro() {
 	liftFlags->isMotionRunning = false;
 }
 
+void Lift::toggleState() {
+
+	switch (robot->getFlag<Lift>().value()->state) {
+		case State::LEVEL_1:
+			setState(State::LEVEL_1);
+			break;
+		case State::LEVEL_2:
+			setState(State::LEVEL_1);
+			break;
+		case State::STOW:
+			setState(State::LEVEL_1);
+			break;
+		case State::IDLE:
+			setState(State::LEVEL_1);
+			break;
+		case State::HOLD:
+			setState(State::LEVEL_1);
+			break;
+	}
+}
+
 void Lift::setState(State state) {
 	robot->getFlag<Lift>().value()->state = state;
 
 	switch (state) {
 		case State::LEVEL_1:
-			robot->getFlag<Lift>().value()->targetAngle = 311;
+			robot->getFlag<Lift>().value()->targetAngle = 308;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::LEVEL_2:
-			robot->getFlag<Lift>().value()->targetAngle = 329.3;
+			robot->getFlag<Lift>().value()->targetAngle = 326.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:

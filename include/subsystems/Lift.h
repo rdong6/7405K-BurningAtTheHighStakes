@@ -20,7 +20,6 @@ private:
 	pros::Motor motor{ports::liftMotor};
 	pros::Rotation rotation{ports::liftRotation};
 	pros::adi::DigitalOut claw{'B'};
-	// PID pid = PID(220, 10, 0, true, 10);
 
 
 	RobotThread updateAngle();
@@ -41,6 +40,8 @@ public:
 		double targetAngle{5};// TBD - Angle lift should move to if code's controlling
 		double errorThresh{2};
 
+		bool liftActivatedExtender{false}; // if true, lift will lower extender when lift arm is in size again -> disabled when any other part of code touches intake extender
+
 		bool isMoving{false};// is the lift currently moving by code to a place
 
 		bool kill{false};// set to true to kill entire lift subsystem
@@ -55,6 +56,7 @@ public:
 
 	void registerTasks() override;
 
+	void toggleState();
 	void setState(State state);
 
 	void setClaw(double enabled);

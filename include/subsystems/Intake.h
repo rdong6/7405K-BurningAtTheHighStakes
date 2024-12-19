@@ -12,6 +12,7 @@ class Intake : public Subsystem {
 private:
 	enum class AntiJamState { IDLE, UNWIND };
 
+	pros::adi::DigitalOut extender{'G'};
 	pros::MotorGroup motors{ports::intake};
 	pros::Distance distance{ports::intakeDistance};
 	pros::Optical color{ports::intakeColor};
@@ -19,12 +20,17 @@ private:
 	AntiJamState state = AntiJamState::IDLE;
 	bool codeOverride = false;// code takes control of intake
 
+	int lastCommandedVoltage = 0;
+
+	bool extenderEnabled = false;
+	
 	bool redRingDetector();
 	bool blueRingDetector();
 
 	bool (Intake::*blueismDetector)(void) = nullptr;
 
 	RobotThread runner();
+	RobotThread opcontrol();
 
 public:
 	struct flags {
@@ -32,6 +38,8 @@ public:
 		bool isMoving{false};// is intake commanded to move?
 		bool torqueStop{false};
 		bool distStop{false};
+
+		bool colorSortResumes{false}; // after color sort, we resume last commanded voltage
 
 		// ring status
 		bool partiallyIn{false};
@@ -49,4 +57,7 @@ public:
 
 	void setTorqueStop(bool val);
 	void setDistStop(bool val);
+
+	void setExtender(bool val);
+	void toggleExtender();
 };

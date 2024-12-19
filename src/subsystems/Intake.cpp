@@ -21,6 +21,7 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot) {
 
 void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->runner(); }, TaskType::SENTINEL);
+	robot->registerTask([this]() { return this->opcontrol(); }, TaskType::OPCTRL);
 
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
@@ -28,11 +29,17 @@ void Intake::registerTasks() {
 	auto controllerRef = controller.value();
 
 	// Maps holding r1 to intake
-	controllerRef->registerCallback([this]() { this->moveVoltage(12000); }, []() {}, Controller::master, Controller::r2,
+	controllerRef->registerCallback([this]() {
+		// this->moveVoltage(10000);
+		 this->moveVoltage(12000);
+		 
+		  }, []() {}, Controller::master, Controller::r2,
 	                                Controller::hold);
 
 	// Maps holding r2 to outtake - when both r1 and r2 are held, r2 takes precedent
-	controllerRef->registerCallback([this]() { this->moveVoltage(-12000); }, []() {}, Controller::master, Controller::r1,
+	controllerRef->registerCallback([this]() { 		
+		this->moveVoltage(-12000); 
+		}, []() {}, Controller::master, Controller::r1,
 	                                Controller::hold);
 
 	// stops the intake when neither button is pressed
@@ -41,10 +48,17 @@ void Intake::registerTasks() {
 
 	controllerRef->registerCallback([this]() { this->moveVoltage(0); }, []() {}, Controller::master, Controller::r2,
 	                                Controller::falling);
+
+	controllerRef->registerCallback([this]() { this->toggleExtender(); }, []() {}, Controller::master, Controller::up,
+	                                Controller::falling);
+}
+
+RobotThread Intake::opcontrol() {
+	// blueismDetector = nullptr;
 }
 
 bool Intake::redRingDetector() {
-	return color.get_hue() < 25;
+	return color.get_hue() < 10;
 }
 
 bool Intake::blueRingDetector() {
@@ -55,14 +69,18 @@ bool Intake::blueRingDetector() {
 RobotThread Intake::runner() {
 	auto intakeFlags = robot->getFlag<Intake>().value();
 
-	// switch (robot->curAlliance) {
-	// 	case Alliance::BLUE:
-	// 		blueismDetector = &Intake::redRingDetector;
-	// 	case Alliance::RED:
-	// 		blueismDetector = &Intake::blueRingDetector;
-	// }
-
-	blueismDetector = &Intake::redRingDetector;
+	// for comps
+	switch (robot->curAlliance) {
+		case Alliance::BLUE:
+			blueismDetector = &Intake::redRingDetector;
+			break;
+		case Alliance::RED:
+			blueismDetector = &Intake::blueRingDetector;
+			break;
+		default:
+			blueismDetector = nullptr;
+			break;
+	}
 
 	// anti-jam vars
 	unsigned int timestamp = 0;// timestamp since last time intake was moving
@@ -74,6 +92,7 @@ RobotThread Intake::runner() {
 	bool blueistPlanOne = false;
 	util::DelayedBool enableBlueist;
 	util::DelayedBool resetBlueist;
+	util::DelayedBool blueistResumeLastVoltage;
 	Timeout blueistTimeout;
 
 	// old blueist code
@@ -87,13 +106,14 @@ RobotThread Intake::runner() {
 	while (true) {
 		// antijam code
 		// keep updating timestamp since last time intake motor was moving
-		if (motors.get_actual_velocity() >= 20) { timestamp = pros::millis(); }
+		if (std::abs(motors.get_actual_velocity()) >= 30) { timestamp = pros::millis(); }
 
 		// temp disables antijam
 		if (intakeFlags->antiJam && state == AntiJamState::IDLE && pros::millis() - timestamp > 250) {
 			// enable antijam code -> unwind the intake rq
 			state = AntiJamState::UNWIND;
 			antiJamTimeout = Timeout(333);
+			printf("\n\n\nANTI JAM ENABLED\n\n\n");
 		}
 
 		if (state == AntiJamState::UNWIND) {
@@ -157,7 +177,8 @@ RobotThread Intake::runner() {
 			printf("BLUE ONE DETECTED\n");
 			firstOne = true;
 			blueistPlanOne = true;
-			blueistStartTimeout = Timeout(0);
+			// blueistStartTimeout = Timeout(0); // testing
+			blueistStartTimeout = Timeout(40); // works for slower
 		}
 
 
@@ -169,7 +190,6 @@ RobotThread Intake::runner() {
 
 		if (blueistPlanTwo) {
 			codeOverride = true;
-			// motors.move_voltage(12000);
 			motors.brake();
 			printf("BLUEISM SHALL COMMENCE\n\n\n\n");
 
@@ -177,7 +197,17 @@ RobotThread Intake::runner() {
 				codeOverride = false;
 				blueistPlanTwo = false;
 				firstOne = false;
+
+				if (intakeFlags->colorSortResumes) {
+					blueistResumeLastVoltage = util::DelayedBool(100);
+				}
 			}
+		}
+
+		if (blueistResumeLastVoltage()) {
+			printf("\n\n\nHERE\n\n\n");
+			moveVoltage(lastCommandedVoltage);
+			blueistResumeLastVoltage = util::DelayedBool();
 		}
 
 
@@ -249,6 +279,7 @@ void Intake::moveVoltage(int mv) {
 	if (codeOverride) { return; }
 	if (state != AntiJamState::IDLE) { return; }
 	robot->getFlag<Intake>().value()->isMoving = (mv != 0 ? true : false);
+	lastCommandedVoltage = mv;
 	motors.move_voltage(mv);
 }
 
@@ -262,4 +293,14 @@ void Intake::moveVel(int vel) {
 void Intake::brake() {
 	robot->getFlag<Intake>().value()->isMoving = false;
 	motors.brake();
+}
+
+void Intake::setExtender(bool val) {
+	extenderEnabled = val;
+	extender.set_value(val);
+}
+
+void Intake::toggleExtender() {
+	extenderEnabled = !extenderEnabled;
+	extender.set_value(extenderEnabled);
 }

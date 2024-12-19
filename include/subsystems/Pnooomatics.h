@@ -8,12 +8,14 @@ class Pnooomatics : public Subsystem {
 private:
 	pros::adi::DigitalOut hang{'D'};
 	pros::adi::DigitalOut clamp{'H'};
-	pros::adi::DigitalOut hammer{'E'};
+	pros::adi::DigitalOut hammer{'F'};
+	pros::adi::DigitalOut claw{'E'};
 	pros::Distance dist{ports::clampDistance};
 
 	bool hangReleased = false;
 	bool clampEnabled = false;
 	bool hammerDeployed = false;
+	bool clawEnabled = false;
 
 	RobotThread runner();
 
@@ -34,4 +36,7 @@ public:
 
 	void setHammer(bool enable);
 	void toggleHammer();
+
+	void setClaw(bool enable);
+	void toggleClaw();
 };
