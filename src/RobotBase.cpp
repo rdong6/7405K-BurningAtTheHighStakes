@@ -94,25 +94,18 @@ void RobotBase::registerTask(TaskFunc func, TaskType type, const RobotFunc& pred
 	switch (type) {
 		case TaskType::AUTON:
 			autonomous.emplace_back(pred, std::move(func));
-			if (pros::competition::is_autonomous()) {
-				coroQueue.emplace_back(pred, autonomous.back().second().getHandle());
-			}
+			if (pros::competition::is_autonomous()) { coroQueue.emplace_back(pred, autonomous.back().second().getHandle()); }
 			break;
-
 		case TaskType::OPCTRL:
 			opcontrol.emplace_back(pred, std::move(func));
 			if (!pros::competition::is_disabled() && !pros::competition::is_autonomous()) {
 				coroQueue.emplace_back(pred, opcontrol.back().second().getHandle());
 			}
 			break;
-
 		case TaskType::DISABLED:
 			disabled.emplace_back(pred, std::move(func));
-			if (pros::competition::is_disabled()) {
-				coroQueue.emplace_back(pred, disabled.back().second().getHandle());
-			}
+			if (pros::competition::is_disabled()) { coroQueue.emplace_back(pred, disabled.back().second().getHandle()); }
 			break;
-
 		case TaskType::SENTINEL:
 			sentinel.emplace_back(pred, func().getHandle());
 			break;

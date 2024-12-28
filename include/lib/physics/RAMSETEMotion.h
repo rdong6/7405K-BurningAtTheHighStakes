@@ -7,8 +7,8 @@
 
 class RAMSETEMotion : public IMotion {
 private:
-	RAMSETE ramsete;
 	std::span<fttbtkjfk::GeneratedPoint> path;
+	RAMSETE ramsete;
 	uint32_t counter;
 
 public:

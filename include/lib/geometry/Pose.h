@@ -130,7 +130,18 @@ constexpr Twist2D Pose::log(const Pose& final) const {
 	const double dtheta = transform.theta();
 	const double halfDTheta = dtheta / 2.0;
 
-	//
+	const double cosMinusOne = transform.rotation().cos() - 1;
 
-	return {};
+	double halfThetaByTanOfHalfDtheta;
+
+	if (std::abs(cosMinusOne) < 1E-9) {
+		halfThetaByTanOfHalfDtheta = 1.0 - 1.0 / 12.0 * dtheta * dtheta;
+	} else {
+		halfThetaByTanOfHalfDtheta = -(halfDTheta * transform.rotation().sin()) / cosMinusOne;
+	}
+
+	const Translation2D translationPart = transform.translation().rotateBy({halfThetaByTanOfHalfDtheta, -halfDTheta}) *
+	                                      std::hypot(halfThetaByTanOfHalfDtheta, halfDTheta);
+
+	return {translationPart.X(), translationPart.Y(), dtheta};
 }

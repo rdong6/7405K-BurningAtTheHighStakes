@@ -15,7 +15,7 @@ private:
 
 public:
 	kinState() = default;
-	kinState(Pose pos, substate velo, substate accel) : position(pos), velo_state(velo), accel_state(accel){};
+	kinState(Pose pos, substate velo, substate accel) : velo_state(velo), accel_state(accel), position(pos) {}
 
 	Pose position;
 	substate velocity() const;

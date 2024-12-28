@@ -44,7 +44,7 @@ RobotThread Odometry::updatePosition() {
 		double l_dist;
 		double r_dist;
 		double b_dist;
-		double perp_offset;
+		double deltaY;
 
 		// if rotation sensor port is defined, then we use that to get dist traveled
 		// otherwise we use motor encoders
@@ -85,43 +85,16 @@ RobotThread Odometry::updatePosition() {
 			b_dist = ((BE - prev_b) / 36000.0) * M_PI * odometers::backDeadwheelDiameter;
 			prev_b = BE;
 
-			perp_offset = b_dist + (odometers::backOffset * dh);// need to test this
+			deltaY = b_dist + (odometers::backOffset * dh);// need to test this
 		} else {
-			perp_offset = 0;
+			deltaY = 0;
 		}
 
-
-		// testing pose exponential
 		double deltaX = (l_dist + r_dist) / 2.0;// figure out what this should be
-		double deltaY = b_dist;
 
 		Rotation2D newHeading = curState.position.rotation() + Rotation2D(dh);
-		Pose newPose = curState.position.exp(Twist2D{deltaX, perp_offset, dh});
+		Pose newPose = curState.position.exp(Twist2D{deltaX, deltaY, dh});
 		curState.position = Pose(newPose.translation(), newHeading);
-
-		// original odom calculation (euler integration)
-		// calculate our pos & heading
-		// double distance =
-		//         (dh == 0) ? (l_dist + r_dist) / 2.0 : ((l_dist + r_dist) / dh) * sin(dh / 2.0);// also need to test
-		//         this
-
-		// double theta = curState.position.theta();
-
-		// double dx = distance * cos(theta - (M_PI / 2)) + perp_offset * sin(theta + (M_PI / 2));
-		// double dy = distance * sin(theta + (M_PI / 2)) + perp_offset * cos(theta + (M_PI / 2));
-		// double dt = 10.0 / 1000.0;
-
-
-		// update odom's state w/ new calculations
-		// curState.setAcceleration((curState.velocity().x - (dx / dt)) / dt, (curState.velocity().y - (dy / dt)) / dt,
-		//                          (curState.velocity().theta - (dh / dt)) / dt);
-		// curState.setVelocity(dx / dt, dy / dt, dh / dt);
-
-		// curState.position = {curState.position.X() + dx, curState.position.X() + dy,
-		//                      util::normalize(curState.position.theta() + dh, 2 * std::numbers::pi)};
-
-		// leftVel = l_dist / dt;
-		// rightVel = r_dist / dt;
 
 		// maybe move this to separate thread
 		printOdom(curState);

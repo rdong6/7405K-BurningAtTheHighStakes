@@ -1,5 +1,4 @@
 #include "subsystems/Intake.h"
-#include "Constants.h"
 #include "Logger.h"
 #include "RobotBase.h"
 #include "lib/utils/CoroutineGenerator.h"
@@ -29,17 +28,15 @@ void Intake::registerTasks() {
 	auto controllerRef = controller.value();
 
 	// Maps holding r1 to intake
-	controllerRef->registerCallback([this]() {
-		// this->moveVoltage(10000);
-		 this->moveVoltage(12000);
-		 
-		  }, []() {}, Controller::master, Controller::r2,
-	                                Controller::hold);
+	controllerRef->registerCallback(
+	        [this]() {
+		        // this->moveVoltage(10000);
+		        this->moveVoltage(12000);
+	        },
+	        []() {}, Controller::master, Controller::r2, Controller::hold);
 
 	// Maps holding r2 to outtake - when both r1 and r2 are held, r2 takes precedent
-	controllerRef->registerCallback([this]() { 		
-		this->moveVoltage(-12000); 
-		}, []() {}, Controller::master, Controller::r1,
+	controllerRef->registerCallback([this]() { this->moveVoltage(-12000); }, []() {}, Controller::master, Controller::r1,
 	                                Controller::hold);
 
 	// stops the intake when neither button is pressed
@@ -54,7 +51,8 @@ void Intake::registerTasks() {
 }
 
 RobotThread Intake::opcontrol() {
-	// blueismDetector = nullptr;
+	blueismDetector = nullptr;
+	co_yield util::coroutine::nextCycle();
 }
 
 bool Intake::redRingDetector() {
@@ -178,7 +176,7 @@ RobotThread Intake::runner() {
 			firstOne = true;
 			blueistPlanOne = true;
 			// blueistStartTimeout = Timeout(0); // testing
-			blueistStartTimeout = Timeout(40); // works for slower
+			blueistStartTimeout = Timeout(40);// works for slower
 		}
 
 
@@ -198,14 +196,12 @@ RobotThread Intake::runner() {
 				blueistPlanTwo = false;
 				firstOne = false;
 
-				if (intakeFlags->colorSortResumes) {
-					blueistResumeLastVoltage = util::DelayedBool(100);
-				}
+				// move intake at last commanded voltage before we did the blueism
+				if (intakeFlags->colorSortResumes) { blueistResumeLastVoltage = util::DelayedBool(100); }
 			}
 		}
 
 		if (blueistResumeLastVoltage()) {
-			printf("\n\n\nHERE\n\n\n");
 			moveVoltage(lastCommandedVoltage);
 			blueistResumeLastVoltage = util::DelayedBool();
 		}

@@ -34,7 +34,14 @@ void Lift::registerTasks() {
 	// when lift controller inputs set, stop whatever code motion is happening
 	controllerRef->registerCallback(
 	        [this]() {
-		        robot->getFlag<Lift>().value()->state = State::IDLE;
+		        Lift::State& curState = robot->getFlag<Lift>().value()->state;
+
+		        // move intake slightly back for a smidge so it clears the rings in ladymech
+		        if (curState == Lift::LEVEL_1 || curState == Lift::LEVEL_2) {
+			        //
+		        }
+
+		        curState = State::IDLE;
 		        move(-12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
@@ -89,14 +96,10 @@ RobotThread Lift::runner() {
 	while (true) {
 		if (liftFlags->kill) { co_return; }
 
-		if (liftFlags->curAngle <= 300) {
-			robot->getSubsystem<Intake>().value()->setExtender(true);
-		}
+		if (liftFlags->curAngle <= 300) { robot->getSubsystem<Intake>().value()->setExtender(true); }
 
 		//  lower intake extender -> lift was last to touch it and move it up
-		if (liftFlags->curAngle > 300) {
-			robot->getSubsystem<Intake>().value()->setExtender(false);
-		}
+		if (liftFlags->curAngle > 300) { robot->getSubsystem<Intake>().value()->setExtender(false); }
 
 		// test this hard clamp
 		if (liftFlags->curAngle <= 210) {

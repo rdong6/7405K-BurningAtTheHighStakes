@@ -18,9 +18,9 @@ private:
 	double prevTime;
 	const double maxVel;
 	const double maxAccel;
-	double curVel;                 // output of rate limited
-	mutable int lastLookaheadIndex;// last index searched when calculating lookahead point
-	Pose lastLookaheadPose;        // used incase we cannot get a circle line intersect
+	double curVel;                    // output of rate limited
+	mutable size_t lastLookaheadIndex;// last index searched when calculating lookahead point
+	Pose lastLookaheadPose;           // used incase we cannot get a circle line intersect
 
 	const int isReversed;
 

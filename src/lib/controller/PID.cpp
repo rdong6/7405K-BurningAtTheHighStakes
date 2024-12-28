@@ -4,11 +4,10 @@
 #include <cstdio>
 
 
-PID::PID() noexcept
-    : kP(0), kI(0), kD(0), iBound(0), prevError(0), errorSum(0), resetFlag(false), errorZeroFlip(false) {}
+PID::PID() noexcept : PID(0, 0, 0, false, 0) {}
 
 PID::PID(double P, double I, double D, bool errorZeroFlip, double iBound) noexcept
-    : kP(P), kI(I), kD(D), iBound(iBound), prevError(0), errorSum(0), resetFlag(true), errorZeroFlip(errorZeroFlip) {}
+    : kP(P), kI(I), kD(D), iBound(iBound), prevError(0), errorSum(0), errorZeroFlip(errorZeroFlip), resetFlag(true) {}
 
 double PID::operator()(double error) {
 	if (resetFlag) {

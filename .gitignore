@@ -17,3 +17,6 @@ temp.errors
 .d/
 *.DS_STORE
 .cache/
+
+# custom stuff
+.cppcheck_cache/

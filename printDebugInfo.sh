@@ -1,0 +1,1 @@
+arm-none-eabi-addr2line -i -f -C -p -e $1 -a $2

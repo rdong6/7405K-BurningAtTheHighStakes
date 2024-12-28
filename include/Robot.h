@@ -46,30 +46,21 @@ public:
 			        static_cast<std::function<decltype(x)()>>([this]() { return std::get<decltype(x)>(this->subsystems); });
 		});
 
-		// have to do this after invoke table is initialized w/ subsystems
-		// as controller callbacks are registered in registerTasks()
-		// issue arises if a subsystem registers tasks before Controller subsystem is inside invoke table
-		util::tuple::for_each(subsystems, [this](auto x) { x->registerTasks(); });
-
 		util::tuple::for_each(flags, [this](auto x) {
 			this->invokeTable[typeid(x)] =
 			        static_cast<std::function<decltype(x)()>>([this]() { return std::get<decltype(x)>(this->flags); });
 		});
+
+		// have to do this after invoke table is initialized w/ subsystems
+		// as controller callbacks are registered in registerTasks()
+		// issue arises if a subsystem registers tasks before Controller subsystem is inside invoke table
+		util::tuple::for_each(subsystems, [this](auto x) { x->registerTasks(); });
 	}
 
 	~Robot() {
 		util::tuple::for_each(subsystems, [](auto x) { delete x; });
 		util::tuple::for_each(flags, [](auto x) { delete x; });
 	}
-
-	// template<typename T>
-	// inline std::optional<util::reference_wrapper<typename T::flags>> getFlag() {
-	// 	if constexpr (tuple_holds<decltype(flags), typename T::flags>::value) {
-	// 		return std::make_optional(util::reference_wrapper<typename T::flags>(std::get<typename T::flags>(flags)));
-	// 	} else {
-	// 		return std::nullopt;
-	// 	}
-	// }
 };
 
 // Odom = SENT

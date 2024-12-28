@@ -12,7 +12,7 @@ namespace util {
 		bool operator()() { return (pros::millis() - time) >= timeout ? true : false; }
 
 	private:
-		int time;
-		int timeout;
+		uint32_t time;
+		uint32_t timeout;
 	};
 }// namespace util

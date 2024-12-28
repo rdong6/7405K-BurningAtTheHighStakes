@@ -6,7 +6,7 @@
 
 // Time is in ms
 // Power is in mV
-TimedMotion::TimedMotion(uint32_t time, double power) : delay(time), power(power) {}
+TimedMotion::TimedMotion(uint32_t time, double power) : power(power), delay(time) {}
 
 IMotion::MotorVoltages TimedMotion::calculate(const kinState state) {
 	return {power, power};

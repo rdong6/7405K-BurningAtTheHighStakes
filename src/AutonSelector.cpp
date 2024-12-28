@@ -22,21 +22,21 @@ static std::pair<uint16_t, uint16_t> separate(uint32_t x) {
 	return std::make_pair(static_cast<uint16_t>(x >> 16), static_cast<uint16_t>(x));
 }
 
+static void btnCallback(lv_event_t* event) {
+	// higher bits = alliance
+	// lower bits = auton
+	auto decodedData = separate((uint32_t) lv_event_get_user_data(event));
+	robotInstance->curAlliance = static_cast<Alliance>(decodedData.first);
+	robotInstance->curAuton = static_cast<Auton>(decodedData.second);
+}
+
 AutonSelector::Button::Button(lv_obj_t* parent, const char* name, Auton auton, Alliance alliance) {
 	btn = lv_btn_create(parent);
 	label = lv_label_create(btn);
 	lv_label_set_text(label, name);
 	lv_obj_center(label);
-	lv_obj_add_event_cb(
-	        btn,
-	        [](lv_event_t* event) {
-		        // higher bits = alliance
-		        // lower bits = auton
-		        auto decodedData = separate((uint32_t) lv_event_get_user_data(event));
-		        robotInstance->curAlliance = static_cast<Alliance>(decodedData.first);
-		        robotInstance->curAuton = static_cast<Auton>(decodedData.second);
-	        },
-	        LV_EVENT_PRESSED, (void*) combine(static_cast<uint16_t>(auton), static_cast<uint16_t>(alliance)));
+	lv_obj_add_event_cb(btn, btnCallback, LV_EVENT_PRESSED,
+	                    (void*) combine(static_cast<uint16_t>(auton), static_cast<uint16_t>(alliance)));
 }
 
 void AutonSelector::Button::setPos(lv_coord_t x, lv_coord_t y) {

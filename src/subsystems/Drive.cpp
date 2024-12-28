@@ -72,8 +72,9 @@ RobotThread Drive::runner() {
 		auto motorVolts = curMotion->calculate(curState);
 
 		if (curMotion->isVelocityControlled()) {
-			setVelocityLeft(motorVolts.left);
-			setVelocityRight(motorVolts.right);
+			// add a 0.5 so requested velocity rounds to nearest number when casting to int
+			setVelocityLeft(motorVolts.left + 0.5);
+			setVelocityRight(motorVolts.right + 0.5);
 		} else {
 			setVoltageLeft(motorVolts.left);
 			setVoltageRight(motorVolts.right);
@@ -93,16 +94,14 @@ RobotFunc Drive::waitUntilSettled(uint32_t timeout) {
 	auto func = [this, timer]() -> bool {
 		if (timer.timedOut()) {
 			// motion timed out
-			// isTimedOut = true;
-
-			// if (!isTimedOut) { return true; }// wait until drive realizes that we timed out
 			this->curMotion = NullMotion();
+
 			return true;
 		} else {
 			if (isSettled) {
 				// motion finished, reset drive state
-				isSettled = false;
-				curMotion = NullMotion();
+				this->isSettled = false;
+				this->curMotion = NullMotion();
 
 				return true;
 			}

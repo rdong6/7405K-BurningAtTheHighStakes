@@ -2,6 +2,28 @@
 #include <cmath>
 #include <numbers>
 
+__attribute__((always_inline)) inline double vsqrtd(double val) {
+	double ret;
+	// clang-format off
+	asm("vsqrt.f64 %P0, %P1"
+	: "=w"(ret) /* output. w = VFP 64bit registers */
+	: "w"(val) /* input */
+	);
+	// clang-format on
+	return ret;
+}
+
+__attribute__((always_inline)) inline float vsqrtf(float val) {
+	float ret;
+	// clang-format off
+	asm("vsqrt.f32 %0, %1"
+	: "=t"(ret) /* output. t = VFP 32bit registers*/
+	: "t"(val) /* input */
+	);
+	// clang-format on
+	return ret;
+}
+
 namespace util {
 	template<typename T>
 	/**

@@ -23,8 +23,7 @@ IMotion::MotorVoltages OpControlMotion::calculate(const kinState state) {
 	double b = 1;
 
 	// sign because when turn is 0, then it will multiply everything by 0
-	double curved_turn =
-	        ::sign(turn) * util::clamp(0.0, 127.0, (a + (b - a) * (std::pow(fabs(turn / 127.0), 2))) * 127.0);
+	double curved_turn = ::sign(turn) * util::clamp(0.0, 127.0, (a + (b - a) * (std::pow(fabs(turn / 127.0), 2))) * 127.0);
 
 	// Combines the turn values with the motor powers
 	// converts from +/-127 into mV as rest of the drive class works with mV

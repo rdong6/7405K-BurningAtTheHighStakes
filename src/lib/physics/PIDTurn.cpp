@@ -11,9 +11,8 @@ namespace {
 
 PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, double maxPower,
                  bool forceRight, bool forceLeft)
-    : targetHeading(targetHeading), pid(pid), counter(0), threshold(threshold), brakeLeft(brakeLeft), brakeRight(brakeRight),
-      initialSign(0), forceRight(forceRight), forceRightTerminate(false), forceLeft(forceLeft), forceLeftTerminate(false),
-      maxPower(maxPower) {}
+    : targetHeading(targetHeading), threshold(threshold), maxPower(maxPower), pid(pid), brakeLeft(brakeLeft),
+      brakeRight(brakeRight), forceRight(forceRight), forceLeft(forceLeft) {}
 
 void PIDTurn::start() {
 	if (startTime == 0) [[unlikely]] {

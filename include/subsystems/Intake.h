@@ -19,15 +19,17 @@ private:
 
 	AntiJamState state = AntiJamState::IDLE;
 	bool codeOverride = false;// code takes control of intake
+	uint32_t timedMoveStartTime = 0;
 
 	int lastCommandedVoltage = 0;
 
 	bool extenderEnabled = false;
-	
+
+	bool (Intake::*blueismDetector)(void) = nullptr;
+
 	bool redRingDetector();
 	bool blueRingDetector();
 
-	bool (Intake::*blueismDetector)(void) = nullptr;
 
 	RobotThread runner();
 	RobotThread opcontrol();
@@ -39,7 +41,7 @@ public:
 		bool torqueStop{false};
 		bool distStop{false};
 
-		bool colorSortResumes{false}; // after color sort, we resume last commanded voltage
+		bool colorSortResumes{false};// after color sort, we resume last commanded voltage
 
 		// ring status
 		bool partiallyIn{false};

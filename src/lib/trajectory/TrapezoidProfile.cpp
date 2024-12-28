@@ -1,18 +1,19 @@
 #include "lib/trajectory/TrapezoidProfile.h"
+#include "lib/utils/Math.h"
 #include <cmath>
 
 TrapezoidProfile::TrapezoidProfile()
-    : start_vel(0), dist(0), acc_max(0), dec_max(0), v_max(0), t_acc(0), t_coast(0), t_dec(0), d_acc(0), d_coast(0),
-      d_dec(0), direction(0) {}
+    : start_vel(0), dist(0), acc_max(0), dec_max(0), v_max(0), t_acc(0), t_coast(0), t_dec(0), d_acc(0), d_coast(0), d_dec(0),
+      direction(0) {}
 
-TrapezoidProfile::TrapezoidProfile(double distance, double max_acceleration, double max_deceleration,
-                                   double max_velocity, double start_vel) {
+TrapezoidProfile::TrapezoidProfile(double distance, double max_acceleration, double max_deceleration, double max_velocity,
+                                   double start_vel) {
 	this->start_vel = start_vel;
 	direction = distance < 0 ? -1 : 1;
 	dist = std::abs(distance);
 	acc_max = max_acceleration;
 	dec_max = max_deceleration;
-	v_max = fmin(fmin(sqrt(acc_max * dist) + start_vel * start_vel, sqrt(dec_max * dist)), max_velocity);
+	v_max = fmin(fmin(vsqrtd(acc_max * dist) + start_vel * start_vel, vsqrtd(dec_max * dist)), max_velocity);
 
 	// generate variables
 

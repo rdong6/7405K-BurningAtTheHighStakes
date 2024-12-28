@@ -28,7 +28,7 @@ PursuitMotion::PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double l
 	// INITIAL VELOCITY - do max vel
 	// veloicty is min of max vel or k/curv - k is 1-5
 	// for (auto& point : path) {
-	for (int i = 0; i < path.size(); i++) {
+	for (size_t i = 0; i < path.size(); i++) {
 		auto& point = path[i];
 
 		if (util::fpEquality(point.pose.x, 0.0)) { point.pose.x = 0; }
@@ -51,7 +51,7 @@ PursuitMotion::PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double l
 	// calulate vels from back of path to front - so that we rate limit decel
 	// vf = √(vi^2 + 2 * a * d)
 	vels[path.size() - 1] = 0;// ending will always be 0 vel
-	for (int i = path.size() - 2; i >= 0; i--) {
+	for (size_t i = path.size() - 2; i >= 0; i--) {
 		double dist =
 		        std::sqrt(std::pow(path[i].pose.x - path[i + 1].pose.x, 2) + std::pow(path[i].pose.y - path[i + 1].pose.y, 2));
 
@@ -63,7 +63,7 @@ int PursuitMotion::findClosestIndex(const Pose& pos) const {
 	double minDist = std::numeric_limits<double>::max();
 	int closestIndex = -1;
 
-	for (int i = 0; i < path.size(); ++i) {
+	for (size_t i = 0; i < path.size(); ++i) {
 		double dist = std::sqrt(std::pow(path[i].pose.x - pos.X(), 2) + std::pow(path[i].pose.y - pos.X(), 2));
 
 		if (dist < minDist) {
@@ -87,7 +87,7 @@ PursuitMotion::circleIntersect(const Pose& p1, const Pose& p2, const Pose& pos) 
 
 	if (discriminant >= 0) {
 		// possible intersection found
-		discriminant = std::sqrt(discriminant);
+		discriminant = vsqrtd(discriminant);
 		double t1 = (-b - discriminant) / (2 * a);
 		double t2 = (-b + discriminant) / (2 * a);
 
@@ -110,10 +110,10 @@ PursuitMotion::circleIntersect(const Pose& p1, const Pose& p2, const Pose& pos) 
 
 Pose PursuitMotion::getLookaheadPoint(const Pose& pos) const {
 	// search path in reverse as the first one found is farthest one down the path and the one we want to pursue
-	for (int i = path.size() - 1; i > lastLookaheadIndex; i--) {
+	for (size_t i = path.size() - 1; i > lastLookaheadIndex; i--) {
 		// is this cast bad? yes. do i care? no
 
-		// THS IS INCORRECT CASTING!!
+		// TODO: FIx this! Can't just recast a ptr anymore as Pose structure change
 		const Pose& lineStart = *reinterpret_cast<const Pose*>(&path[i - 1].pose);
 		const Pose& lineEnd = *reinterpret_cast<const Pose*>(&path[i].pose);
 
@@ -136,7 +136,7 @@ Pose PursuitMotion::getLookaheadPoint(const Pose& pos) const {
 
 	double a = -std::tan(heading);
 	double c = std::tan(heading) * pos.X() - pos.X();
-	double x = std::fabs(a * lookahead.X() + lookahead.X() + c) / std::sqrt((a * a) + 1);
+	double x = std::fabs(a * lookahead.X() + lookahead.X() + c) / vsqrtd((a * a) + 1);
 	double d = std::hypot(lookahead.X() - pos.X(), lookahead.X() - pos.X());
 
 	return side * ((2 * x) / (d * d));

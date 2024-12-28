@@ -2,9 +2,9 @@ ARCHTUPLE=arm-none-eabi-
 DEVICE=VEX EDR V5
 
 # Flags/Compiler Parameters
-MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=softfp -Os -g
+MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=softfp -g -Os # use -Og for debugging
 CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK $(INC_FLAGS) -MMD -MP -DFMT_STATIC_THOUSANDS_SEPERATOR=',' -DFMT_USE_LONG_DOUBLE=0 -DFMT_USE_FLOAT128=0 -DFMT_USE_FLOAT=0 -DFMT_USE_USER_DEFINED_LITERALS=0 -DFMT_USE_FULL_CACHE_DRAGONBOX=0 -DFREERTOS
-GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables
+GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables #-fanalyzer
 
 # Check if the llemu files in libvgl exist. If they do, define macros that the
 # llemu headers in the kernel repo can use to conditionally include the libvgl
@@ -16,13 +16,14 @@ ifneq (,$(wildcard ./include/liblvgl/llemu.hpp))
 	CPPFLAGS += -D_PROS_INCLUDE_LIBLVGL_LLEMU_HPP
 endif
 
-WARNFLAGS=-Wno-psabi
+#WARNFLAGS=-Wall -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wextra-semi -Wnull-dereference -Wswitch-enum -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches -Wsuggest-override
+WARNFLAGS=-Wall -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wnull-dereference -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches # no suggest-override, no switch-enum, no extra-semis
 SPACE := $() $()
 COMMA := ,
 
 ASMFLAGS=$(MFLAGS) $(WARNFLAGS)
-CFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=gnu11
-CXXFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=gnu++20
+CFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=gnu2x
+CXXFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=gnu++23
 LDFLAGS=$(MFLAGS) $(WARNFLAGS) -nostdlib $(GCCFLAGS)
 SIZEFLAGS=-d --common
 NUMFMTFLAGS=--to=iec --format %.2f --suffix=B
@@ -33,7 +34,7 @@ LIBRARIES+=$(wildcard $(FWDIR)/*.a)
 EXCLUDE_COLD_LIBRARIES+=$(FWDIR)/libc.a $(FWDIR)/libm.a
 COLD_LIBRARIES=$(filter-out $(EXCLUDE_COLD_LIBRARIES), $(LIBRARIES))
 wlprefix=-Wl,$(subst $(SPACE),$(COMMA),$1)
-LNK_FLAGS=--gc-sections --start-group $(strip $(LIBRARIES)) -lgcc -lstdc++ --end-group -T$(FWDIR)/v5-common.ld
+LNK_FLAGS=--gc-sections --start-group $(strip $(LIBRARIES)) -lgcc -lstdc++ --end-group -T$(FWDIR)/v5-common.ld --no-warn-rwx-segments
 
 # Directories
 ROOT=.
