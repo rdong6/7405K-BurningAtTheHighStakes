@@ -2,9 +2,6 @@
 #include "RobotBase.h"
 #include "lib/utils/CoroutineGenerator.h"
 #include "pros/misc.h"
-#include "pros/misc.hpp"
-#include "pros/rtos.h"
-#include "pros/rtos.hpp"
 #include <tuple>
 
 Controller::Controller(RobotBase* robot) : Subsystem(robot) {}

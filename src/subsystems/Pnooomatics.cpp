@@ -1,5 +1,4 @@
 #include "subsystems/Pnooomatics.h"
-#include "lib/utils/DelayedBool.h"
 #include "subsystems/Controller.h"
 #include "subsystems/Subsystem.h"
 
@@ -19,32 +18,24 @@ void Pnooomatics::registerTasks() {
 	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::b,
 	                                Controller::rising);
 
-	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::a,
+	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::y,
 	                                Controller::rising);
 
-	controllerRef->registerCallback([this]() { toggleClaw(); }, []() {}, Controller::master, Controller::y,
-	                                Controller::rising);
+	// controllerRef->registerCallback([this]() { toggleClaw(); }, []() {}, Controller::master, Controller::y,
+	// Controller::rising);
 
-	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
+	robot->registerTask([this]() { return this->autoClampCoro(); }, TaskType::AUTON,
+	                    [robot = this->robot]() { return robot->getFlag<Pnooomatics>().value()->clampMogo; });
 }
 
-RobotThread Pnooomatics::runner() {
-
-	util::DelayedBool enableClamp;
-
+RobotThread Pnooomatics::autoClampCoro() {
 	while (true) {
-		if (dist.get_distance() <= 40 && robot->getFlag<Pnooomatics>().value()->clampMogo) {
-			enableClamp = util::DelayedBool(50);
-			robot->getFlag<Pnooomatics>().value()->clampMogo = false;
+		if (dist.get_distance() <= 40 /* TUNE THIS! */) {
 			setClamp(true);
+			robot->getFlag<Pnooomatics>().value()->clampMogo = false;
 		}
 
-		// if (enableClamp()) {
-		// 	setClamp(true);
-		// 	enableClamp = util::DelayedBool();
-		// }
-
-		co_yield util::coroutine::nextCycle();
+		co_yield [robot = this->robot]() { return robot->getFlag<Pnooomatics>().value()->clampMogo; };
 	}
 }
 

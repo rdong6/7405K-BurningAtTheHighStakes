@@ -12,29 +12,29 @@
 // overunder bot
 
 namespace ports {
-	constexpr int frontLeftMotor = -15;
-	constexpr int middleLeftMotor = -18;
-	constexpr int backLeftMotor = 19;
+	constexpr int frontLeftMotor = -9;
+	constexpr int middleLeftMotor = -6;
+	constexpr int backLeftMotor = 7;
 	constexpr int weakLeftMotor = 0;
 
-	constexpr int frontRightMotor = 12;
-	constexpr int middleRightMotor = 14;
-	constexpr int backRightMotor = -13;
+	constexpr int frontRightMotor = 3;
+	constexpr int middleRightMotor = 1;
+	constexpr int backRightMotor = -2;
 	constexpr int weakRightMotor = 0;
 
-	constexpr std::initializer_list<std::int8_t> intake = {-10};
-	constexpr int intakeDistance = 7;
-	constexpr int intakeColor = 6;
+	constexpr std::initializer_list<std::int8_t> intake = {11};
+	constexpr int intakeDistance = 0;
+	constexpr int intakeColor = 20;
 
-	constexpr int clampDistance = 8;
+	constexpr int clampDistance = 4;
 
-	constexpr int liftMotor = 4;
+	constexpr int liftMotor = -8;
 	constexpr int liftRotation = 5;
 
-	constexpr int leftRotation = 20;
-	constexpr int rightRotation = -1;
-	constexpr int backRotation = -9;
-	constexpr int imu = 16;
+	constexpr int leftRotation = 19;
+	constexpr int rightRotation = -12;
+	constexpr int backRotation = -10;
+	constexpr int imu = 18;
 }// namespace ports
 
 namespace odometers {

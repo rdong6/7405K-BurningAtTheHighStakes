@@ -8,8 +8,8 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
-#define UPPER_BOUNDS 358
-#define LOWER_BOUNDS 98
+#define UPPER_BOUNDS 185
+#define LOWER_BOUNDS 1.5
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -18,7 +18,8 @@ Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	rotation.set_data_rate(5);
 	pros::delay(20);// needed so get_angle() isn't 0
 	int32_t curPosition = rotation.get_angle();
-	rotation.set_position(curPosition < 1000 ? 36000 + curPosition : curPosition);
+	rotation.set_position(curPosition);
+	// rotation.set_position(curPosition < 1000 ? 36000 + curPosition : curPosition);
 	pros::delay(20);
 }
 
@@ -35,21 +36,22 @@ void Lift::registerTasks() {
 	controllerRef->registerCallback(
 	        [this]() {
 		        Lift::State& curState = robot->getFlag<Lift>().value()->state;
-
-		        // move intake slightly back for a smidge so it clears the rings in ladymech
-		        if (curState == Lift::LEVEL_1 || curState == Lift::LEVEL_2) {
-			        //
+		        if (curState == State::LEVEL_1) {
+			        // move intake slightly back so it doesn't get caught in ring
+			        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = true;
+		        } else {
+			        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
 		        }
 
 		        curState = State::IDLE;
-		        move(-12000);
+		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
 
 	controllerRef->registerCallback(
 	        [this]() {
 		        robot->getFlag<Lift>().value()->state = State::IDLE;
-		        move(12000);
+		        move(-12000);
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
 
@@ -57,8 +59,12 @@ void Lift::registerTasks() {
 
 	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2, Controller::falling);
 
-	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::right,
-	                                Controller::rising);
+	controllerRef->registerCallback(
+	        [this]() {
+		        setState(State::LEVEL_1);
+		        // toggleState();
+	        },
+	        []() {}, Controller::master, Controller::right, Controller::rising);
 }
 
 RobotThread Lift::updateAngle() {
@@ -96,20 +102,27 @@ RobotThread Lift::runner() {
 	while (true) {
 		if (liftFlags->kill) { co_return; }
 
-		if (liftFlags->curAngle <= 300) { robot->getSubsystem<Intake>().value()->setExtender(true); }
+		/*if (liftFlags->curAngle <= 300) { robot->getSubsystem<Intake>().value()->setExtender(true); }
 
 		//  lower intake extender -> lift was last to touch it and move it up
 		if (liftFlags->curAngle > 300) { robot->getSubsystem<Intake>().value()->setExtender(false); }
 
 		// test this hard clamp
 		if (liftFlags->curAngle <= 210) {
-			liftFlags->targetAngle = 220;
-			liftFlags->state = Lift::HOLD;
+		    liftFlags->targetAngle = 220;
+		    liftFlags->state = Lift::HOLD;
+		}*/
+
+		// SOFT STOP
+		if (liftFlags->curAngle >= 185) {
+			liftFlags->targetAngle = 185;
+			setState(Lift::HOLD);
 		}
 
 		if (liftFlags->state == State::IDLE) {
 			liftFlags->isMoving = false;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			motor.move_velocity(0);
 			co_yield util::coroutine::nextCycle();
 			continue;
 		}
@@ -136,59 +149,11 @@ RobotThread Lift::runner() {
 	}
 }
 
-RobotThread Lift::openLiftCoro() {
-	auto liftFlags = robot->getFlag<Lift>().value();
-	liftFlags->isMotionRunning = true;
-	liftFlags->targetAngle = 110;// tune this
-	liftFlags->errorThresh = 3;
-
-
-	co_yield util::coroutine::nextCycle();
-
-	// wait to move to place
-	// maybe change this condition to make it faster/more fluid
-	while (liftFlags->curAngle < 98 /* TBD! */ && liftFlags->isMoving) {
-		if (!liftFlags->isMotionRunning) { co_return; }
-		co_yield util::coroutine::nextCycle();
-	}
-	claw.set_value(true);
-	co_yield util::coroutine::delay(100);
-
-	liftFlags->pid.reset();
-	liftFlags->targetAngle = 76.5;
-	liftFlags->errorThresh = 1;
-
-	co_yield util::coroutine::nextCycle();
-	if (!liftFlags->isMotionRunning) { co_return; }
-	co_yield [this]() -> bool { return !robot->getFlag<Lift>().value()->isMoving; };
-	liftFlags->isMotionRunning = false;
-}
-
-RobotThread Lift::closeLiftCoro() {
-	auto liftFlags = robot->getFlag<Lift>().value();
-
-	claw.set_value(false);
-	liftFlags->isMotionRunning = true;
-	liftFlags->targetAngle = 105;
-	liftFlags->errorThresh = 3;
-
-	co_yield util::coroutine::nextCycle();
-	co_yield [=]() -> bool { return !liftFlags->isMoving; };
-	co_yield util::coroutine::delay(300);// give time for the claw to actually close
-
-	liftFlags->targetAngle = 10;
-	liftFlags->errorThresh = 2;
-
-	co_yield util::coroutine::nextCycle();
-	co_yield [this]() -> bool { return !robot->getFlag<Lift>().value()->isMoving; };
-	liftFlags->isMotionRunning = false;
-}
-
 void Lift::toggleState() {
 
 	switch (robot->getFlag<Lift>().value()->state) {
 		case State::LEVEL_1:
-			setState(State::LEVEL_1);
+			setState(State::STOW);
 			break;
 		case State::LEVEL_2:
 			setState(State::LEVEL_1);
@@ -210,15 +175,15 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			robot->getFlag<Lift>().value()->targetAngle = 308;
+			robot->getFlag<Lift>().value()->targetAngle = 36.3;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::LEVEL_2:
-			robot->getFlag<Lift>().value()->targetAngle = 326.5;
+			robot->getFlag<Lift>().value()->targetAngle = 36.3;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:
-			robot->getFlag<Lift>().value()->targetAngle = 356;
+			robot->getFlag<Lift>().value()->targetAngle = 2.5;// determine
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::IDLE:
@@ -245,8 +210,12 @@ void Lift::setClaw(double enabled) {
 
 
 void Lift::move(int mv) {
-	if (mv > 0 && (rotation.get_position() / 100.0) > UPPER_BOUNDS) { mv = 0; }
-	if (mv < 0 && (rotation.get_position() / 100.0) < LOWER_BOUNDS) { mv = 0; }
+	double curAngle = robot->getFlag<Lift>().value()->curAngle;
+	if (mv > 0 && curAngle > UPPER_BOUNDS) { mv = 0; }
+	if (mv < 0 && curAngle < LOWER_BOUNDS) { mv = 0; }
+
+	//// for soft stop
+	if (mv > 0) { mv *= (210 - curAngle) / 210.0; }
 
 	if (mv == 0) {
 		motor.brake();

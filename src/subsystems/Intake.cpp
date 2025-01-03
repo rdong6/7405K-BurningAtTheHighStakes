@@ -2,7 +2,6 @@
 #include "Logger.h"
 #include "RobotBase.h"
 #include "lib/utils/CoroutineGenerator.h"
-#include "lib/utils/DelayedBool.h"
 #include "lib/utils/Timeout.h"
 #include "pros/motors.h"
 #include "subsystems/Controller.h"
@@ -20,7 +19,15 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot) {
 
 void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->runner(); }, TaskType::SENTINEL);
-	robot->registerTask([this]() { return this->opcontrol(); }, TaskType::OPCTRL);
+
+	// TODO!!: DETERMINE ORDERING (IF BLUEISM CODE WOULD MESS UP ANTI-JAM CODE)
+	robot->registerTask([this]() { return this->antiJamCoro(); }, TaskType::AUTON,
+	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->antiJam; });
+	robot->registerTask([this]() { return this->antiJamCoro(); }, TaskType::OPCTRL,
+	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->antiJam; });
+	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::AUTON);
+	robot->registerTask([this]() { return this->ladyBrownClearanceCoro(); }, TaskType::OPCTRL,
+	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; });
 
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
@@ -28,12 +35,8 @@ void Intake::registerTasks() {
 	auto controllerRef = controller.value();
 
 	// Maps holding r1 to intake
-	controllerRef->registerCallback(
-	        [this]() {
-		        // this->moveVoltage(10000);
-		        this->moveVoltage(12000);
-	        },
-	        []() {}, Controller::master, Controller::r2, Controller::hold);
+	controllerRef->registerCallback([this]() { this->moveVoltage(12000); }, []() {}, Controller::master, Controller::r2,
+	                                Controller::hold);
 
 	// Maps holding r2 to outtake - when both r1 and r2 are held, r2 takes precedent
 	controllerRef->registerCallback([this]() { this->moveVoltage(-12000); }, []() {}, Controller::master, Controller::r1,
@@ -50,24 +53,13 @@ void Intake::registerTasks() {
 	                                Controller::falling);
 }
 
-RobotThread Intake::opcontrol() {
-	blueismDetector = nullptr;
-	co_yield util::coroutine::nextCycle();
-}
+/*
+Coroutine which runs blueism code.
 
-bool Intake::redRingDetector() {
-	return color.get_hue() < 10;
-}
-
-bool Intake::blueRingDetector() {
-	return color.get_hue() >= 75;
-}
-
-// As of now, running constantly on robot no matter the competition state
-RobotThread Intake::runner() {
-	auto intakeFlags = robot->getFlag<Intake>().value();
-
-	// for comps
+Thread Type: AUTON
+*/
+RobotThread Intake::blueismCoro() {
+	// TODO: Determine if this should be done here or elsewhere in the program
 	switch (robot->curAlliance) {
 		case Alliance::BLUE:
 			blueismDetector = &Intake::redRingDetector;
@@ -80,23 +72,69 @@ RobotThread Intake::runner() {
 			break;
 	}
 
+	// suspend coroutine until we want blueism enabled (blueismDetector points to either red or blue detector func)
+	co_yield [this]() -> bool { return this->blueismDetector; };
+
+	auto intakeFlags = robot->getFlag<Intake>().value();
+	while (true) {
+		// Checks if ring of opposite alliance is in intake. Check dist to elim false positives
+		if ((this->*blueismDetector)() && color.get_proximity() >= 80) {
+			// Determines how long after seeing the ring do we stop the intake*/
+			co_yield util::coroutine::delay(40 /* TUNE THIS */);
+		}
+
+		// Now code takes over intake and stops it to eject ring
+		codeOverride = true;
+		motors.brake();
+
+		// determines how long we stop intake for before resuming any normal operations
+		co_yield util::coroutine::delay(200 /* TUNE THIS */);
+
+		// returns control to intake and if requested, move intake to last commanded voltage before we blueism
+		codeOverride = false;
+		if (intakeFlags->colorSortResumes) {
+			// determines how long after we ejected ring do we resume intake's last voltage
+			co_yield util::coroutine::delay(100 /* TUNE THIS */);
+			moveVoltage(lastCommandedVoltage);
+		}
+
+
+		co_yield [this]() -> bool { return this->blueismDetector; };
+	}
+}
+
+RobotThread Intake::ladyBrownClearanceCoro() {
+	while (true) {
+		codeOverride = true;
+		motors.move_voltage(4000);
+		co_yield util::coroutine::delay(60);
+		robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
+		motors.brake();
+		codeOverride = false;
+		co_yield [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; };
+	}
+}
+
+/*
+Coroutine that handles antijam logic for the intake.
+
+Initial Predicate: Needs Intake::flags::antiJam == true before coro ever runs
+Type: OPCTRL & AUTON (NOT SENTINEL!)
+*/
+RobotThread Intake::antiJamCoro() {
+	while (true) {
+		// do antijam code here
+		co_yield [robot = this->robot]() { return robot->getFlag<Intake>().value()->antiJam; };
+	}
+}
+
+// As of now, running constantly on robot no matter the competition state
+RobotThread Intake::runner() {
+	auto intakeFlags = robot->getFlag<Intake>().value();
 	// anti-jam vars
 	unsigned int timestamp = 0;// timestamp since last time intake was moving
 	bool runAntiJam = false;
 	Timeout antiJamTimeout;
-
-
-	// bluism plan
-	bool blueistPlanOne = false;
-	util::DelayedBool enableBlueist;
-	util::DelayedBool resetBlueist;
-	util::DelayedBool blueistResumeLastVoltage;
-	Timeout blueistTimeout;
-
-	// old blueist code
-	bool firstOne = false;
-	bool blueistPlanTwo = false;
-	Timeout blueistStartTimeout;
 
 	// lady-brown mech detector
 	bool enableLadyBrownDetector = false;
@@ -104,107 +142,26 @@ RobotThread Intake::runner() {
 	while (true) {
 		// antijam code
 		// keep updating timestamp since last time intake motor was moving
-		if (std::abs(motors.get_actual_velocity()) >= 30) { timestamp = pros::millis(); }
+		/*if (std::abs(motors.get_actual_velocity()) >= 30) { timestamp = pros::millis(); }
 
 		// temp disables antijam
 		if (intakeFlags->antiJam && state == AntiJamState::IDLE && pros::millis() - timestamp > 250) {
-			// enable antijam code -> unwind the intake rq
-			state = AntiJamState::UNWIND;
-			antiJamTimeout = Timeout(333);
-			printf("\n\n\nANTI JAM ENABLED\n\n\n");
+		    // enable antijam code -> unwind the intake rq
+		    state = AntiJamState::UNWIND;
+		    antiJamTimeout = Timeout(333);
+		    printf("\n\n\nANTI JAM ENABLED\n\n\n");
 		}
 
 		if (state == AntiJamState::UNWIND) {
-			motors.move_voltage(-12000);
+		    motors.move_voltage(-12000);
 
-			if (antiJamTimeout.timedOut()) {
-				motors.move_voltage(0);
-				state = AntiJamState::IDLE;
-			}
-		}
+		    if (antiJamTimeout.timedOut()) {
+		        motors.move_voltage(0);
+		        state = AntiJamState::IDLE;
+		    }
+		}*/
 
 		// end of antijam code
-
-		// ring ejector (Proof of concept)
-
-		// short circuiting prevents calling a nullptr
-		// check if we already engaged blueism plan -> don't wanna reset timeout
-		/*if (blueismDetector && (this->*blueismDetector)() && !blueistPlanOne) {
-		    blueistPlanOne = true;
-		    // enableBlueist = util::DelayedBool(225);
-		    enableBlueist = util::DelayedBool(300);
-		    blueistTimeout = Timeout(1000);// TUNE
-		    printf("BLUEISM SHALL COMMENCE\n");
-		}
-
-		if (enableBlueist()) {
-		    printf("\nACTIVATING BLUEISM\n");
-		    motors.brake();
-		    codeOverride = true;
-
-		    if (blueistTimeout.timedOut()) {
-		        printf("\nSTOPPING BLUEISM\n");
-		        codeOverride = false;
-		        enableBlueist = util::DelayedBool();
-		        resetBlueist = util::DelayedBool(250);
-		    }
-		}
-
-		if (resetBlueist()) {
-		    resetBlueist = util::DelayedBool();
-		    blueistPlanOne = false;
-		}*/
-
-
-		//
-		/*double hue = color.get_hue();
-		if (hue >= 75) {
-		    printf("BLUE ONE DETECTED\n");
-		    firstOne = true;
-		    blueistPlanOne = true;
-		    blueistStartTimeout = Timeout(0);
-		}
-
-		if (0 < hue && hue < 25) {
-		    printf("RED ONE DETECTED\n");
-		    firstOne = true;
-		}*/
-
-		if (blueismDetector && (this->*blueismDetector)() && color.get_proximity() >= 80) {
-			printf("%d  %f\n", color.get_proximity(), color.get_hue());
-			printf("BLUE ONE DETECTED\n");
-			firstOne = true;
-			blueistPlanOne = true;
-			// blueistStartTimeout = Timeout(0); // testing
-			blueistStartTimeout = Timeout(40);// works for slower
-		}
-
-
-		if (blueistPlanOne && blueistStartTimeout.timedOut()) {
-			blueistPlanOne = false;
-			blueistPlanTwo = true;
-			blueistTimeout = Timeout(200);
-		}
-
-		if (blueistPlanTwo) {
-			codeOverride = true;
-			motors.brake();
-			printf("BLUEISM SHALL COMMENCE\n\n\n\n");
-
-			if (blueistTimeout.timedOut()) {
-				codeOverride = false;
-				blueistPlanTwo = false;
-				firstOne = false;
-
-				// move intake at last commanded voltage before we did the blueism
-				if (intakeFlags->colorSortResumes) { blueistResumeLastVoltage = util::DelayedBool(100); }
-			}
-		}
-
-		if (blueistResumeLastVoltage()) {
-			moveVoltage(lastCommandedVoltage);
-			blueistResumeLastVoltage = util::DelayedBool();
-		}
 
 
 		// lady brown loaded detector
@@ -257,6 +214,14 @@ RobotThread Intake::runner() {
 
 		co_yield util::coroutine::nextCycle();
 	}
+}
+
+bool Intake::redRingDetector() {
+	return color.get_hue() < 10;
+}
+
+bool Intake::blueRingDetector() {
+	return color.get_hue() >= 75;
 }
 
 void Intake::setTorqueStop(bool val) {

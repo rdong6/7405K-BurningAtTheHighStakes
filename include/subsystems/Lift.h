@@ -25,22 +25,20 @@ private:
 	RobotThread updateAngle();
 	RobotThread runner();
 
-	RobotThread openLiftCoro();
-	RobotThread closeLiftCoro();
-
 	void move(int mv);
 
 public:
 	struct flags {
 		State state{State::IDLE};
 
-		PID pid = PID(400, 10, 0, true, 10);
+		PID pid = PID(225, 10, 0, true, 10);
 
 		double curAngle{};
 		double targetAngle{5};// TBD - Angle lift should move to if code's controlling
 		double errorThresh{2};
 
-		bool liftActivatedExtender{false}; // if true, lift will lower extender when lift arm is in size again -> disabled when any other part of code touches intake extender
+		bool liftActivatedExtender{false};// if true, lift will lower extender when lift arm is in size again -> disabled when
+		                                  // any other part of code touches intake extender
 
 		bool isMoving{false};// is the lift currently moving by code to a place
 

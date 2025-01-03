@@ -12,7 +12,7 @@ class Intake : public Subsystem {
 private:
 	enum class AntiJamState { IDLE, UNWIND };
 
-	pros::adi::DigitalOut extender{'G'};
+	pros::adi::DigitalOut extender{'F'};
 	pros::MotorGroup motors{ports::intake};
 	pros::Distance distance{ports::intakeDistance};
 	pros::Optical color{ports::intakeColor};
@@ -30,9 +30,10 @@ private:
 	bool redRingDetector();
 	bool blueRingDetector();
 
-
 	RobotThread runner();
-	RobotThread opcontrol();
+	RobotThread blueismCoro();
+	RobotThread ladyBrownClearanceCoro();// moves intake slightly back so lady brown clears intake as it goes to score
+	RobotThread antiJamCoro();
 
 public:
 	struct flags {
@@ -40,6 +41,7 @@ public:
 		bool isMoving{false};// is intake commanded to move?
 		bool torqueStop{false};
 		bool distStop{false};
+		bool ladyBrownClearanceEnabled{false};// when enabled by lift, move intake back slightly
 
 		bool colorSortResumes{false};// after color sort, we resume last commanded voltage
 
