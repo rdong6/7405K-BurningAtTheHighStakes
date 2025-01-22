@@ -19,7 +19,7 @@ Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	pros::delay(20);// needed so get_angle() isn't 0
 	int32_t curPosition = rotation.get_angle();
 	rotation.set_position(curPosition);
-	// rotation.set_position(curPosition < 1000 ? 36000 + curPosition : curPosition);
+	rotation.set_position(curPosition >= 35000 ? 36000 - curPosition : curPosition);
 	pros::delay(20);
 }
 
@@ -215,7 +215,7 @@ void Lift::move(int mv) {
 	if (mv < 0 && curAngle < LOWER_BOUNDS) { mv = 0; }
 
 	//// for soft stop
-	if (mv > 0) { mv *= (210 - curAngle) / 210.0; }
+	// if (mv > 0) { mv *= (300 - curAngle) / 300.0; }
 
 	if (mv == 0) {
 		motor.brake();

@@ -76,7 +76,13 @@ RobotThread Odometry::updatePosition() {
 			dh = util::toRad(curRotation - prevRotation);
 			prevRotation = curRotation;
 		} else {
-			dh = (l_dist - r_dist) / (odometers::trackWidth);
+			double trackWidth;// selects between track width of drivetrain or deadwheels
+			if constexpr (ports::rightRotation != 0) {
+				trackWidth = odometers::deadwheelTrackWidth;
+			} else {
+				trackWidth = odometers::trackWidth;
+			}
+			dh = (l_dist - r_dist) / (trackWidth);
 		}
 
 		if constexpr (ports::backRotation != 0) {
@@ -85,18 +91,17 @@ RobotThread Odometry::updatePosition() {
 			b_dist = ((BE - prev_b) / 36000.0) * M_PI * odometers::backDeadwheelDiameter;
 			prev_b = BE;
 
-			deltaY = b_dist + (odometers::backOffset * dh);// need to test this
+			deltaY = b_dist + (odometers::backOffset * dh);
 		} else {
 			deltaY = 0;
 		}
 
-		double deltaX = (l_dist + r_dist) / 2.0;// figure out what this should be
+		double deltaX = (l_dist + r_dist) / 2.0;
 
 		Rotation2D newHeading = curState.position.rotation() + Rotation2D(dh);
 		Pose newPose = curState.position.exp(Twist2D{deltaX, deltaY, dh});
 		curState.position = Pose(newPose.translation(), newHeading);
 
-		// maybe move this to separate thread
 		printOdom(curState);
 
 		// to tune the trackwidth - the data being printed to line 6 is not needed

@@ -170,7 +170,7 @@ void PursuitMotion::start() {
 
 [[deprecated("NEED TO FIX THE DIFFERENTIAL DRIVE KINEMATICS CONVERTING CHASSIS SPEEDS TO WHEEL SPEEDS-> FLIP SIGNS")]] IMotion::
         MotorVoltages
-        PursuitMotion::calculate(const kinState state) {
+        PursuitMotion::calculate(const kinState& state) {
 	// dt is used for rate limiting of vel of robot
 	double curTime = pros::millis();
 	double dt = (curTime - prevTime) / 1000.0;
@@ -227,6 +227,6 @@ bool PursuitMotion::isVelocityControlled() const {
 	return true;
 }
 
-bool PursuitMotion::isSettled(const kinState state) {
+bool PursuitMotion::isSettled(const kinState& state) {
 	return curDistFromEnd(state) <= threshold;
 }

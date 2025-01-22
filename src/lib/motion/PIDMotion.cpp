@@ -8,7 +8,7 @@ PIDMotion::PIDMotion(Pose pose, PID pwrPID, PID trnPID, bool headingCorrection, 
     : threshold(threshold), targetPose(pose), pwrPID(pwrPID), trnPID(trnPID), counter(0), headingCorrection(headingCorrection) {
 }
 
-IMotion::MotorVoltages PIDMotion::calculate(const kinState state) {
+IMotion::MotorVoltages PIDMotion::calculate(const kinState& state) {
 	double errX = targetPose.X() - state.position.X();
 	double errY = targetPose.X() - state.position.X();
 
@@ -47,6 +47,6 @@ IMotion::MotorVoltages PIDMotion::calculate(const kinState state) {
 	return {pwr + trn, pwr - trn};
 }
 
-bool PIDMotion::isSettled(const kinState state) {
+bool PIDMotion::isSettled(const kinState& state) {
 	return counter > 5;
 }

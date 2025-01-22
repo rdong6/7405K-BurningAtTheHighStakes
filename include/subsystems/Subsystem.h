@@ -1,6 +1,5 @@
 #pragma once
 #include "RobotBase.h"
-#include "lib/utils/is_derived.h"
 #include <arm_neon.h>
 #include <cxxabi.h>
 #include <stdexcept>
@@ -13,9 +12,7 @@ public:
 	Subsystem() = delete;
 
 	Subsystem(RobotBase* robot) : robot(robot) {
-		if (!robot || !dynamic_cast<RobotBase*>(robot)) {
-			throw std::runtime_error("Invalid Instantiation of Subsystem!");
-		}
+		if (!robot || !dynamic_cast<RobotBase*>(robot)) { throw std::runtime_error("Invalid Instantiation of Subsystem!"); }
 	}
 
 	virtual void registerTasks() {}

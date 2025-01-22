@@ -1,0 +1,362 @@
+[Ramsete] Vel: 0.00	Angular Vel: 0.00	eX: -0.00	eY: -0.00	eThetha: -0.00
+[RamseteMotin] ElapsedTime: 0.00	Sampled State: (t: 0.00 X: 0.00 Y: 0.00 H: 0.00 v: 0.00) 	Left: 0.00	Right: 0.00
+[Ramsete] Vel: 0.00	Angular Vel: 0.00	eX: -0.00	eY: -0.00	eThetha: -0.00
+[RamseteMotin] ElapsedTime: 0.00	Sampled State: (t: 0.00 X: 0.00 Y: 0.00 H: 0.00 v: 0.00) 	Left: 0.00	Right: 0.00
+[Ramsete] Vel: 0.00	Angular Vel: 0.00	eX: -0.00	eY: -0.00	eThetha: -0.00
+[RamseteMotin] ElapsedTime: 0.00	Sampled State: (t: 0.00 X: 0.00 Y: 0.00 H: 0.00 v: 0.00) 	Left: 0.00	Right: 0.00
+[Ramsete] Vel: 0.36	Angular Vel: 0.00	eX: 0.00	eY: 0.00	eThetha: 0.00
+[RamseteMotin] ElapsedTime: 0.01	Sampled State: (t: 0.01 X: 0.00 Y: 0.00 H: 0.19 v: 0.36) 	Left: 3.46	Right: 3.59
+[Ramsete] Vel: 0.96	Angular Vel: 0.02	eX: 0.01	eY: 0.00	eThetha: 0.02
+[RamseteMotin] ElapsedTime: 0.02	Sampled State: (t: 0.02 X: 0.01 Y: 0.00 H: 1.36 v: 0.96) 	Left: 8.20	Right: 10.64
+[Ramsete] Vel: 1.57	Angular Vel: 0.07	eX: 0.02	eY: 0.00	eThetha: 0.06
+[RamseteMotin] ElapsedTime: 0.03	Sampled State: (t: 0.03 X: 0.02 Y: 0.00 H: 3.59 v: 1.56) 	Left: 10.09	Right: 20.60
+[Ramsete] Vel: 2.17	Angular Vel: 0.19	eX: 0.04	eY: 0.01	eThetha: 0.12
+[RamseteMotin] ElapsedTime: 0.04	Sampled State: (t: 0.04 X: 0.04 Y: 0.01 H: 6.88 v: 2.16) 	Left: 7.21	Right: 35.32
+[Ramsete] Vel: 2.76	Angular Vel: 0.41	eX: 0.06	eY: 0.01	eThetha: 0.20
+[RamseteMotin] ElapsedTime: 0.05	Sampled State: (t: 0.05 X: 0.06 Y: 0.01 H: 11.23 v: 2.76) 	Left: -2.74	Right: 56.89
+[Ramsete] Vel: 3.38	Angular Vel: 0.54	eX: 0.09	eY: 0.02	eThetha: 0.22
+[RamseteMotin] ElapsedTime: 0.06	Sampled State: (t: 0.06 X: 0.09 Y: 0.02 H: 12.55 v: 3.36) 	Left: -6.29	Right: 72.56
+[Ramsete] Vel: 4.03	Angular Vel: 0.61	eX: 0.13	eY: 0.03	eThetha: 0.22
+[RamseteMotin] ElapsedTime: 0.07	Sampled State: (t: 0.07 X: 0.13 Y: 0.03 H: 12.68 v: 3.96) 	Left: -4.98	Right: 83.95
+[Ramsete] Vel: 4.70	Angular Vel: 0.66	eX: 0.17	eY: 0.04	eThetha: 0.22
+[RamseteMotin] ElapsedTime: 0.08	Sampled State: (t: 0.08 X: 0.17 Y: 0.04 H: 12.84 v: 4.56) 	Left: -2.52	Right: 94.57
+[Ramsete] Vel: 5.39	Angular Vel: 0.70	eX: 0.22	eY: 0.05	eThetha: 0.23
+[RamseteMotin] ElapsedTime: 0.09	Sampled State: (t: 0.09 X: 0.22 Y: 0.05 H: 13.01 v: 5.16) 	Left: 1.25	Right: 104.32
+[Ramsete] Vel: 6.11	Angular Vel: 0.73	eX: 0.27	eY: 0.06	eThetha: 0.23
+[RamseteMotin] ElapsedTime: 0.10	Sampled State: (t: 0.10 X: 0.27 Y: 0.06 H: 13.21 v: 5.76) 	Left: 6.48	Right: 113.13
+[Ramsete] Vel: 6.86	Angular Vel: 0.79	eX: 0.33	eY: 0.07	eThetha: 0.23
+[RamseteMotin] ElapsedTime: 0.11	Sampled State: (t: 0.11 X: 0.33 Y: 0.07 H: 13.37 v: 6.36) 	Left: 9.15	Right: 125.16
+[Ramsete] Vel: 7.64	Angular Vel: 0.85	eX: 0.39	eY: 0.09	eThetha: 0.24
+[RamseteMotin] ElapsedTime: 0.12	Sampled State: (t: 0.12 X: 0.39 Y: 0.09 H: 13.54 v: 6.96) 	Left: 12.40	Right: 137.25
+[Ramsete] Vel: 8.46	Angular Vel: 0.92	eX: 0.46	eY: 0.11	eThetha: 0.24
+[RamseteMotin] ElapsedTime: 0.13	Sampled State: (t: 0.13 X: 0.46 Y: 0.11 H: 13.70 v: 7.56) 	Left: 15.65	Right: 150.09
+[Ramsete] Vel: 9.32	Angular Vel: 0.98	eX: 0.54	eY: 0.13	eThetha: 0.24
+[RamseteMotin] ElapsedTime: 0.14	Sampled State: (t: 0.14 X: 0.54 Y: 0.13 H: 13.88 v: 8.16) 	Left: 19.07	Right: 163.54
+[Ramsete] Vel: 10.22	Angular Vel: 1.05	eX: 0.62	eY: 0.15	eThetha: 0.24
+[RamseteMotin] ElapsedTime: 0.15	Sampled State: (t: 0.15 X: 0.62 Y: 0.15 H: 14.06 v: 8.76) 	Left: 22.77	Right: 177.46
+[Ramsete] Vel: 11.17	Angular Vel: 1.13	eX: 0.71	eY: 0.17	eThetha: 0.25
+[RamseteMotin] ElapsedTime: 0.16	Sampled State: (t: 0.16 X: 0.71 Y: 0.17 H: 14.23 v: 9.36) 	Left: 26.57	Right: 192.20
+[Ramsete] Vel: 12.16	Angular Vel: 1.20	eX: 0.80	eY: 0.19	eThetha: 0.25
+[RamseteMotin] ElapsedTime: 0.17	Sampled State: (t: 0.17 X: 0.80 Y: 0.19 H: 14.42 v: 9.96) 	Left: 30.76	Right: 207.38
+[Ramsete] Vel: 13.20	Angular Vel: 1.28	eX: 0.89	eY: 0.21	eThetha: 0.25
+[RamseteMotin] ElapsedTime: 0.18	Sampled State: (t: 0.18 X: 0.90 Y: 0.22 H: 14.60 v: 10.56) 	Left: 35.06	Right: 223.49
+[Ramsete] Vel: 14.28	Angular Vel: 1.36	eX: 0.99	eY: 0.24	eThetha: 0.25
+[RamseteMotin] ElapsedTime: 0.19	Sampled State: (t: 0.19 X: 1.01 Y: 0.25 H: 14.79 v: 11.16) 	Left: 39.72	Right: 240.04
+[Ramsete] Vel: 15.40	Angular Vel: 1.45	eX: 1.09	eY: 0.26	eThetha: 0.26
+[RamseteMotin] ElapsedTime: 0.20	Sampled State: (t: 0.20 X: 1.12 Y: 0.28 H: 14.99 v: 11.76) 	Left: 44.62	Right: 257.12
+[Ramsete] Vel: 16.57	Angular Vel: 1.53	eX: 1.18	eY: 0.29	eThetha: 0.26
+[RamseteMotin] ElapsedTime: 0.21	Sampled State: (t: 0.21 X: 1.24 Y: 0.31 H: 15.18 v: 12.36) 	Left: 49.78	Right: 274.72
+[Ramsete] Vel: 17.76	Angular Vel: 1.62	eX: 1.28	eY: 0.32	eThetha: 0.26
+[RamseteMotin] ElapsedTime: 0.22	Sampled State: (t: 0.22 X: 1.36 Y: 0.34 H: 15.38 v: 12.96) 	Left: 55.21	Right: 292.67
+[Ramsete] Vel: 18.99	Angular Vel: 1.70	eX: 1.38	eY: 0.35	eThetha: 0.26
+[RamseteMotin] ElapsedTime: 0.23	Sampled State: (t: 0.23 X: 1.49 Y: 0.38 H: 15.59 v: 13.56) 	Left: 60.81	Right: 311.10
+[Ramsete] Vel: 20.26	Angular Vel: 1.79	eX: 1.47	eY: 0.38	eThetha: 0.26
+[RamseteMotin] ElapsedTime: 0.24	Sampled State: (t: 0.24 X: 1.62 Y: 0.41 H: 15.80 v: 14.16) 	Left: 66.78	Right: 330.09
+[Ramsete] Vel: 21.56	Angular Vel: 1.88	eX: 1.57	eY: 0.41	eThetha: 0.26
+[RamseteMotin] ElapsedTime: 0.25	Sampled State: (t: 0.25 X: 1.76 Y: 0.45 H: 16.01 v: 14.76) 	Left: 73.22	Right: 349.10
+[Ramsete] Vel: 22.89	Angular Vel: 1.96	eX: 1.66	eY: 0.45	eThetha: 0.26
+[RamseteMotin] ElapsedTime: 0.26	Sampled State: (t: 0.26 X: 1.90 Y: 0.49 H: 16.23 v: 15.36) 	Left: 80.03	Right: 368.33
+[Ramsete] Vel: 24.25	Angular Vel: 2.04	eX: 1.75	eY: 0.49	eThetha: 0.25
+[RamseteMotin] ElapsedTime: 0.27	Sampled State: (t: 0.27 X: 2.05 Y: 0.54 H: 16.45 v: 15.96) 	Left: 87.33	Right: 387.68
+[Ramsete] Vel: 25.64	Angular Vel: 2.12	eX: 1.84	eY: 0.52	eThetha: 0.25
+[RamseteMotin] ElapsedTime: 0.28	Sampled State: (t: 0.28 X: 2.21 Y: 0.58 H: 16.67 v: 16.56) 	Left: 95.60	Right: 406.72
+[Ramsete] Vel: 27.03	Angular Vel: 2.19	eX: 1.92	eY: 0.55	eThetha: 0.24
+[RamseteMotin] ElapsedTime: 0.29	Sampled State: (t: 0.29 X: 2.37 Y: 0.63 H: 16.90 v: 17.16) 	Left: 103.71	Right: 425.83
+[Ramsete] Vel: 28.45	Angular Vel: 2.26	eX: 2.00	eY: 0.58	eThetha: 0.24
+[RamseteMotin] ElapsedTime: 0.30	Sampled State: (t: 0.30 X: 2.54 Y: 0.68 H: 17.14 v: 17.76) 	Left: 112.51	Right: 444.86
+[Ramsete] Vel: 29.84	Angular Vel: 2.32	eX: 2.07	eY: 0.61	eThetha: 0.23
+[RamseteMotin] ElapsedTime: 0.31	Sampled State: (t: 0.31 X: 2.71 Y: 0.74 H: 17.38 v: 18.36) 	Left: 121.52	Right: 462.92
+[Ramsete] Vel: 31.25	Angular Vel: 2.38	eX: 2.14	eY: 0.64	eThetha: 0.23
+[RamseteMotin] ElapsedTime: 0.32	Sampled State: (t: 0.32 X: 2.89 Y: 0.79 H: 17.63 v: 18.96) 	Left: 131.04	Right: 481.13
+[Ramsete] Vel: 32.68	Angular Vel: 2.43	eX: 2.21	eY: 0.66	eThetha: 0.22
+[RamseteMotin] ElapsedTime: 0.33	Sampled State: (t: 0.33 X: 3.07 Y: 0.85 H: 17.88 v: 19.56) 	Left: 141.33	Right: 498.82
+[Ramsete] Vel: 34.19	Angular Vel: 2.49	eX: 2.28	eY: 0.69	eThetha: 0.21
+[RamseteMotin] ElapsedTime: 0.34	Sampled State: (t: 0.34 X: 3.26 Y: 0.91 H: 18.13 v: 20.16) 	Left: 152.32	Right: 517.46
+[Ramsete] Vel: 35.68	Angular Vel: 2.54	eX: 2.35	eY: 0.72	eThetha: 0.20
+[RamseteMotin] ElapsedTime: 0.35	Sampled State: (t: 0.35 X: 3.45 Y: 0.98 H: 18.39 v: 20.76) 	Left: 163.16	Right: 535.81
+[Ramsete] Vel: 37.18	Angular Vel: 2.58	eX: 2.42	eY: 0.75	eThetha: 0.20
+[RamseteMotin] ElapsedTime: 0.36	Sampled State: (t: 0.36 X: 3.65 Y: 1.05 H: 18.66 v: 21.36) 	Left: 174.46	Right: 553.88
+[Ramsete] Vel: 38.59	Angular Vel: 2.63	eX: 2.46	eY: 0.77	eThetha: 0.19
+[RamseteMotin] ElapsedTime: 0.37	Sampled State: (t: 0.37 X: 3.86 Y: 1.12 H: 18.94 v: 21.96) 	Left: 185.12	Right: 570.80
+[Ramsete] Vel: 40.10	Angular Vel: 2.65	eX: 2.52	eY: 0.79	eThetha: 0.18
+[RamseteMotin] ElapsedTime: 0.38	Sampled State: (t: 0.38 X: 4.07 Y: 1.19 H: 19.22 v: 22.56) 	Left: 197.79	Right: 587.60
+[Ramsete] Vel: 41.64	Angular Vel: 2.68	eX: 2.58	eY: 0.81	eThetha: 0.17
+[RamseteMotin] ElapsedTime: 0.39	Sampled State: (t: 0.39 X: 4.28 Y: 1.26 H: 19.51 v: 23.16) 	Left: 210.98	Right: 604.69
+[Ramsete] Vel: 43.14	Angular Vel: 2.70	eX: 2.63	eY: 0.82	eThetha: 0.16
+[RamseteMotin] ElapsedTime: 0.40	Sampled State: (t: 0.40 X: 4.51 Y: 1.34 H: 19.80 v: 23.76) 	Left: 224.46	Right: 620.61
+[Ramsete] Vel: 44.53	Angular Vel: 2.72	eX: 2.67	eY: 0.84	eThetha: 0.15
+[RamseteMotin] ElapsedTime: 0.41	Sampled State: (t: 0.41 X: 4.73 Y: 1.42 H: 20.10 v: 24.36) 	Left: 236.13	Right: 636.09
+[Ramsete] Vel: 46.09	Angular Vel: 2.74	eX: 2.72	eY: 0.85	eThetha: 0.14
+[RamseteMotin] ElapsedTime: 0.42	Sampled State: (t: 0.42 X: 4.96 Y: 1.51 H: 20.41 v: 24.96) 	Left: 250.42	Right: 652.40
+[Ramsete] Vel: 47.51	Angular Vel: 2.77	eX: 2.76	eY: 0.88	eThetha: 0.14
+[RamseteMotin] ElapsedTime: 0.43	Sampled State: (t: 0.43 X: 5.20 Y: 1.60 H: 20.73 v: 25.56) 	Left: 261.72	Right: 668.96
+[Ramsete] Vel: 49.14	Angular Vel: 2.79	eX: 2.82	eY: 0.89	eThetha: 0.13
+[RamseteMotin] ElapsedTime: 0.44	Sampled State: (t: 0.44 X: 5.44 Y: 1.69 H: 21.05 v: 26.16) 	Left: 276.66	Right: 685.88
+[Ramsete] Vel: 50.38	Angular Vel: 2.77	eX: 2.83	eY: 0.88	eThetha: 0.12
+[RamseteMotin] ElapsedTime: 0.45	Sampled State: (t: 0.45 X: 5.69 Y: 1.79 H: 21.38 v: 26.76) 	Left: 289.76	Right: 697.06
+[Ramsete] Vel: 51.44	Angular Vel: 2.78	eX: 2.82	eY: 0.89	eThetha: 0.11
+[RamseteMotin] ElapsedTime: 0.46	Sampled State: (t: 0.46 X: 5.94 Y: 1.89 H: 21.72 v: 27.36) 	Left: 299.90	Right: 707.80
+[Ramsete] Vel: 52.74	Angular Vel: 2.79	eX: 2.83	eY: 0.90	eThetha: 0.10
+[RamseteMotin] ElapsedTime: 0.47	Sampled State: (t: 0.47 X: 6.20 Y: 1.99 H: 22.07 v: 27.96) 	Left: 311.57	Right: 721.45
+[Ramsete] Vel: 54.22	Angular Vel: 2.86	eX: 2.87	eY: 0.94	eThetha: 0.10
+[RamseteMotin] ElapsedTime: 0.48	Sampled State: (t: 0.48 X: 6.46 Y: 2.10 H: 22.43 v: 28.56) 	Left: 321.08	Right: 741.00
+[Ramsete] Vel: 55.45	Angular Vel: 2.85	eX: 2.88	eY: 0.94	eThetha: 0.09
+[RamseteMotin] ElapsedTime: 0.49	Sampled State: (t: 0.49 X: 6.72 Y: 2.21 H: 22.80 v: 29.16) 	Left: 333.49	Right: 752.77
+[Ramsete] Vel: 56.28	Angular Vel: 2.85	eX: 2.84	eY: 0.92	eThetha: 0.09
+[RamseteMotin] ElapsedTime: 0.50	Sampled State: (t: 0.50 X: 7.00 Y: 2.32 H: 23.18 v: 29.76) 	Left: 342.08	Right: 760.43
+[Ramsete] Vel: 57.42	Angular Vel: 2.89	eX: 2.84	eY: 0.94	eThetha: 0.08
+[RamseteMotin] ElapsedTime: 0.51	Sampled State: (t: 0.51 X: 7.27 Y: 2.44 H: 23.57 v: 30.36) 	Left: 349.80	Right: 774.87
+[Ramsete] Vel: 58.51	Angular Vel: 2.97	eX: 2.84	eY: 0.98	eThetha: 0.08
+[RamseteMotin] ElapsedTime: 0.52	Sampled State: (t: 0.52 X: 7.55 Y: 2.57 H: 23.97 v: 30.96) 	Left: 354.81	Right: 791.32
+[Ramsete] Vel: 59.77	Angular Vel: 3.04	eX: 2.85	eY: 1.00	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.53	Sampled State: (t: 0.53 X: 7.84 Y: 2.69 H: 24.38 v: 31.56) 	Left: 361.94	Right: 808.87
+[Ramsete] Vel: 60.74	Angular Vel: 3.11	eX: 2.83	eY: 1.02	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.54	Sampled State: (t: 0.54 X: 8.13 Y: 2.83 H: 24.80 v: 32.16) 	Left: 366.82	Right: 823.00
+[Ramsete] Vel: 61.62	Angular Vel: 3.18	eX: 2.81	eY: 1.03	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.55	Sampled State: (t: 0.55 X: 8.42 Y: 2.96 H: 25.24 v: 32.76) 	Left: 370.04	Right: 836.93
+[Ramsete] Vel: 62.30	Angular Vel: 3.30	eX: 2.76	eY: 1.06	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.56	Sampled State: (t: 0.56 X: 8.72 Y: 3.11 H: 25.69 v: 33.36) 	Left: 367.62	Right: 852.78
+[Ramsete] Vel: 63.09	Angular Vel: 3.43	eX: 2.75	eY: 1.10	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.57	Sampled State: (t: 0.57 X: 9.02 Y: 3.25 H: 26.15 v: 33.85) 	Left: 366.24	Right: 869.52
+[Ramsete] Vel: 62.25	Angular Vel: 3.52	eX: 2.68	eY: 1.14	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.58	Sampled State: (t: 0.58 X: 9.33 Y: 3.40 H: 26.61 v: 33.83) 	Left: 351.15	Right: 868.15
+[Ramsete] Vel: 61.55	Angular Vel: 3.64	eX: 2.62	eY: 1.20	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.59	Sampled State: (t: 0.59 X: 9.63 Y: 3.56 H: 27.09 v: 33.76) 	Left: 335.43	Right: 870.17
+[Ramsete] Vel: 60.89	Angular Vel: 3.74	eX: 2.57	eY: 1.23	eThetha: 0.08
+[RamseteMotin] ElapsedTime: 0.60	Sampled State: (t: 0.60 X: 9.93 Y: 3.71 H: 27.57 v: 33.70) 	Left: 321.70	Right: 870.94
+[Ramsete] Vel: 59.68	Angular Vel: 3.86	eX: 2.47	eY: 1.28	eThetha: 0.08
+[RamseteMotin] ElapsedTime: 0.61	Sampled State: (t: 0.61 X: 10.22 Y: 3.87 H: 28.05 v: 33.63) 	Left: 301.16	Right: 867.89
+[Ramsete] Vel: 58.59	Angular Vel: 3.99	eX: 2.38	eY: 1.33	eThetha: 0.09
+[RamseteMotin] ElapsedTime: 0.62	Sampled State: (t: 0.62 X: 10.52 Y: 4.03 H: 28.54 v: 33.55) 	Left: 280.57	Right: 867.20
+[Ramsete] Vel: 57.89	Angular Vel: 4.14	eX: 2.33	eY: 1.39	eThetha: 0.09
+[RamseteMotin] ElapsedTime: 0.63	Sampled State: (t: 0.63 X: 10.81 Y: 4.19 H: 29.04 v: 33.48) 	Left: 262.83	Right: 871.17
+[Ramsete] Vel: 56.37	Angular Vel: 4.31	eX: 2.20	eY: 1.46	eThetha: 0.10
+[RamseteMotin] ElapsedTime: 0.64	Sampled State: (t: 0.64 X: 11.11 Y: 4.35 H: 29.54 v: 33.40) 	Left: 235.19	Right: 868.94
+[Ramsete] Vel: 55.12	Angular Vel: 4.48	eX: 2.09	eY: 1.52	eThetha: 0.10
+[RamseteMotin] ElapsedTime: 0.65	Sampled State: (t: 0.65 X: 11.39 Y: 4.52 H: 30.05 v: 33.32) 	Left: 210.45	Right: 869.16
+[Ramsete] Vel: 54.13	Angular Vel: 4.67	eX: 2.01	eY: 1.59	eThetha: 0.11
+[RamseteMotin] ElapsedTime: 0.66	Sampled State: (t: 0.66 X: 11.68 Y: 4.69 H: 30.56 v: 33.24) 	Left: 187.29	Right: 873.05
+[Ramsete] Vel: 51.64	Angular Vel: 4.82	eX: 1.81	eY: 1.65	eThetha: 0.12
+[RamseteMotin] ElapsedTime: 0.67	Sampled State: (t: 0.67 X: 11.97 Y: 4.86 H: 31.08 v: 33.01) 	Left: 151.50	Right: 859.98
+[Ramsete] Vel: 49.44	Angular Vel: 4.99	eX: 1.64	eY: 1.72	eThetha: 0.12
+[RamseteMotin] ElapsedTime: 0.68	Sampled State: (t: 0.68 X: 12.25 Y: 5.03 H: 31.60 v: 32.77) 	Left: 117.40	Right: 851.03
+[Ramsete] Vel: 47.96	Angular Vel: 5.13	eX: 1.53	eY: 1.77	eThetha: 0.13
+[RamseteMotin] ElapsedTime: 0.69	Sampled State: (t: 0.69 X: 12.52 Y: 5.20 H: 32.13 v: 32.52) 	Left: 92.73	Right: 846.74
+[Ramsete] Vel: 45.26	Angular Vel: 5.29	eX: 1.31	eY: 1.83	eThetha: 0.14
+[RamseteMotin] ElapsedTime: 0.70	Sampled State: (t: 0.70 X: 12.80 Y: 5.37 H: 32.66 v: 32.28) 	Left: 54.90	Right: 831.74
+[Ramsete] Vel: 43.59	Angular Vel: 5.49	eX: 1.18	eY: 1.92	eThetha: 0.15
+[RamseteMotin] ElapsedTime: 0.71	Sampled State: (t: 0.71 X: 13.07 Y: 5.55 H: 33.19 v: 32.03) 	Left: 23.96	Right: 829.85
+[Ramsete] Vel: 40.98	Angular Vel: 5.65	eX: 0.95	eY: 1.99	eThetha: 0.15
+[RamseteMotin] ElapsedTime: 0.72	Sampled State: (t: 0.72 X: 13.33 Y: 5.72 H: 33.73 v: 31.79) 	Left: -13.37	Right: 816.16
+[Ramsete] Vel: 38.87	Angular Vel: 5.78	eX: 0.78	eY: 2.04	eThetha: 0.16
+[RamseteMotin] ElapsedTime: 0.73	Sampled State: (t: 0.73 X: 13.60 Y: 5.90 H: 34.27 v: 31.55) 	Left: -44.02	Right: 805.52
+[Ramsete] Vel: 36.81	Angular Vel: 5.91	eX: 0.60	eY: 2.10	eThetha: 0.17
+[RamseteMotin] ElapsedTime: 0.74	Sampled State: (t: 0.74 X: 13.86 Y: 6.08 H: 34.82 v: 31.31) 	Left: -73.42	Right: 794.51
+[Ramsete] Vel: 34.49	Angular Vel: 6.03	eX: 0.40	eY: 2.15	eThetha: 0.18
+[RamseteMotin] ElapsedTime: 0.75	Sampled State: (t: 0.75 X: 14.11 Y: 6.26 H: 35.37 v: 31.07) 	Left: -105.05	Right: 780.66
+[Ramsete] Vel: 32.08	Angular Vel: 6.18	eX: 0.18	eY: 2.23	eThetha: 0.18
+[RamseteMotin] ElapsedTime: 0.76	Sampled State: (t: 0.76 X: 14.36 Y: 6.44 H: 35.93 v: 30.84) 	Left: -139.47	Right: 767.77
+[Ramsete] Vel: 29.84	Angular Vel: 6.32	eX: -0.02	eY: 2.31	eThetha: 0.19
+[RamseteMotin] ElapsedTime: 0.77	Sampled State: (t: 0.77 X: 14.61 Y: 6.62 H: 36.49 v: 30.60) 	Left: -172.03	Right: 756.49
+[Ramsete] Vel: 27.63	Angular Vel: 6.44	eX: -0.23	eY: 2.38	eThetha: 0.19
+[RamseteMotin] ElapsedTime: 0.78	Sampled State: (t: 0.78 X: 14.85 Y: 6.80 H: 37.05 v: 30.37) 	Left: -202.73	Right: 744.01
+[Ramsete] Vel: 25.62	Angular Vel: 6.54	eX: -0.41	eY: 2.45	eThetha: 0.20
+[RamseteMotin] ElapsedTime: 0.79	Sampled State: (t: 0.79 X: 15.10 Y: 6.99 H: 37.62 v: 30.15) 	Left: -229.53	Right: 731.41
+[Ramsete] Vel: 23.72	Angular Vel: 6.63	eX: -0.59	eY: 2.52	eThetha: 0.20
+[RamseteMotin] ElapsedTime: 0.80	Sampled State: (t: 0.80 X: 15.33 Y: 7.17 H: 38.19 v: 29.92) 	Left: -254.78	Right: 719.39
+[Ramsete] Vel: 22.57	Angular Vel: 6.73	eX: -0.70	eY: 2.62	eThetha: 0.20
+[RamseteMotin] ElapsedTime: 0.81	Sampled State: (t: 0.81 X: 15.57 Y: 7.36 H: 38.77 v: 29.70) 	Left: -273.11	Right: 715.24
+[Ramsete] Vel: 20.87	Angular Vel: 6.84	eX: -0.86	eY: 2.74	eThetha: 0.19
+[RamseteMotin] ElapsedTime: 0.82	Sampled State: (t: 0.82 X: 15.80 Y: 7.54 H: 39.35 v: 29.48) 	Left: -297.92	Right: 706.76
+[Ramsete] Vel: 19.69	Angular Vel: 6.94	eX: -0.98	eY: 2.87	eThetha: 0.19
+[RamseteMotin] ElapsedTime: 0.83	Sampled State: (t: 0.83 X: 16.02 Y: 7.73 H: 39.93 v: 29.27) 	Left: -316.74	Right: 702.40
+[Ramsete] Vel: 18.88	Angular Vel: 7.04	eX: -1.06	eY: 3.03	eThetha: 0.18
+[RamseteMotin] ElapsedTime: 0.84	Sampled State: (t: 0.84 X: 16.24 Y: 7.92 H: 40.52 v: 29.05) 	Left: -332.08	Right: 701.92
+[Ramsete] Vel: 18.24	Angular Vel: 7.13	eX: -1.12	eY: 3.19	eThetha: 0.17
+[RamseteMotin] ElapsedTime: 0.85	Sampled State: (t: 0.85 X: 16.46 Y: 8.11 H: 41.12 v: 28.85) 	Left: -345.36	Right: 702.66
+[Ramsete] Vel: 17.63	Angular Vel: 7.24	eX: -1.18	eY: 3.38	eThetha: 0.15
+[RamseteMotin] ElapsedTime: 0.86	Sampled State: (t: 0.86 X: 16.68 Y: 8.30 H: 41.71 v: 28.64) 	Left: -359.08	Right: 704.51
+[Ramsete] Vel: 17.69	Angular Vel: 7.26	eX: -1.16	eY: 3.52	eThetha: 0.13
+[RamseteMotin] ElapsedTime: 0.87	Sampled State: (t: 0.87 X: 16.89 Y: 8.49 H: 42.32 v: 28.44) 	Left: -359.98	Right: 706.40
+[Ramsete] Vel: 17.71	Angular Vel: 7.32	eX: -1.15	eY: 3.71	eThetha: 0.11
+[RamseteMotin] ElapsedTime: 0.88	Sampled State: (t: 0.88 X: 17.10 Y: 8.68 H: 42.92 v: 28.24) 	Left: -363.89	Right: 710.80
+[Ramsete] Vel: 18.13	Angular Vel: 7.38	eX: -1.10	eY: 3.92	eThetha: 0.09
+[RamseteMotin] ElapsedTime: 0.89	Sampled State: (t: 0.89 X: 17.30 Y: 8.87 H: 43.53 v: 28.05) 	Left: -364.43	Right: 719.53
+[Ramsete] Vel: 18.87	Angular Vel: 7.43	eX: -1.01	eY: 4.13	eThetha: 0.07
+[RamseteMotin] ElapsedTime: 0.90	Sampled State: (t: 0.90 X: 17.51 Y: 9.07 H: 44.15 v: 27.86) 	Left: -360.98	Right: 730.51
+[Ramsete] Vel: 19.43	Angular Vel: 7.45	eX: -0.93	eY: 4.34	eThetha: 0.04
+[RamseteMotin] ElapsedTime: 0.91	Sampled State: (t: 0.91 X: 17.70 Y: 9.26 H: 44.77 v: 27.68) 	Left: -357.21	Right: 737.82
+[Ramsete] Vel: 20.43	Angular Vel: 7.49	eX: -0.81	eY: 4.57	eThetha: 0.01
+[RamseteMotin] ElapsedTime: 0.92	Sampled State: (t: 0.92 X: 17.90 Y: 9.46 H: 45.39 v: 27.49) 	Left: -349.82	Right: 750.00
+[Ramsete] Vel: 21.79	Angular Vel: 7.41	eX: -0.64	eY: 4.74	eThetha: -0.02
+[RamseteMotin] ElapsedTime: 0.93	Sampled State: (t: 0.93 X: 18.09 Y: 9.65 H: 46.02 v: 27.32) 	Left: -331.05	Right: 757.81
+[Ramsete] Vel: 23.48	Angular Vel: 7.33	eX: -0.42	eY: 4.92	eThetha: -0.05
+[RamseteMotin] ElapsedTime: 0.94	Sampled State: (t: 0.94 X: 18.28 Y: 9.85 H: 46.65 v: 27.15) 	Left: -308.49	Right: 768.50
+[Ramsete] Vel: 25.70	Angular Vel: 7.27	eX: -0.14	eY: 5.13	eThetha: -0.09
+[RamseteMotin] ElapsedTime: 0.95	Sampled State: (t: 0.95 X: 18.46 Y: 10.05 H: 47.28 v: 26.98) 	Left: -282.56	Right: 785.91
+[Ramsete] Vel: 27.75	Angular Vel: 7.24	eX: 0.13	eY: 5.37	eThetha: -0.12
+[RamseteMotin] ElapsedTime: 0.96	Sampled State: (t: 0.96 X: 18.64 Y: 10.25 H: 47.92 v: 26.81) 	Left: -260.19	Right: 803.85
+[Ramsete] Vel: 29.94	Angular Vel: 7.06	eX: 0.43	eY: 5.51	eThetha: -0.16
+[RamseteMotin] ElapsedTime: 0.97	Sampled State: (t: 0.97 X: 18.82 Y: 10.44 H: 48.57 v: 26.65) 	Left: -225.45	Right: 811.99
+[Ramsete] Vel: 32.35	Angular Vel: 6.81	eX: 0.76	eY: 5.61	eThetha: -0.20
+[RamseteMotin] ElapsedTime: 0.98	Sampled State: (t: 0.98 X: 19.00 Y: 10.65 H: 49.21 v: 26.50) 	Left: -183.55	Right: 817.20
+[Ramsete] Vel: 35.00	Angular Vel: 6.59	eX: 1.12	eY: 5.74	eThetha: -0.24
+[RamseteMotin] ElapsedTime: 0.99	Sampled State: (t: 0.99 X: 19.17 Y: 10.85 H: 49.86 v: 26.35) 	Left: -141.23	Right: 826.74
+[Ramsete] Vel: 37.45	Angular Vel: 6.36	eX: 1.47	eY: 5.87	eThetha: -0.28
+[RamseteMotin] ElapsedTime: 1.00	Sampled State: (t: 1.00 X: 19.34 Y: 11.05 H: 50.52 v: 26.20) 	Left: -100.25	Right: 833.83
+[Ramsete] Vel: 39.97	Angular Vel: 6.04	eX: 1.84	eY: 5.95	eThetha: -0.33
+[RamseteMotin] ElapsedTime: 1.01	Sampled State: (t: 1.01 X: 19.50 Y: 11.25 H: 51.18 v: 26.06) 	Left: -51.93	Right: 834.96
+[Ramsete] Vel: 42.70	Angular Vel: 5.70	eX: 2.24	eY: 6.02	eThetha: -0.37
+[RamseteMotin] ElapsedTime: 1.02	Sampled State: (t: 1.02 X: 19.66 Y: 11.45 H: 51.84 v: 25.92) 	Left: -0.55	Right: 836.91
+[Ramsete] Vel: 45.35	Angular Vel: 5.29	eX: 2.64	eY: 6.04	eThetha: -0.42
+[RamseteMotin] ElapsedTime: 1.03	Sampled State: (t: 1.03 X: 19.82 Y: 11.66 H: 52.50 v: 25.79) 	Left: 55.86	Right: 832.39
+[Ramsete] Vel: 48.24	Angular Vel: 4.85	eX: 3.09	eY: 6.07	eThetha: -0.47
+[RamseteMotin] ElapsedTime: 1.04	Sampled State: (t: 1.04 X: 19.98 Y: 11.86 H: 53.17 v: 25.66) 	Left: 115.81	Right: 829.05
+[Ramsete] Vel: 51.18	Angular Vel: 4.39	eX: 3.54	eY: 6.06	eThetha: -0.51
+[RamseteMotin] ElapsedTime: 1.05	Sampled State: (t: 1.05 X: 20.13 Y: 12.07 H: 53.84 v: 25.54) 	Left: 179.09	Right: 823.37
+[Ramsete] Vel: 54.02	Angular Vel: 3.82	eX: 4.00	eY: 5.97	eThetha: -0.56
+[RamseteMotin] ElapsedTime: 1.06	Sampled State: (t: 1.06 X: 20.28 Y: 12.28 H: 54.52 v: 25.42) 	Left: 248.81	Right: 809.30
+[Ramsete] Vel: 56.78	Angular Vel: 3.29	eX: 4.45	eY: 5.91	eThetha: -0.61
+[RamseteMotin] ElapsedTime: 1.07	Sampled State: (t: 1.07 X: 20.43 Y: 12.48 H: 55.19 v: 25.31) 	Left: 314.73	Right: 797.59
+[Ramsete] Vel: 59.38	Angular Vel: 2.71	eX: 4.89	eY: 5.80	eThetha: -0.65
+[RamseteMotin] ElapsedTime: 1.08	Sampled State: (t: 1.08 X: 20.57 Y: 12.69 H: 55.87 v: 25.20) 	Left: 382.40	Right: 780.71
+[Ramsete] Vel: 61.64	Angular Vel: 2.08	eX: 5.28	eY: 5.63	eThetha: -0.70
+[RamseteMotin] ElapsedTime: 1.09	Sampled State: (t: 1.09 X: 20.71 Y: 12.90 H: 56.56 v: 25.10) 	Left: 451.11	Right: 756.36
+[Ramsete] Vel: 63.61	Angular Vel: 1.51	eX: 5.65	eY: 5.50	eThetha: -0.74
+[RamseteMotin] ElapsedTime: 1.10	Sampled State: (t: 1.10 X: 20.84 Y: 13.11 H: 57.24 v: 25.00) 	Left: 512.44	Right: 733.54
+[Ramsete] Vel: 65.54	Angular Vel: 0.91	eX: 6.01	eY: 5.32	eThetha: -0.79
+[RamseteMotin] ElapsedTime: 1.11	Sampled State: (t: 1.11 X: 20.98 Y: 13.32 H: 57.93 v: 24.90) 	Left: 575.27	Right: 708.62
+[Ramsete] Vel: 67.18	Angular Vel: 0.31	eX: 6.33	eY: 5.13	eThetha: -0.83
+[RamseteMotin] ElapsedTime: 1.12	Sampled State: (t: 1.12 X: 21.11 Y: 13.53 H: 58.63 v: 24.81) 	Left: 635.00	Right: 680.99
+[Ramsete] Vel: 68.63	Angular Vel: -0.31	eX: 6.63	eY: 4.90	eThetha: -0.86
+[RamseteMotin] ElapsedTime: 1.13	Sampled State: (t: 1.13 X: 21.24 Y: 13.74 H: 59.32 v: 24.73) 	Left: 694.60	Right: 649.69
+[Ramsete] Vel: 69.92	Angular Vel: -0.86	eX: 6.91	eY: 4.71	eThetha: -0.90
+[RamseteMotin] ElapsedTime: 1.14	Sampled State: (t: 1.14 X: 21.36 Y: 13.96 H: 60.02 v: 24.65) 	Left: 747.78	Right: 621.75
+[Ramsete] Vel: 70.85	Angular Vel: -1.45	eX: 7.15	eY: 4.47	eThetha: -0.94
+[RamseteMotin] ElapsedTime: 1.15	Sampled State: (t: 1.15 X: 21.48 Y: 14.17 H: 60.71 v: 24.58) 	Left: 800.16	Right: 587.72
+[Ramsete] Vel: 71.74	Angular Vel: -2.00	eX: 7.37	eY: 4.24	eThetha: -0.97
+[RamseteMotin] ElapsedTime: 1.16	Sampled State: (t: 1.16 X: 21.60 Y: 14.39 H: 61.41 v: 24.51) 	Left: 849.68	Right: 555.52
+[Ramsete] Vel: 72.20	Angular Vel: -2.55	eX: 7.54	eY: 4.00	eThetha: -1.01
+[RamseteMotin] ElapsedTime: 1.17	Sampled State: (t: 1.17 X: 21.72 Y: 14.60 H: 62.12 v: 24.44) 	Left: 894.32	Right: 519.98
+[Ramsete] Vel: 72.48	Angular Vel: -3.08	eX: 7.68	eY: 3.76	eThetha: -1.04
+[RamseteMotin] ElapsedTime: 1.18	Sampled State: (t: 1.18 X: 21.83 Y: 14.82 H: 62.82 v: 24.38) 	Left: 935.93	Right: 483.86
+[Ramsete] Vel: 72.67	Angular Vel: -3.61	eX: 7.80	eY: 3.49	eThetha: -1.07
+[RamseteMotin] ElapsedTime: 1.19	Sampled State: (t: 1.19 X: 21.94 Y: 15.04 H: 63.53 v: 24.33) 	Left: 976.99	Right: 446.44
+[Ramsete] Vel: 72.76	Angular Vel: -4.11	eX: 7.91	eY: 3.23	eThetha: -1.09
+[RamseteMotin] ElapsedTime: 1.20	Sampled State: (t: 1.20 X: 22.05 Y: 15.25 H: 64.23 v: 24.28) 	Left: 1014.40	Right: 410.90
+[Ramsete] Vel: 72.64	Angular Vel: -4.56	eX: 7.98	eY: 3.01	eThetha: -1.12
+[RamseteMotin] ElapsedTime: 1.21	Sampled State: (t: 1.21 X: 22.15 Y: 15.47 H: 64.94 v: 24.23) 	Left: 1046.56	Right: 376.34
+[Ramsete] Vel: 72.27	Angular Vel: -5.01	eX: 8.02	eY: 2.77	eThetha: -1.15
+[RamseteMotin] ElapsedTime: 1.22	Sampled State: (t: 1.22 X: 22.25 Y: 15.69 H: 65.65 v: 24.19) 	Left: 1076.13	Right: 339.42
+[Ramsete] Vel: 71.90	Angular Vel: -5.48	eX: 8.06	eY: 2.50	eThetha: -1.17
+[RamseteMotin] ElapsedTime: 1.23	Sampled State: (t: 1.23 X: 22.35 Y: 15.91 H: 66.36 v: 24.16) 	Left: 1106.93	Right: 301.51
+[Ramsete] Vel: 71.18	Angular Vel: -5.93	eX: 8.04	eY: 2.24	eThetha: -1.20
+[RamseteMotin] ElapsedTime: 1.24	Sampled State: (t: 1.24 X: 22.45 Y: 16.14 H: 67.07 v: 24.13) 	Left: 1132.79	Right: 261.51
+[Ramsete] Vel: 70.44	Angular Vel: -6.34	eX: 8.03	eY: 2.01	eThetha: -1.22
+[RamseteMotin] ElapsedTime: 1.25	Sampled State: (t: 1.25 X: 22.54 Y: 16.36 H: 67.79 v: 24.10) 	Left: 1155.51	Right: 224.39
+[Ramsete] Vel: 69.82	Angular Vel: -6.46	eX: 7.97	eY: 1.92	eThetha: -1.22
+[RamseteMotin] ElapsedTime: 1.26	Sampled State: (t: 1.26 X: 22.63 Y: 16.58 H: 68.50 v: 24.09) 	Left: 1158.28	Right: 209.31
+[Ramsete] Vel: 68.80	Angular Vel: -6.83	eX: 7.90	eY: 1.71	eThetha: -1.25
+[RamseteMotin] ElapsedTime: 1.27	Sampled State: (t: 1.27 X: 22.72 Y: 16.81 H: 69.21 v: 24.07) 	Left: 1175.52	Right: 172.06
+[Ramsete] Vel: 67.34	Angular Vel: -7.16	eX: 7.78	eY: 1.53	eThetha: -1.27
+[RamseteMotin] ElapsedTime: 1.28	Sampled State: (t: 1.28 X: 22.80 Y: 17.03 H: 69.93 v: 24.06) 	Left: 1185.45	Right: 133.59
+[Ramsete] Vel: 66.79	Angular Vel: -7.52	eX: 7.76	eY: 1.30	eThetha: -1.29
+[RamseteMotin] ElapsedTime: 1.29	Sampled State: (t: 1.29 X: 22.88 Y: 17.26 H: 70.64 v: 24.06) 	Left: 1206.66	Right: 101.55
+[Ramsete] Vel: 64.89	Angular Vel: -7.83	eX: 7.57	eY: 1.13	eThetha: -1.30
+[RamseteMotin] ElapsedTime: 1.30	Sampled State: (t: 1.30 X: 22.96 Y: 17.49 H: 71.36 v: 24.06) 	Left: 1210.73	Right: 60.41
+[Ramsete] Vel: 63.44	Angular Vel: -8.12	eX: 7.43	eY: 0.97	eThetha: -1.32
+[RamseteMotin] ElapsedTime: 1.31	Sampled State: (t: 1.31 X: 23.03 Y: 17.71 H: 72.07 v: 24.06) 	Left: 1217.63	Right: 24.97
+[Ramsete] Vel: 62.01	Angular Vel: -8.43	eX: 7.30	eY: 0.77	eThetha: -1.34
+[RamseteMotin] ElapsedTime: 1.32	Sampled State: (t: 1.32 X: 23.11 Y: 17.94 H: 72.79 v: 24.08) 	Left: 1226.54	Right: -11.96
+[Ramsete] Vel: 60.43	Angular Vel: -8.75	eX: 7.13	eY: 0.55	eThetha: -1.35
+[RamseteMotin] ElapsedTime: 1.33	Sampled State: (t: 1.33 X: 23.18 Y: 18.17 H: 73.50 v: 24.09) 	Left: 1234.60	Right: -50.85
+[Ramsete] Vel: 58.63	Angular Vel: -8.95	eX: 6.94	eY: 0.46	eThetha: -1.37
+[RamseteMotin] ElapsedTime: 1.34	Sampled State: (t: 1.34 X: 23.24 Y: 18.41 H: 74.21 v: 24.11) 	Left: 1231.91	Right: -83.53
+[Ramsete] Vel: 56.76	Angular Vel: -9.22	eX: 6.73	eY: 0.29	eThetha: -1.38
+[RamseteMotin] ElapsedTime: 1.35	Sampled State: (t: 1.35 X: 23.31 Y: 18.64 H: 74.93 v: 24.14) 	Left: 1232.83	Right: -121.09
+[Ramsete] Vel: 54.99	Angular Vel: -9.46	eX: 6.53	eY: 0.13	eThetha: -1.39
+[RamseteMotin] ElapsedTime: 1.36	Sampled State: (t: 1.36 X: 23.37 Y: 18.87 H: 75.64 v: 24.17) 	Left: 1233.75	Right: -156.65
+[Ramsete] Vel: 52.93	Angular Vel: -9.61	eX: 6.31	eY: 0.05	eThetha: -1.40
+[RamseteMotin] ElapsedTime: 1.37	Sampled State: (t: 1.37 X: 23.43 Y: 19.11 H: 76.35 v: 24.14) 	Left: 1223.95	Right: -187.14
+[Ramsete] Vel: 50.01	Angular Vel: -9.66	eX: 6.07	eY: -0.12	eThetha: -1.41
+[RamseteMotin] ElapsedTime: 1.38	Sampled State: (t: 1.38 X: 23.48 Y: 19.34 H: 77.05 v: 23.74) 	Left: 1199.14	Right: -219.59
+[Ramsete] Vel: 46.86	Angular Vel: -9.56	eX: 5.84	eY: -0.22	eThetha: -1.42
+[RamseteMotin] ElapsedTime: 1.39	Sampled State: (t: 1.39 X: 23.53 Y: 19.57 H: 77.73 v: 23.14) 	Left: 1160.81	Right: -242.97
+[Ramsete] Vel: 43.87	Angular Vel: -9.40	eX: 5.62	eY: -0.27	eThetha: -1.43
+[RamseteMotin] ElapsedTime: 1.40	Sampled State: (t: 1.40 X: 23.58 Y: 19.79 H: 78.40 v: 22.54) 	Left: 1119.96	Right: -260.60
+[Ramsete] Vel: 40.89	Angular Vel: -9.21	eX: 5.38	eY: -0.30	eThetha: -1.43
+[RamseteMotin] ElapsedTime: 1.41	Sampled State: (t: 1.41 X: 23.63 Y: 20.01 H: 79.04 v: 21.94) 	Left: 1077.15	Right: -276.27
+[Ramsete] Vel: 38.05	Angular Vel: -9.04	eX: 5.14	eY: -0.37	eThetha: -1.44
+[RamseteMotin] ElapsedTime: 1.42	Sampled State: (t: 1.42 X: 23.67 Y: 20.22 H: 79.67 v: 21.34) 	Left: 1036.93	Right: -291.51
+[Ramsete] Vel: 35.24	Angular Vel: -8.80	eX: 4.88	eY: -0.37	eThetha: -1.44
+[RamseteMotin] ElapsedTime: 1.43	Sampled State: (t: 1.43 X: 23.70 Y: 20.43 H: 80.27 v: 20.74) 	Left: 991.20	Right: -300.96
+[Ramsete] Vel: 32.89	Angular Vel: -8.51	eX: 4.67	eY: -0.33	eThetha: -1.44
+[RamseteMotin] ElapsedTime: 1.44	Sampled State: (t: 1.44 X: 23.74 Y: 20.63 H: 80.85 v: 20.14) 	Left: 946.97	Right: -302.63
+[Ramsete] Vel: 30.68	Angular Vel: -8.20	eX: 4.46	eY: -0.29	eThetha: -1.43
+[RamseteMotin] ElapsedTime: 1.45	Sampled State: (t: 1.45 X: 23.77 Y: 20.83 H: 81.42 v: 19.54) 	Left: 902.48	Right: -301.60
+[Ramsete] Vel: 28.52	Angular Vel: -7.91	eX: 4.24	eY: -0.30	eThetha: -1.42
+[RamseteMotin] ElapsedTime: 1.46	Sampled State: (t: 1.46 X: 23.79 Y: 21.02 H: 81.96 v: 18.94) 	Left: 860.02	Right: -301.41
+[Ramsete] Vel: 26.44	Angular Vel: -7.56	eX: 4.01	eY: -0.24	eThetha: -1.41
+[RamseteMotin] ElapsedTime: 1.47	Sampled State: (t: 1.47 X: 23.82 Y: 21.20 H: 82.49 v: 18.34) 	Left: 814.62	Right: -296.60
+[Ramsete] Vel: 24.69	Angular Vel: -7.20	eX: 3.81	eY: -0.17	eThetha: -1.40
+[RamseteMotin] ElapsedTime: 1.48	Sampled State: (t: 1.48 X: 23.84 Y: 21.38 H: 82.99 v: 17.74) 	Left: 770.83	Right: -287.13
+[Ramsete] Vel: 23.10	Angular Vel: -6.86	eX: 3.62	eY: -0.16	eThetha: -1.38
+[RamseteMotin] ElapsedTime: 1.49	Sampled State: (t: 1.49 X: 23.86 Y: 21.56 H: 83.48 v: 17.14) 	Left: 730.31	Right: -277.77
+[Ramsete] Vel: 21.64	Angular Vel: -6.49	eX: 3.44	eY: -0.10	eThetha: -1.36
+[RamseteMotin] ElapsedTime: 1.50	Sampled State: (t: 1.50 X: 23.88 Y: 21.72 H: 83.94 v: 16.54) 	Left: 688.56	Right: -264.68
+[Ramsete] Vel: 20.28	Angular Vel: -6.09	eX: 3.26	eY: -0.00	eThetha: -1.34
+[RamseteMotin] ElapsedTime: 1.51	Sampled State: (t: 1.51 X: 23.90 Y: 21.88 H: 84.39 v: 15.94) 	Left: 645.61	Right: -248.42
+[Ramsete] Vel: 19.07	Angular Vel: -5.67	eX: 3.10	eY: 0.11	eThetha: -1.32
+[RamseteMotin] ElapsedTime: 1.52	Sampled State: (t: 1.52 X: 23.91 Y: 22.04 H: 84.82 v: 15.34) 	Left: 603.47	Right: -229.99
+[Ramsete] Vel: 18.00	Angular Vel: -5.29	eX: 2.95	eY: 0.16	eThetha: -1.29
+[RamseteMotin] ElapsedTime: 1.53	Sampled State: (t: 1.53 X: 23.93 Y: 22.19 H: 85.23 v: 14.74) 	Left: 564.96	Right: -212.32
+[Ramsete] Vel: 16.94	Angular Vel: -4.93	eX: 2.78	eY: 0.19	eThetha: -1.26
+[RamseteMotin] ElapsedTime: 1.54	Sampled State: (t: 1.54 X: 23.94 Y: 22.33 H: 85.62 v: 14.14) 	Left: 527.72	Right: -195.86
+[Ramsete] Vel: 16.02	Angular Vel: -4.54	eX: 2.64	eY: 0.26	eThetha: -1.23
+[RamseteMotin] ElapsedTime: 1.55	Sampled State: (t: 1.55 X: 23.95 Y: 22.47 H: 86.00 v: 13.54) 	Left: 490.29	Right: -176.53
+[Ramsete] Vel: 15.07	Angular Vel: -4.15	eX: 2.48	eY: 0.36	eThetha: -1.19
+[RamseteMotin] ElapsedTime: 1.56	Sampled State: (t: 1.56 X: 23.96 Y: 22.60 H: 86.35 v: 12.94) 	Left: 452.32	Right: -157.18
+[Ramsete] Vel: 14.19	Angular Vel: -3.78	eX: 2.33	eY: 0.43	eThetha: -1.16
+[RamseteMotin] ElapsedTime: 1.57	Sampled State: (t: 1.57 X: 23.96 Y: 22.73 H: 86.69 v: 12.34) 	Left: 416.31	Right: -138.43
+[Ramsete] Vel: 13.33	Angular Vel: -3.42	eX: 2.18	eY: 0.48	eThetha: -1.12
+[RamseteMotin] ElapsedTime: 1.58	Sampled State: (t: 1.58 X: 23.97 Y: 22.85 H: 87.01 v: 11.74) 	Left: 382.08	Right: -121.04
+[Ramsete] Vel: 12.47	Angular Vel: -3.10	eX: 2.02	eY: 0.50	eThetha: -1.08
+[RamseteMotin] ElapsedTime: 1.59	Sampled State: (t: 1.59 X: 23.98 Y: 22.97 H: 87.31 v: 11.14) 	Left: 349.71	Right: -105.46
+[Ramsete] Vel: 11.61	Angular Vel: -2.79	eX: 1.86	eY: 0.52	eThetha: -1.04
+[RamseteMotin] ElapsedTime: 1.60	Sampled State: (t: 1.60 X: 23.98 Y: 23.07 H: 87.60 v: 10.54) 	Left: 318.44	Right: -91.04
+[Ramsete] Vel: 10.80	Angular Vel: -2.48	eX: 1.70	eY: 0.54	eThetha: -1.00
+[RamseteMotin] ElapsedTime: 1.61	Sampled State: (t: 1.61 X: 23.98 Y: 23.18 H: 87.87 v: 9.94) 	Left: 288.30	Right: -76.72
+[Ramsete] Vel: 10.00	Angular Vel: -2.19	eX: 1.53	eY: 0.56	eThetha: -0.95
+[RamseteMotin] ElapsedTime: 1.62	Sampled State: (t: 1.62 X: 23.99 Y: 23.27 H: 88.12 v: 9.34) 	Left: 258.97	Right: -63.18
+[Ramsete] Vel: 9.23	Angular Vel: -1.91	eX: 1.38	eY: 0.60	eThetha: -0.91
+[RamseteMotin] ElapsedTime: 1.63	Sampled State: (t: 1.63 X: 23.99 Y: 23.36 H: 88.36 v: 8.74) 	Left: 230.99	Right: -50.09
+[Ramsete] Vel: 8.47	Angular Vel: -1.65	eX: 1.22	eY: 0.62	eThetha: -0.86
+[RamseteMotin] ElapsedTime: 1.64	Sampled State: (t: 1.64 X: 23.99 Y: 23.45 H: 88.58 v: 8.14) 	Left: 204.34	Right: -38.46
+[Ramsete] Vel: 7.73	Angular Vel: -1.42	eX: 1.06	eY: 0.59	eThetha: -0.82
+[RamseteMotin] ElapsedTime: 1.65	Sampled State: (t: 1.65 X: 23.99 Y: 23.53 H: 88.78 v: 7.54) 	Left: 180.27	Right: -28.81
+[Ramsete] Vel: 6.95	Angular Vel: -1.20	eX: 0.88	eY: 0.58	eThetha: -0.77
+[RamseteMotin] ElapsedTime: 1.66	Sampled State: (t: 1.66 X: 24.00 Y: 23.60 H: 88.97 v: 6.94) 	Left: 156.55	Right: -20.38
+[Ramsete] Vel: 6.25	Angular Vel: -1.01	eX: 0.72	eY: 0.55	eThetha: -0.72
+[RamseteMotin] ElapsedTime: 1.67	Sampled State: (t: 1.67 X: 24.00 Y: 23.66 H: 89.14 v: 6.34) 	Left: 135.16	Right: -12.77
+[Ramsete] Vel: 5.56	Angular Vel: -0.82	eX: 0.57	eY: 0.53	eThetha: -0.67
+[RamseteMotin] ElapsedTime: 1.68	Sampled State: (t: 1.68 X: 24.00 Y: 23.73 H: 89.30 v: 5.74) 	Left: 114.91	Right: -6.00
+[Ramsete] Vel: 4.92	Angular Vel: -0.66	eX: 0.44	eY: 0.50	eThetha: -0.61
+[RamseteMotin] ElapsedTime: 1.69	Sampled State: (t: 1.69 X: 24.00 Y: 23.78 H: 89.44 v: 5.14) 	Left: 96.56	Right: -0.09
+[Ramsete] Vel: 4.25	Angular Vel: -0.52	eX: 0.27	eY: 0.42	eThetha: -0.56
+[RamseteMotin] ElapsedTime: 1.70	Sampled State: (t: 1.70 X: 24.00 Y: 23.83 H: 89.56 v: 4.54) 	Left: 79.81	Right: 3.35
+[Ramsete] Vel: 3.62	Angular Vel: -0.41	eX: 0.14	eY: 0.30	eThetha: -0.51
+[RamseteMotin] ElapsedTime: 1.71	Sampled State: (t: 1.71 X: 24.00 Y: 23.87 H: 89.67 v: 3.94) 	Left: 65.34	Right: 5.61
+[Ramsete] Vel: 2.98	Angular Vel: -0.31	eX: -0.02	eY: 0.13	eThetha: -0.45
+[RamseteMotin] ElapsedTime: 1.72	Sampled State: (t: 1.72 X: 24.00 Y: 23.91 H: 89.76 v: 3.34) 	Left: 52.21	Right: 6.24
+[Ramsete] Vel: 2.40	Angular Vel: -0.23	eX: -0.15	eY: 0.00	eThetha: -0.40
+[RamseteMotin] ElapsedTime: 1.73	Sampled State: (t: 1.73 X: 24.00 Y: 23.94 H: 89.84 v: 2.74) 	Left: 40.15	Right: 6.82
+[Ramsete] Vel: 1.82	Angular Vel: -0.15	eX: -0.29	eY: -0.09	eThetha: -0.35
+[RamseteMotin] ElapsedTime: 1.74	Sampled State: (t: 1.74 X: 24.00 Y: 23.96 H: 89.90 v: 2.14) 	Left: 28.88	Right: 6.69
+[Ramsete] Vel: 1.27	Angular Vel: -0.09	eX: -0.42	eY: -0.22	eThetha: -0.29
+[RamseteMotin] ElapsedTime: 1.75	Sampled State: (t: 1.75 X: 24.00 Y: 23.98 H: 89.95 v: 1.54) 	Left: 19.34	Right: 5.59
+[Ramsete] Vel: 0.75	Angular Vel: -0.05	eX: -0.54	eY: -0.35	eThetha: -0.25
+[RamseteMotin] ElapsedTime: 1.76	Sampled State: (t: 1.76 X: 24.00 Y: 23.99 H: 89.98 v: 0.94) 	Left: 10.92	Right: 3.82
+[Ramsete] Vel: 0.26	Angular Vel: -0.02	eX: -0.69	eY: -0.52	eThetha: -0.20
+[RamseteMotin] ElapsedTime: 1.77	Sampled State: (t: 1.77 X: 24.00 Y: 24.00 H: 90.00 v: 0.34) 	Left: 3.69	Right: 1.43
+[Ramsete] Vel: 0.00	Angular Vel: 0.00	eX: -0.83	eY: -0.71	eThetha: -0.15
+[RamseteMotin] ElapsedTime: 1.78	Sampled State: (t: 1.77 X: 24.00 Y: 24.00 H: 90.00 v: 0.00) 	Left: 0.00	Right: 0.00

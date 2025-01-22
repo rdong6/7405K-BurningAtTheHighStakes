@@ -14,9 +14,9 @@ private:
 
 	int direction;
 
-	double acceleration(double t) const;
-	double velocity(double t) const;
-	double position(double t) const;
+	[[nodiscard]] double acceleration(double t) const;
+	[[nodiscard]] double velocity(double t) const;
+	[[nodiscard]] double position(double t) const;
 
 public:
 	TrapezoidProfile();
@@ -24,8 +24,8 @@ public:
 	                 double start_velocity = 0);
 
 	// time in seconds (0 = start of profile)
-	State getState(double t) const;
+	[[nodiscard]] State getState(double t) const;
 
-	double getTargetDist() const;
-	double getTotalTime() const;
+	[[nodiscard]] double getTargetDist() const;
+	[[nodiscard]] double getTotalTime() const;
 };

@@ -3,19 +3,10 @@
 #include "lib/motion/NullMotion.h"
 #include "lib/motion/OpControlMotion.h"
 #include "lib/utils/CoroutineGenerator.h"
-#include "lib/utils/Math.h"
 #include "lib/utils/Timeout.h"
-#include "lib/utils/todo.h"
 #include "pros/abstract_motor.hpp"
-#include "pros/misc.h"
 #include "pros/motors.h"
-#include "pros/rtos.h"
-#include "pros/rtos.hpp"
-#include "subsystems/Controller.h"
-#include "subsystems/Intake.h"
 #include "subsystems/Odometry.h"
-#include <algorithm>
-#include <stdexcept>
 
 Drive::Drive(RobotBase* robot) : Subsystem(robot) {
 	leftDrive.set_gearing_all(pros::E_MOTOR_GEAR_600);
@@ -94,14 +85,14 @@ RobotFunc Drive::waitUntilSettled(uint32_t timeout) {
 	auto func = [this, timer]() -> bool {
 		if (timer.timedOut()) {
 			// motion timed out
-			this->curMotion = NullMotion();
+			this->curMotion = NullMotion(true);
 
 			return true;
 		} else {
 			if (isSettled) {
 				// motion finished, reset drive state
 				this->isSettled = false;
-				this->curMotion = NullMotion();
+				this->curMotion = NullMotion(true);
 
 				return true;
 			}

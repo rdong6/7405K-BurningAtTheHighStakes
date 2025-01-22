@@ -7,6 +7,8 @@
 #include <span>
 #include <utility>
 
+
+class kinState;
 class PursuitMotion : public IMotion {
 private:
 	std::span<fttbtkjfk::PursuitPoint> path;
@@ -62,7 +64,7 @@ public:
 	PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double lookahead, double maxVel, double maxAccel,
 	              bool reversed = false, double threshold = 1, double k = 2);
 	void start() override;
-	MotorVoltages calculate(const kinState state) override;
+	MotorVoltages calculate(const kinState& state) override;
 	bool isVelocityControlled() const override;
-	bool isSettled(const kinState state) override;
+	bool isSettled(const kinState& state) override;
 };

@@ -28,7 +28,7 @@ void PIDTurn::start() {
 	}
 }
 
-IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
+IMotion::MotorVoltages PIDTurn::calculate(const kinState& state) {
 	// Calculates the difference in degrees from our current heading to the target heading
 	double error = util::getShortestAngle(util::toDeg(state.position.theta()), targetHeading);
 
@@ -82,7 +82,7 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState state) {
 	return {leftPwr, rightPwr};
 }
 
-bool PIDTurn::isSettled(const kinState state) {
+bool PIDTurn::isSettled(const kinState& state) {
 	// If the counter is above 5 (meaning we have had our error below the threshold for 5 iterations) then return that
 	// it is settled
 	return counter > 5;

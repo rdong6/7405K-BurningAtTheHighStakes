@@ -1,5 +1,4 @@
 #pragma once
-#include "Logger.h"
 #include "Rotation2D.h"
 #include "Translation2D.h"
 #include "Twist2D.h"
@@ -14,6 +13,8 @@ public:
 
 	// theta in rads
 	constexpr Pose(double x, double y, double theta = 0) : m_translation(x, y), m_rotation(theta) {}
+
+	constexpr Pose(double x, double y, Rotation2D rotation) : m_translation(x, y), m_rotation(rotation) {}
 
 	/// GETTER FUNCTIONS
 
@@ -77,7 +78,10 @@ public:
 	constexpr Pose operator*(double scalar) const { return Pose{m_translation * scalar, m_rotation * scalar}; }
 	constexpr Pose operator/(double scalar) const { return operator/(1.0 / scalar); }
 
-	constexpr bool operator==(const Pose&) const = default;
+	// constexpr bool operator==(const Pose&) const = default;
+	constexpr bool operator==(const Pose& other) const {
+		return util::fpEquality(X(), other.X()) && util::fpEquality(Y(), other.Y()) && util::fpEquality(theta(), other.theta());
+	}
 
 private:
 	Translation2D m_translation;

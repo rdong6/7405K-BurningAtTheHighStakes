@@ -27,6 +27,12 @@ RAMSETE::WheelVelocities RAMSETE::calculate(const Pose& curPose, const Pose& tar
 	double vel = linearVelRef * std::cos(eTheta) + k * eX;
 	double angularVel = angularVelRef + k * eTheta + beta * linearVelRef * sinc(eTheta) * eY;
 
+	printf("[Ramsete] Vel: %.2f\tAngular Vel: %.2f\teX: %.2f\teY: %.2f\teThetha: %.2f\n", vel, angularVel, eX, eY,
+	       util::toDeg(eTheta));
 	// converts from chassis (linear vel & angular vel) to wheel speeds (left & right)
 	return {vel - angularVel * odometers::trackWidth * 0.5, vel + angularVel * odometers::trackWidth * 0.5};
+}
+
+RAMSETE::WheelVelocities RAMSETE::calculate(const Pose& curPose, const Trajectory::State& state) const {
+	return calculate(curPose, state.pose, state.vel, state.vel * state.curvature);
 }

@@ -2,7 +2,9 @@
 #include <cmath>
 #include <numbers>
 
+// These 2 sqrt funcs only exist because current PROS's libm's std::sqrt() still does not compile into a hardware instruction
 __attribute__((always_inline)) inline double vsqrtd(double val) {
+#ifdef VEX
 	double ret;
 	// clang-format off
 	asm("vsqrt.f64 %P0, %P1"
@@ -11,9 +13,13 @@ __attribute__((always_inline)) inline double vsqrtd(double val) {
 	);
 	// clang-format on
 	return ret;
+#else
+	return std::sqrt(val);
+#endif
 }
 
 __attribute__((always_inline)) inline float vsqrtf(float val) {
+#ifdef VEX
 	float ret;
 	// clang-format off
 	asm("vsqrt.f32 %0, %1"
@@ -22,6 +28,9 @@ __attribute__((always_inline)) inline float vsqrtf(float val) {
 	);
 	// clang-format on
 	return ret;
+#else
+	return std::sqrtf(val);
+#endif
 }
 
 namespace util {
@@ -45,12 +54,12 @@ namespace util {
 
 	// linear interpolate between 2 values
 	// 0 ≤ t ≤ 1
-	constexpr double lerp(double a, double b, double t) {
-		return a + (b - a) * t;
+	constexpr double lerp(double start, double end, double t) {
+		return start + (end - start) * t;
 	}
 
 	// normalizes value to be within a certain range (0-range)
-	// ex: clamp angle to between 0˚-360˚ instead of angle being continous
+	// ex: clamp angle to between 0˚-360˚ instead of angle being continuous
 	//	- normalize(angle, 2π) -> restrict to [0, 2π]
 	template<class T>
 	T normalize(T val, T range) {

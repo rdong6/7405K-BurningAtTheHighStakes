@@ -13,6 +13,7 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot) {
 
 	// sets the proper cart of the motor incase you ever want to use moveVel
 	motors.set_gearing_all(pros::E_MOTOR_GEAR_600);
+	motors.set_encoder_units_all(pros::E_MOTOR_ENCODER_ROTATIONS);
 
 	color.set_led_pwm(100);
 }
@@ -76,11 +77,21 @@ RobotThread Intake::blueismCoro() {
 	co_yield [this]() -> bool { return this->blueismDetector; };
 
 	auto intakeFlags = robot->getFlag<Intake>().value();
+
+	double motorStartPosition = 0.0;
+
 	while (true) {
 		// Checks if ring of opposite alliance is in intake. Check dist to elim false positives
 		if ((this->*blueismDetector)() && color.get_proximity() >= 80) {
 			// Determines how long after seeing the ring do we stop the intake*/
-			co_yield util::coroutine::delay(40 /* TUNE THIS */);
+
+			motorStartPosition = motors.get_position();
+
+			co_yield [&]() -> bool {
+				return std::fabs(motors.get_position() - motorStartPosition) < 1250.0; /* TUNE THIS */
+			};
+
+			// co_yield util::coroutine::delay(40 /* TUNE THIS */);
 		}
 
 		// Now code takes over intake and stops it to eject ring

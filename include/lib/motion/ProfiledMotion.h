@@ -20,6 +20,6 @@ public:
 	ProfiledMotion(double dist, double maxVel, double accel, double decel, double threshold = 0.5);
 	void start() override;
 	bool isVelocityControlled() const override;// for testing
-	MotorVoltages calculate(const kinState state) override;
-	bool isSettled(const kinState state) override;
+	MotorVoltages calculate(const kinState& state) override;
+	bool isSettled(const kinState& state) override;
 };

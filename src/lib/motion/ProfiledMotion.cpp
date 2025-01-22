@@ -28,7 +28,7 @@ bool ProfiledMotion::isVelocityControlled() const {
 	return true;
 }
 
-IMotion::MotorVoltages ProfiledMotion::calculate(const kinState state) {
+IMotion::MotorVoltages ProfiledMotion::calculate(const kinState& state) {
 	double time = (pros::millis() - startTime) / 1000.0;// because profile works in terms of seconds
 
 	// testing to see if forcing it to the end of motion is better
@@ -60,7 +60,7 @@ IMotion::MotorVoltages ProfiledMotion::calculate(const kinState state) {
 	return {motorRPM, motorRPM};
 }
 
-bool ProfiledMotion::isSettled(const kinState state) {
+bool ProfiledMotion::isSettled(const kinState& state) {
 	// Considers the bot settled if the total distance travelled during the motion of the bot is within a certain
 	// threshold of the desired distance
 	// auto odom = robotInstance->getSubsystem<Odometry>();

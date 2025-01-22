@@ -71,7 +71,8 @@ public:
 // Controller = OPCTRL
 
 // ODOM, LIFT, INTAKE, PNOOMATICS, LIFT, DRIVE, CONTROLLER
-inline Robot<Odometry, Lift, Intake, Pnooomatics, Drive, Controller>* robotInstance = nullptr;
+// inline Robot<Odometry, Lift, Intake, Pnooomatics, Drive, Controller>* robotInstance = nullptr;
+inline Robot<Odometry, Drive>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;
 
 // #define GET_SUBSYSTEM(className) (robotInstance->getSubsystem<#className>().value_or(#classsName{}));

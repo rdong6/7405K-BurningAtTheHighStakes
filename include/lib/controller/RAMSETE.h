@@ -1,5 +1,6 @@
 #pragma once
 #include "lib/geometry/Pose.h"
+#include "lib/trajectory/Trajectory.h"
 
 class RAMSETE {
 private:
@@ -17,4 +18,5 @@ public:
 	RAMSETE(double beta, double zeta);
 
 	WheelVelocities calculate(const Pose& curPose, const Pose& targetPose, double linearVelRef, double angularVelRef) const;
+	WheelVelocities calculate(const Pose& curPose, const Trajectory::State& state) const;
 };

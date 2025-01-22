@@ -2,6 +2,7 @@
 #include "Constants.h"
 #include "pros/motors.h"
 #include "pros/rotation.h"
+#include "pros/rtos.hpp"
 #include <numbers>
 
 #define MV_PER_S (1000)
@@ -15,9 +16,9 @@ void DriveCharacterizationMotion::start() {
 	startRightPos = pros::c::rotation_get_position(ports::rightRotation);
 }
 
-IMotion::MotorVoltages DriveCharacterizationMotion::calculate(const kinState state) {
+IMotion::MotorVoltages DriveCharacterizationMotion::calculate(const kinState& state) {
 	//// Quasi-static
-	double time = (pros::millis() - startTime) / 1000.0;// time since start in seconds
+	double time = (pros::c::millis() - startTime) / 1000.0;// time since start in seconds
 	double pwr = time * MV_PER_S;
 
 	double leftVolMV =
@@ -43,7 +44,7 @@ IMotion::MotorVoltages DriveCharacterizationMotion::calculate(const kinState sta
 	// return {12000, 12000};
 }
 
-bool DriveCharacterizationMotion::isSettled(const kinState state) {
+bool DriveCharacterizationMotion::isSettled(const kinState& state) {
 	// return (pros::millis() - startTime) / 1000.0  (12000.0 / MV_PER_S);
 
 	return false;// for max accel

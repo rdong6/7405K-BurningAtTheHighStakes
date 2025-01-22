@@ -9,7 +9,7 @@ namespace {
 	}
 }// namespace
 
-IMotion::MotorVoltages OpControlMotion::calculate(const kinState state) {
+IMotion::MotorVoltages OpControlMotion::calculate(const kinState& state) {
 	// Gets analog inputs from controller (analog inputs means that the more the joystick if pushed, the larger the
 	// input we get)
 	int power = pros::c::controller_get_analog(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -37,6 +37,6 @@ IMotion::MotorVoltages OpControlMotion::calculate(const kinState state) {
 	return {left, right};
 }
 
-bool OpControlMotion::isSettled(const kinState state) {
+bool OpControlMotion::isSettled(const kinState& state) {
 	return false;
 }

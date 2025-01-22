@@ -1,6 +1,6 @@
 #include "subsystems/Pnooomatics.h"
+#include "pros/misc.h"
 #include "subsystems/Controller.h"
-#include "subsystems/Subsystem.h"
 
 Pnooomatics::Pnooomatics(RobotBase* robot) : Subsystem(robot) {
 	hang.set_value(hangReleased);
@@ -52,11 +52,12 @@ void Pnooomatics::toggleHang() {
 void Pnooomatics::setClamp(bool enable) {
 	clampEnabled = enable;
 	clamp.set_value(enable);
+	if (clampEnabled) { pros::c::controller_rumble(pros::E_CONTROLLER_MASTER, "."); }
+	pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Clamp: %d", clampEnabled);
 }
 
 void Pnooomatics::toggleClamp() {
-	clampEnabled = !clampEnabled;
-	clamp.set_value(clampEnabled);
+	setClamp(!clampEnabled);
 }
 
 void Pnooomatics::setHammer(bool enable) {

@@ -26,6 +26,6 @@ public:
 	PIDTurn(double targetHeading, PID pid, bool brakeLeft = false, bool brakeRight = false, double threshold = 0.5,
 	        double maxPower = 12000, bool forceRight = false, bool forceLeft = false);
 	void start() override;
-	MotorVoltages calculate(const kinState state) override;
-	bool isSettled(const kinState state) override;
+	MotorVoltages calculate(const kinState& state) override;
+	bool isSettled(const kinState& state) override;
 };

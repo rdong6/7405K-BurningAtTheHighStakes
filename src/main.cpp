@@ -1,12 +1,15 @@
 #include "main.h"
 #include "AutonSelector.h"
+#include "Constants.h"
 #include "Robot.h"
 #include "RobotBase.h"
 #include "lib/geometry/kinState.h"
 #include "lib/motion/DriveCharacterizationMotion.h"
 #include "lib/motion/PIDTurn.h"
 #include "lib/motion/ProfiledMotion.h"
+#include "lib/motion/RAMSETEMotion.h"
 #include "lib/motion/TimedMotion.h"
+#include "lib/trajectory/constraints/CentripetalAccelerationConstraint.h"
 #include "lib/utils/CoroutineGenerator.h"
 #include "lib/utils/Math.h"
 #include "lib/utils/ReferenceWrapper.h"
@@ -30,6 +33,8 @@
 #include "lib/geometry/Translation2D.h"
 #include "lib/geometry/Twist2D.h"
 
+#include <lib/spline/CubicHermiteSpline.h>
+
 RobotThread autonomousUser();
 
 void robot_init() {
@@ -45,7 +50,7 @@ void robot_init() {
  */
 
 void initialize() {
-	AutonSelector autonSelector;// also initalizes pros::lcd
+	// AutonSelector autonSelector;// also initalizes pros::lcd
 	robot_init();
 	// autonSelector.run();
 
@@ -763,6 +768,8 @@ RobotThread redMogoRushSafe() {
 	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
 	auto odom = robotInstance->getSubsystem<Odometry>().value();
 #pragma GCC diagnostic pop
+	co_yield util::coroutine::delay(2000);
+
 	drive->setCurrentMotion(ProfiledMotion(-9.5, 50, 60, 60));
 	co_yield drive->waitUntilSettled(1500);
 	// drive->setCurrentMotion(PIDTurn(90, PID(750, 1, 5000, true, 10), false, false));
@@ -843,20 +850,21 @@ RobotThread blueQualRingSideAuton() {
 	drive->setCurrentMotion(PIDTurn(90, PID(750, 1, 5000, true, 10), false, false));// tuning pid so we don't undershoot
 	co_yield drive->waitUntilSettled(1000);
 	// drive->setCurrentMotion(ProfiledMotion(-5.5, 50, 60, 60));
-	drive->setCurrentMotion(ProfiledMotion(-5.3, 50, 60, 60));// decrease backup a bit
+	drive->setCurrentMotion(ProfiledMotion(-5.45, 50, 60, 60));// decrease backup a bit
 	co_yield drive->waitUntilSettled(1500);
 	intake->moveVoltage(-12000);
 	co_yield util::coroutine::delay(500);
-	drive->setCurrentMotion(ProfiledMotion(5, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(3.5, 50, 60, 60));
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(1500);
 	intake->moveVoltage(0);
 
-	drive->setCurrentMotion(PIDTurn(226, PID(750, 1, 5000, true, 10), false, false));
+	drive->setCurrentMotion(PIDTurn(221, PID(750, 1, 5000, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
 
 
-	drive->setCurrentMotion(ProfiledMotion(-33, 50, 60, 25));
+	// drive->setCurrentMotion(ProfiledMotion(-33, 50, 60, 25));
+	drive->setCurrentMotion(ProfiledMotion(-35, 50, 60, 25));
 	co_yield drive->waitUntilSettled(1500);
 	pnoomatics->setClamp(true);
 	co_yield util::coroutine::delay(300);
@@ -896,9 +904,10 @@ RobotThread blueQualRingSideAuton() {
 	// turn and hit the ladder
 	drive->setCurrentMotion(PIDTurn(-34.8, PID(1100, 1, 5000, true, 10), false, false));
 	co_yield drive->waitUntilSettled(500);
-	drive->setCurrentMotion(ProfiledMotion(-45, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-50, 40, 60, 60));
 	co_yield util::coroutine::delay(1200);
-	drive->setCurrentMotion(PIDTurn(135, PID(750, 1, 5000, true, 10), false, false));
+	drive->setCurrentMotion(PIDTurn(165.9, PID(750, 1, 5000, true, 10), false, false));
+	pnoomatics->setHammer(true);
 	co_yield drive->waitUntilSettled(1000);
 
 
@@ -1115,7 +1124,8 @@ RobotThread redQualRingSideAuton() {
 	co_yield drive->waitUntilSettled(1500);
 	intake->moveVoltage(-12000);
 	co_yield util::coroutine::delay(500);
-	drive->setCurrentMotion(ProfiledMotion(5, 50, 60, 60));
+	// drive->setCurrentMotion(ProfiledMotion(5, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(3, 50, 60, 60));
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(1500);
 	intake->moveVoltage(0);
@@ -1150,19 +1160,30 @@ RobotThread redQualRingSideAuton() {
 	// our version of getting the corner
 	drive->setCurrentMotion(PIDTurn(69.5, PID(750, 1, 5000, true, 10), false, false));
 	co_yield drive->waitUntilSettled(800);
-	drive->setCurrentMotion(ProfiledMotion(40, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(40, 50, 60, 80));
 	co_yield util::coroutine::delay(1000);
+	// liftFlags->targetAngle = 70;
+	// lift->setState(Lift::HOLD);
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(1500);
 	intake->moveVoltage(-12000);
 
-	// 40.2
-	drive->setCurrentMotion(PIDTurn(45, PID(1100, 1, 5000, true, 10), false, false));
+	// go hit the ladder
+
+	// from the garage
+	drive->setCurrentMotion(PIDTurn(43, PID(1100, 1, 5000, true, 10), false, false));
 	co_yield drive->waitUntilSettled(500);
-	drive->setCurrentMotion(ProfiledMotion(-48, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-49.5, 45, 60, 60));
 	co_yield util::coroutine::delay(1200);
 	drive->setCurrentMotion(PIDTurn(140, PID(750, 1, 5000, true, 10), false, false));
 	co_yield drive->waitUntilSettled(1000);
+
+	// using lady brown
+	// drive->setCurrentMotion(PIDTurn(43, PID(1100, 1, 5000, true, 10), false, false));
+	// co_yield drive->waitUntilSettled(500);
+	// drive->setCurrentMotion(ProfiledMotion(-59.5, 50, 60, 60));
+	// co_yield drive->waitUntilSettled(1250);
+
 
 	// terrence's ending to get to the middle
 	/*drive->setCurrentMotion(PIDTurn(60, PID(750, 1, 5000, true, 10), false, false));
@@ -1387,13 +1408,80 @@ RobotThread blueMogoRush() {
 	co_yield util::coroutine::nextCycle();
 }
 
+RobotThread blueFuckedUpAuton() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+	auto drive = robotInstance->getSubsystem<Drive>().value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto intakeFlags = robotInstance->getFlag<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto liftFlags = robotInstance->getFlag<Lift>().value();
+	auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
+	auto odom = robotInstance->getSubsystem<Odometry>().value();
+#pragma GCC diagnostic pop
+
+	drive->setCurrentMotion(ProfiledMotion(-30, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+	pnoomatics->setClamp(true);
+	co_yield util::coroutine::delay(400);
+	intake->moveVoltage(-12000);
+
+	drive->setCurrentMotion(PIDTurn(90, PID(750, 1, 5000, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 60));
+	co_yield drive->waitUntilSettled(1500);
+	co_yield util::coroutine::delay(1500);
+	intake->moveVoltage(0);
+}
+
+// Test includes for splining
+#include "lib/spline/CubicBezier.h"
+#include "lib/spline/Path.h"
+#include "lib/trajectory/Trajectory.h"
+#include "lib/trajectory/TrajectoryGenerator.h"
+#include "lib/trajectory/constraints/DifferentialDriveConstraint.h"
+
 RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
-	auto coro = blueQualRingSideAuton();
+
+	Spline testSpline = Spline(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(48, 10), Pose(48, 48)));
+
+	// testing out ramsete
+	// 13.1 - 1.3
+	// Path path(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(24, 5), Pose(24, 24)));
+	const Path path(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(48, 10), Pose(48, 48)));
+	const Path testHermitePath(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{48, 0}, {48, 70.941125497}}));
+	TrajectoryConstraint testConstraint(DifferentialDriveConstraint(50, odometers::trackWidth));
+	TrajectoryConstraint testConstraint1(CentripetalAccelerationConstraint(10));
+	TrajectoryGenerator trajectoryGenerator({testConstraint, testConstraint1});
+	Trajectory generatedTrajectory = trajectoryGenerator.generate(testHermitePath, 0, 0, 50, 30, false);
+
+	pros::lcd::print(6, "DONE GENERATING TRAJECTORY\n");
+
+	auto drive = robotInstance->getSubsystem<Drive>().value();
+	// drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.00001, 0)));
+
+	// works kinda
+	// drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.0025, 0.1)));
+	drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.001079997257, 0.0177799904)));// tuning
+	co_yield drive->waitUntilSettled();
+	auto finalPose = robotInstance->getSubsystem<Odometry>().value()->getCurrentState().position;
+	auto targetPose = generatedTrajectory.sample(100.0).pose;
+	printf("Final Pos: X: %f Y: %f H: %f\t\target Pos: X: %f Y: %f H: %f\tTotal Time: %f\n", finalPose.X(), finalPose.Y(),
+	       finalPose.rotation().degrees(), targetPose.X(), targetPose.Y(), targetPose.rotation().degrees(),
+	       generatedTrajectory.getTotalTime());
+
+	pros::lcd::print(6, "DONE MOVING\n");
+
+	// END TESTING
+
+
+	/*auto coro = blueQualRingSideAuton();
 	// auto coro = redQualRingSideAuton();
 	// auto coro = redMogoRushSafe();
 	// auto coro = blueMogoRush();
-	while (coro) { co_yield coro(); }
+	while (coro) { co_yield coro(); }*/
 
 	// if (robotInstance->curAlliance == Alliance::BLUE) {
 	// 	switch (robotInstance->curAuton) {

@@ -20,3 +20,6 @@ temp.errors
 
 # custom stuff
 .cppcheck_cache/
+pathing/
+PathEditor/
+.idea/

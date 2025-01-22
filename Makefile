@@ -3,7 +3,7 @@ DEVICE=VEX EDR V5
 
 # Flags/Compiler Parameters
 MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard -g -Os # use -Og for debugging
-CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK $(INC_FLAGS) -MMD -MP -DFMT_STATIC_THOUSANDS_SEPERATOR=',' -DFMT_USE_LONG_DOUBLE=0 -DFMT_USE_FLOAT128=0 -DFMT_USE_FLOAT=0 -DFMT_USE_USER_DEFINED_LITERALS=0 -DFMT_USE_FULL_CACHE_DRAGONBOX=0 -DFREERTOS
+CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK $(INC_FLAGS) -MMD -MP -DFMT_STATIC_THOUSANDS_SEPERATOR=',' -DFMT_USE_LONG_DOUBLE=0 -DFMT_USE_FLOAT128=0 -DFMT_USE_FLOAT=0 -DFMT_USE_USER_DEFINED_LITERALS=0 -DFMT_USE_FULL_CACHE_DRAGONBOX=0 -DFREERTOS -DVEX
 GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables #-fanalyzer
 
 # Check if the llemu files in libvgl exist. If they do, define macros that the
@@ -17,7 +17,7 @@ ifneq (,$(wildcard ./include/liblvgl/llemu.hpp))
 endif
 
 #WARNFLAGS=-Wall -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wextra-semi -Wnull-dereference -Wswitch-enum -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches -Wsuggest-override
-WARNFLAGS=-Wall -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wnull-dereference -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches # no suggest-override, no switch-enum, no extra-semis
+WARNFLAGS=-Wall -Wconversion -Wsign-conversion -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wnull-dereference -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches # no suggest-override, no switch-enum, no extra-semis
 SPACE := $() $()
 COMMA := ,
 
