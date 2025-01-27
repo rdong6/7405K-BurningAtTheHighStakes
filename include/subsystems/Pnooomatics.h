@@ -8,7 +8,7 @@ class Pnooomatics : public Subsystem {
 private:
 	pros::adi::DigitalOut hang{'0'};
 	pros::adi::DigitalOut clamp{'D'};
-	pros::adi::DigitalOut hammer{'G'};
+	pros::adi::DigitalOut hammer{'B'};
 	pros::adi::DigitalOut claw{'0'};
 	pros::Distance dist{ports::clampDistance};
 

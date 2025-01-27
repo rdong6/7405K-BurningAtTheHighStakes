@@ -19,6 +19,8 @@ Odometry::Odometry(RobotBase* robot) : Subsystem(robot) {
 	leftWheel.set_data_rate(5);
 	rightWheel.reset_position();
 	rightWheel.set_data_rate(5);
+	verticalWheel.reset_position();
+	verticalWheel.set_data_rate(5);
 	imu.set_data_rate(5);
 	imu.reset(true);
 }
@@ -37,42 +39,56 @@ void Odometry::setPose(Pose pose) {
 
 RobotThread Odometry::updatePosition() {
 	auto drive = robot->getSubsystem<Drive>();
+	const double imuScalar = 1.005586592;
 
-	prevRotation = imu.get_rotation();
+	prevRotation = imu.get_rotation() * imuScalar;
 
 	while (true) {
 		double l_dist;
 		double r_dist;
 		double b_dist;
+		double v_dist;
 		double deltaY;
+		double deltaX;
+		double dh;
 
 		// if rotation sensor port is defined, then we use that to get dist traveled
 		// otherwise we use motor encoders
 
-		// TODO: clean up code - lots of repeat within the compile time selections
-		if constexpr (ports::leftRotation != 0) {
+		// TODO: Fix motor encoders so they use drive's gear ratios instead
+		if constexpr (ports::leftRotation != 0 && ports::rightRotation != 0) {
+			// use right & left deadwheels to calculate deltaX
 			double LE = leftWheel.get_position();
 			l_dist = ((LE - prev_l) / 36000.0) * M_PI * odometers::leftDeadwheelDiameter;
 			prev_l = LE;
-		} else {
-			double LE = drive ? drive.value()->getLeftPosition() : 0;
-			l_dist = ((LE - prev_l) / 360.0) * M_PI * odometers::leftDeadwheelDiameter;
-			prev_l = LE;
-		}
 
-		if constexpr (ports::rightRotation != 0) {
 			double RE = rightWheel.get_position();
 			r_dist = ((RE - prev_r) / 36000.0) * M_PI * odometers::rightDeadwheelDiameter;
 			prev_r = RE;
+
+			deltaX = (l_dist + r_dist) / 2.0;
+		} else if constexpr (ports::verticalRotation != 0) {
+			// use 1 vertical deadwheel to calculate deltaX
+			double VE = verticalWheel.get_position();
+			pros::lcd::print(4, "VE: %f", VE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
+			v_dist = ((VE - prev_v) / 36000.0) * M_PI * odometers::verticalDeadwheelDiameter;
+			prev_v = VE;
 		} else {
+			// use motor encoders
+			double LE = drive ? drive.value()->getLeftPosition() : 0;
+			l_dist = ((LE - prev_l) / 360.0) * M_PI * odometers::leftDeadwheelDiameter;
+			prev_l = LE;
+
 			double RE = drive ? drive.value()->getRightPosition() : 0;
 			r_dist = ((RE - prev_r) / 360.0) * M_PI * odometers::rightDeadwheelDiameter;
 			prev_r = RE;
+
+			deltaX = (l_dist + r_dist) / 2.0;
 		}
 
-		double dh = 0;
+
 		if constexpr (ports::imu > 0) {
-			double curRotation = -imu.get_rotation();
+			double curRotation = -imu.get_rotation() * imuScalar;
 			dh = util::toRad(curRotation - prevRotation);
 			prevRotation = curRotation;
 		} else {
@@ -83,6 +99,11 @@ RobotThread Odometry::updatePosition() {
 				trackWidth = odometers::trackWidth;
 			}
 			dh = (l_dist - r_dist) / (trackWidth);
+		}
+
+		if constexpr (ports::leftRotation == 0 && ports::rightRotation == 0 && ports::verticalRotation != 0) {
+			deltaX = v_dist + (odometers::verticalOffset * dh);
+			printf("DeltaX: %f\tV_dist: %f\n", deltaX, v_dist);
 		}
 
 		if constexpr (ports::backRotation != 0) {
@@ -96,7 +117,6 @@ RobotThread Odometry::updatePosition() {
 			deltaY = 0;
 		}
 
-		double deltaX = (l_dist + r_dist) / 2.0;
 
 		Rotation2D newHeading = curState.position.rotation() + Rotation2D(dh);
 		Pose newPose = curState.position.exp(Twist2D{deltaX, deltaY, dh});
@@ -105,9 +125,9 @@ RobotThread Odometry::updatePosition() {
 		printOdom(curState);
 
 		// to tune the trackwidth - the data being printed to line 6 is not needed
-		// pros::lcd::print(4, "LE: %f", sDrive.getLeftPosition() / 360.0 * M_PI * odometers::leftDeadwheelDiameter);
-		// pros::lcd::print(5, "RE: %f", sDrive.getRightPosition() / 360.0 * M_PI * odometers::rightDeadwheelDiameter);
-		// pros::lcd::print(6, "h: %f",
+		// pros::lcd::print(5, "LE: %f", sDrive.getLeftPosition() / 360.0 * M_PI * odometers::leftDeadwheelDiameter);
+		// pros::lcd::print(6, "RE: %f", sDrive.getRightPosition() / 360.0 * M_PI * odometers::rightDeadwheelDiameter);
+		// pros::lcd::print(7, "h: %f",
 		//                  ((sDrive.getLeftPosition() / 360.0 * M_PI * odometers::leftDeadwheelDiameter) -
 		//                   (sDrive.getRightPosition() / 360.0 * M_PI * odometers::rightDeadwheelDiameter)) /
 		//                          10.4714285483 / M_PI * 180);

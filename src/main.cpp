@@ -50,7 +50,7 @@ void robot_init() {
  */
 
 void initialize() {
-	// AutonSelector autonSelector;// also initalizes pros::lcd
+	AutonSelector autonSelector;// also initalizes pros::lcd
 	robot_init();
 	// autonSelector.run();
 

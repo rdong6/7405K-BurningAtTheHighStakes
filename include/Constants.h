@@ -10,43 +10,30 @@
 
 
 namespace ports {
-	constexpr int frontLeftMotor = 1;
-	constexpr int middleLeftMotor = 7;
-	constexpr int backLeftMotor = 11;
+	constexpr int frontLeftMotor = -6;
+	constexpr int middleLeftMotor = -7;
+	constexpr int backLeftMotor = -11;
 	constexpr int weakLeftMotor = 0;
 
-	constexpr int frontRightMotor = -10;
-	constexpr int middleRightMotor = -9;
-	constexpr int backRightMotor = -12;
+	constexpr int frontRightMotor = 10;
+	constexpr int middleRightMotor = 9;
+	constexpr int backRightMotor = 12;
 	constexpr int weakRightMotor = 0;
 
-	// constexpr std::initializer_list<std::int8_t> intake = {11};
-	// constexpr int intakeDistance = 0;
-	// constexpr int intakeColor = 20;
-	//
-	// constexpr int clampDistance = 4;
-	//
-	// constexpr int liftMotor = -8;
-	// constexpr int liftRotation = 5;
-	//
-	// constexpr int leftRotation = 19;
-	// constexpr int rightRotation = -12;
-	// constexpr int backRotation = -10;
-	// constexpr int imu = 18;
-
-	constexpr std::initializer_list<std::int8_t> intake = {0};
+	constexpr std::initializer_list<std::int8_t> intake = {1};
 	constexpr int intakeDistance = 0;
-	constexpr int intakeColor = 0;
+	constexpr int intakeColor = 18;
 
 	constexpr int clampDistance = 0;
 
-	constexpr int liftMotor = 0;
-	constexpr int liftRotation = 0;
+	constexpr int liftMotor = -8;
+	constexpr int liftRotation = 20;
 
 	constexpr int leftRotation = 0;
 	constexpr int rightRotation = 0;
-	constexpr int backRotation = 0;
-	constexpr int imu = 0;
+	constexpr int backRotation = 16;
+	constexpr int verticalRotation = 13; // this will only ever be used if we have 1 vertical deadwheel on the bot
+	constexpr int imu = 3;
 }// namespace ports
 
 namespace odometers {
@@ -54,11 +41,16 @@ namespace odometers {
 
 	// distance between left and right wheels of drivetrain
 	constexpr double trackWidth = 11.75;
+	constexpr double deadwheelTrackWidth =
+	        0.0;// dist between left & right deadwheels -> only used if deadwheels used to calc heading
 
 	constexpr double leftDeadwheelDiameter = 2.75;
 	constexpr double rightDeadwheelDiameter = 2.75;
 	constexpr double backDeadwheelDiameter = 2.75;// ignored if backRotation is 0
-	constexpr double backOffset = 1.1353052607;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
-	constexpr double deadwheelTrackWidth =
-	        0.0;// dist between left & right deadwheels -> only used if deadwheels used to calc heading
+	constexpr double verticalDeadwheelDiameter = 2; // used only if vertical deadwheel
+	// constexpr double backOffset = 0.1;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
+	// constexpr double backOffset = 0.236;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
+	constexpr double backOffset = 1.84;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
+	// constexpr double verticalOffset = 0.41; // only used if we have 1 vertical deadwheel (no left & right deadwheels)
+	constexpr double verticalOffset = 0.106; // only used if we have 1 vertical deadwheel (no left & right deadwheels)
 }// namespace odometers

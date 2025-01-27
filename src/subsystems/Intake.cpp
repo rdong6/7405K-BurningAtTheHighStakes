@@ -36,11 +36,11 @@ void Intake::registerTasks() {
 	auto controllerRef = controller.value();
 
 	// Maps holding r1 to intake
-	controllerRef->registerCallback([this]() { this->moveVoltage(12000); }, []() {}, Controller::master, Controller::r2,
+	controllerRef->registerCallback([this]() { this->moveVoltage(-12000); }, []() {}, Controller::master, Controller::r2,
 	                                Controller::hold);
 
 	// Maps holding r2 to outtake - when both r1 and r2 are held, r2 takes precedent
-	controllerRef->registerCallback([this]() { this->moveVoltage(-12000); }, []() {}, Controller::master, Controller::r1,
+	controllerRef->registerCallback([this]() { this->moveVoltage(12000); }, []() {}, Controller::master, Controller::r1,
 	                                Controller::hold);
 
 	// stops the intake when neither button is pressed

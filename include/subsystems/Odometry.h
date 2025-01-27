@@ -8,10 +8,10 @@
 
 class Odometry : public Subsystem {
 private:
-	pros::Rotation leftWheel{ports::leftRotation}, rightWheel{ports::rightRotation}, backWheel{ports::backRotation};
+	pros::Rotation leftWheel{ports::leftRotation}, rightWheel{ports::rightRotation}, backWheel{ports::backRotation}, verticalWheel{ports::verticalRotation};
 	pros::IMU imu{ports::imu};
 
-	double prev_l = 0, prev_r = 0, prev_b = 0;
+	double prev_l = 0, prev_r = 0, prev_b = 0, prev_v = 0;
 	double curL = 0, curR = 0;
 	double prevRotation = 0;// for IMU only
 

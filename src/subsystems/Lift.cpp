@@ -19,7 +19,7 @@ Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	pros::delay(20);// needed so get_angle() isn't 0
 	int32_t curPosition = rotation.get_angle();
 	rotation.set_position(curPosition);
-	rotation.set_position(curPosition >= 35000 ? 36000 - curPosition : curPosition);
+	rotation.set_position(curPosition >= 35000 ? curPosition - 36000 : curPosition);
 	pros::delay(20);
 }
 
@@ -114,16 +114,16 @@ RobotThread Lift::runner() {
 		}*/
 
 		// SOFT STOP
-		if (liftFlags->curAngle >= 185) {
-			liftFlags->targetAngle = 185;
-			setState(Lift::HOLD);
-		}
+		// if (liftFlags->curAngle >= 215) {
+		// 	liftFlags->targetAngle = 215;
+		// 	setState(Lift::HOLD);
+		// }
 
 		if (liftFlags->state == State::IDLE) {
 			liftFlags->isMoving = false;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			motor.move_velocity(0);
-			co_yield util::coroutine::nextCycle();
+			co_yield [&]() -> bool { return liftFlags->state != State::IDLE; };
 			continue;
 		}
 
@@ -175,11 +175,11 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			robot->getFlag<Lift>().value()->targetAngle = 36.3;
+			robot->getFlag<Lift>().value()->targetAngle = 28.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::LEVEL_2:
-			robot->getFlag<Lift>().value()->targetAngle = 36.3;
+			robot->getFlag<Lift>().value()->targetAngle = 28.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:
