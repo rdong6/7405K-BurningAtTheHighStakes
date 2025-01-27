@@ -68,6 +68,260 @@ void initialize() {
 	        robotInstance, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Scheduler");
 }
 
+RobotThread redSAWP() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+	auto drive = robotInstance->getSubsystem<Drive>().value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto intakeFlags = robotInstance->getFlag<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto liftFlags = robotInstance->getFlag<Lift>().value();
+	auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
+	auto odom = robotInstance->getSubsystem<Odometry>().value();
+#pragma GCC diagnostic pop
+
+	drive->setCurrentMotion(PIDTurn(40, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+
+	liftFlags->targetAngle = 210;
+	lift->setState(Lift::HOLD);
+	co_yield util::coroutine::nextCycle();
+	Timeout liftTimeout = Timeout(700);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
+	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 45));
+	co_yield drive->waitUntilSettled(1500);
+
+
+	lift->setState(Lift::STOW);
+	liftTimeout = Timeout(700);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
+
+	drive->setCurrentMotion(PIDTurn(20, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(-34, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+
+	pnoomatics->setClamp(true);
+
+	drive->setCurrentMotion(PIDTurn(230, PID(200, 1, 75, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	//tune
+	intake->moveVoltage(12000);
+	drive->setCurrentMotion(ProfiledMotion(17, 50, 60, 30));
+	co_yield drive->waitUntilSettled(1500);
+
+	drive->setCurrentMotion(PIDTurn(270, PID(200, 1, 45, true, 10), true, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(5, 50, 60, 30));
+	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(PIDTurn(0, PID(200, 1, 75, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(34, 50, 60, 50));
+	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(PIDTurn(90, PID(200, 1, 75, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(48, 50, 60, 30));
+	co_yield util::coroutine::delay(500);
+	pnoomatics->setClamp(false);
+	co_yield drive->waitUntilSettled(2000);
+	intake->setDistStop(true);
+	co_yield util::coroutine::delay(500);
+	drive->setCurrentMotion(PIDTurn(330, PID(200, 1, 75, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(-30, 50, 60, 30));
+	co_yield drive->waitUntilSettled(1000);
+	pnoomatics->setClamp(false);
+	intake->moveVoltage(12000);
+	drive->setCurrentMotion(PIDTurn(270, PID(200, 1, 75, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(10, 50, 60, 30));
+	co_yield drive->waitUntilSettled(1000);
+	liftFlags->targetAngle = 210;
+	lift->setState(Lift::IDLE);
+	co_yield util::coroutine::nextCycle();
+
+
+
+	//ending statement
+	co_yield util::coroutine::delay(5000);
+	intake->moveVoltage(0);
+	co_yield util::coroutine::nextCycle();
+}
+
+RobotThread redRingSide() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+	auto drive = robotInstance->getSubsystem<Drive>().value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto intakeFlags = robotInstance->getFlag<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto liftFlags = robotInstance->getFlag<Lift>().value();
+	auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
+	auto odom = robotInstance->getSubsystem<Odometry>().value();
+#pragma GCC diagnostic pop
+	
+	drive->setCurrentMotion(PIDTurn(40, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+
+	liftFlags->targetAngle = 210;
+	lift->setState(Lift::HOLD);
+	co_yield util::coroutine::nextCycle();
+	Timeout liftTimeout = Timeout(700);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
+	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 45));
+	co_yield drive->waitUntilSettled(1500);
+
+
+	lift->setState(Lift::STOW);
+	liftTimeout = Timeout(700);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
+
+	drive->setCurrentMotion(PIDTurn(20, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(-34, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+
+	pnoomatics->setClamp(true);
+
+	drive->setCurrentMotion(PIDTurn(230, PID(200, 1, 75, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	//tune
+	intake->moveVoltage(12000);
+	drive->setCurrentMotion(ProfiledMotion(17, 50, 60, 30));
+	co_yield drive->waitUntilSettled(1500);
+
+	drive->setCurrentMotion(PIDTurn(270, PID(200, 1, 45, true, 10), true, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(5, 50, 60, 30));
+	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(PIDTurn(0, PID(200, 1, 75, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(34, 50, 60, 50));
+	co_yield drive->waitUntilSettled(1500);
+
+	drive->setCurrentMotion(PIDTurn(315, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 30));
+	co_yield drive->waitUntilSettled(1500);
+	co_yield util::coroutine::delay(500);
+	
+	if(Auton::QUAL){
+		drive->setCurrentMotion(ProfiledMotion(-70, 50, 60, 30));
+		co_yield util::coroutine::delay(750);
+
+		liftFlags->targetAngle = 60;
+		lift->setState(Lift::HOLD);
+		co_yield util::coroutine::nextCycle();
+	}
+	
+	if(Auton::ELIM){
+		drive->setCurrentMotion(ProfiledMotion(-10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		drive->setCurrentMotion(ProfiledMotion(10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		co_yield util::coroutine::delay(500);
+		drive->setCurrentMotion(ProfiledMotion(-10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		drive->setCurrentMotion(ProfiledMotion(10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		co_yield util::coroutine::delay(500);
+
+		drive->setCurrentMotion(ProfiledMotion(-20, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+
+		drive->setCurrentMotion(PIDTurn(90, PID(200, 1, 45, true, 10), false, false, 0.5));
+		co_yield drive->waitUntilSettled(500);
+		drive->setCurrentMotion(ProfiledMotion(50, 50, 60, 50));
+		co_yield drive->waitUntilSettled(3000);
+	}
+}
+
+RobotThread redMogoSide() {
+	#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+	auto drive = robotInstance->getSubsystem<Drive>().value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto intakeFlags = robotInstance->getFlag<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto liftFlags = robotInstance->getFlag<Lift>().value();
+	auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
+	auto odom = robotInstance->getSubsystem<Odometry>().value();
+#pragma GCC diagnostic pop
+	
+	drive->setCurrentMotion(PIDTurn(320, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+
+	liftFlags->targetAngle = 210;
+	lift->setState(Lift::HOLD);
+	co_yield util::coroutine::nextCycle();
+	Timeout liftTimeout = Timeout(700);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
+	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 45));
+	co_yield drive->waitUntilSettled(1500);
+
+	lift->setState(Lift::STOW);
+	liftTimeout = Timeout(700);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
+
+	drive->setCurrentMotion(PIDTurn(340, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(-34, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+
+	pnoomatics->setClamp(true);
+
+	intake->moveVoltage(12000);
+	drive->setCurrentMotion(PIDTurn(100, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+
+	drive->setCurrentMotion(PIDTurn(0, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+
+	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+
+	drive->setCurrentMotion(PIDTurn(50, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+
+	drive->setCurrentMotion(ProfiledMotion(24, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+	co_yield util::coroutine::delay(500);
+
+	drive->setCurrentMotion(ProfiledMotion(-10, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+
+	pnoomatics->setHammer(true);
+
+	drive->setCurrentMotion(PIDTurn(230, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+
+	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 25));
+	co_yield drive->waitUntilSettled(1500);
+	pnoomatics->setClamp(false);
+
+	drive->setCurrentMotion(ProfiledMotion(60, 50, 60, 25));
+	
+	if(Auton::QUAL){
+		
+		co_yield util::coroutine::delay(750);
+
+		liftFlags->targetAngle = 100;
+		lift->setState(Lift::HOLD);
+		co_yield util::coroutine::nextCycle();
+	}
+	co_yield drive->waitUntilSettled(2000);
+}
+
+
+RobotThread blueRingSide() {
+
+}
+
 RobotThread blueMogoSide() {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
@@ -703,11 +957,7 @@ RobotThread testAuton() {
 	auto odom = robotInstance->getSubsystem<Odometry>().value();
 #pragma GCC diagnostic pop
 
-
-	Pose curPose = odom->getCurrentState().position;
-	Pose targetPose(0, -9);
-
-	drive->setCurrentMotion(PIDTurn(curPose.headingTo(targetPose).degrees(), PID(150, 1, 50, true, 10), false, false));
+	drive->setCurrentMotion(PIDTurn(210, PID(150, 1, 50, true, 10), false, false));
 	drive->waitUntilSettled(1000);
 
 	// drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(targetPose.translation()), 60, 60, 60));
@@ -1445,43 +1695,43 @@ RobotThread blueFuckedUpAuton() {
 RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
 
-	Spline testSpline = Spline(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(48, 10), Pose(48, 48)));
+	// Spline testSpline = Spline(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(48, 10), Pose(48, 48)));
 
-	// testing out ramsete
-	// 13.1 - 1.3
-	// Path path(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(24, 5), Pose(24, 24)));
-	const Path path(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(48, 10), Pose(48, 48)));
-	const Path testHermitePath(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{48, 0}, {48, 70.941125497}}));
-	TrajectoryConstraint testConstraint(DifferentialDriveConstraint(50, odometers::trackWidth));
-	TrajectoryConstraint testConstraint1(CentripetalAccelerationConstraint(10));
-	TrajectoryGenerator trajectoryGenerator({testConstraint, testConstraint1});
-	Trajectory generatedTrajectory = trajectoryGenerator.generate(testHermitePath, 0, 0, 50, 30, false);
+	// // testing out ramsete
+	// // 13.1 - 1.3
+	// // Path path(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(24, 5), Pose(24, 24)));
+	// const Path path(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(48, 10), Pose(48, 48)));
+	// const Path testHermitePath(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{48, 0}, {48, 70.941125497}}));
+	// TrajectoryConstraint testConstraint(DifferentialDriveConstraint(50, odometers::trackWidth));
+	// TrajectoryConstraint testConstraint1(CentripetalAccelerationConstraint(10));
+	// TrajectoryGenerator trajectoryGenerator({testConstraint, testConstraint1});
+	// Trajectory generatedTrajectory = trajectoryGenerator.generate(testHermitePath, 0, 0, 50, 30, false);
 
-	pros::lcd::print(6, "DONE GENERATING TRAJECTORY\n");
+	// pros::lcd::print(6, "DONE GENERATING TRAJECTORY\n");
 
-	auto drive = robotInstance->getSubsystem<Drive>().value();
-	// drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.00001, 0)));
+	// auto drive = robotInstance->getSubsystem<Drive>().value();
+	// // drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.00001, 0)));
 
-	// works kinda
-	// drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.0025, 0.1)));
-	drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.001079997257, 0.0177799904)));// tuning
-	co_yield drive->waitUntilSettled();
-	auto finalPose = robotInstance->getSubsystem<Odometry>().value()->getCurrentState().position;
-	auto targetPose = generatedTrajectory.sample(100.0).pose;
-	printf("Final Pos: X: %f Y: %f H: %f\t\target Pos: X: %f Y: %f H: %f\tTotal Time: %f\n", finalPose.X(), finalPose.Y(),
-	       finalPose.rotation().degrees(), targetPose.X(), targetPose.Y(), targetPose.rotation().degrees(),
-	       generatedTrajectory.getTotalTime());
+	// // works kinda
+	// // drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.0025, 0.1)));
+	// drive->setCurrentMotion(RAMSETEMotion(generatedTrajectory, RAMSETE(0.001079997257, 0.0177799904)));// tuning
+	// co_yield drive->waitUntilSettled();
+	// auto finalPose = robotInstance->getSubsystem<Odometry>().value()->getCurrentState().position;
+	// auto targetPose = generatedTrajectory.sample(100.0).pose;
+	// printf("Final Pos: X: %f Y: %f H: %f\t\target Pos: X: %f Y: %f H: %f\tTotal Time: %f\n", finalPose.X(), finalPose.Y(),
+	//        finalPose.rotation().degrees(), targetPose.X(), targetPose.Y(), targetPose.rotation().degrees(),
+	//        generatedTrajectory.getTotalTime());
 
-	pros::lcd::print(6, "DONE MOVING\n");
+	// pros::lcd::print(6, "DONE MOVING\n");
 
 	// END TESTING
 
 
-	/*auto coro = blueQualRingSideAuton();
+	// auto coro = redRingSide();
 	// auto coro = redQualRingSideAuton();
 	// auto coro = redMogoRushSafe();
-	// auto coro = blueMogoRush();
-	while (coro) { co_yield coro(); }*/
+	auto coro = testAuton();
+	while (coro) { co_yield coro(); }
 
 	// if (robotInstance->curAlliance == Alliance::BLUE) {
 	// 	switch (robotInstance->curAuton) {

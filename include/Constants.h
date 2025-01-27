@@ -32,12 +32,12 @@ namespace ports {
 	constexpr int leftRotation = 0;
 	constexpr int rightRotation = 0;
 	constexpr int backRotation = 16;
-	constexpr int verticalRotation = 13; // this will only ever be used if we have 1 vertical deadwheel on the bot
+	constexpr int verticalRotation = 0; // this will only ever be used if we have 1 vertical deadwheel on the bot
 	constexpr int imu = 3;
 }// namespace ports
 
 namespace odometers {
-	constexpr double driveGearRatio = 3.25 / 60.0 * 36;// diameter + gear ratio included
+	constexpr double driveGearRatio = 2.75;// diameter + gear ratio included
 
 	// distance between left and right wheels of drivetrain
 	constexpr double trackWidth = 11.75;
@@ -52,5 +52,5 @@ namespace odometers {
 	// constexpr double backOffset = 0.236;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
 	constexpr double backOffset = 1.84;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
 	// constexpr double verticalOffset = 0.41; // only used if we have 1 vertical deadwheel (no left & right deadwheels)
-	constexpr double verticalOffset = 0.106; // only used if we have 1 vertical deadwheel (no left & right deadwheels)
+	constexpr double verticalOffset = 0.07778; // only used if we have 1 vertical deadwheel (no left & right deadwheels)
 }// namespace odometers
