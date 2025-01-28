@@ -9,12 +9,13 @@ class Transform2D;
 class Pose {
 public:
 	constexpr Pose() = default;
-	constexpr Pose(Translation2D translation, Rotation2D rotation) : m_translation(translation), m_rotation(rotation) {}
+	constexpr Pose(const Translation2D& translation, const Rotation2D& rotation)
+	    : m_translation(translation), m_rotation(rotation) {}
 
 	// theta in rads
 	constexpr Pose(double x, double y, double theta = 0) : m_translation(x, y), m_rotation(theta) {}
 
-	constexpr Pose(double x, double y, Rotation2D rotation) : m_translation(x, y), m_rotation(rotation) {}
+	constexpr Pose(double x, double y, const Rotation2D& rotation) : m_translation(x, y), m_rotation(rotation) {}
 
 	/// GETTER FUNCTIONS
 
@@ -76,7 +77,7 @@ public:
 	constexpr Transform2D operator-(const Pose& initial) const;
 
 	constexpr Pose operator*(double scalar) const { return Pose{m_translation * scalar, m_rotation * scalar}; }
-	constexpr Pose operator/(double scalar) const { return operator/(1.0 / scalar); }
+	constexpr Pose operator/(double scalar) const { return operator*(1.0 / scalar); }
 
 	// constexpr bool operator==(const Pose&) const = default;
 	constexpr bool operator==(const Pose& other) const {

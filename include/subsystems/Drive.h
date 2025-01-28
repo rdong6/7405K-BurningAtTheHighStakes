@@ -64,5 +64,5 @@ public:
 
 	// todo: reimpl a way to indicate if motion timed out or settled
 	RobotFunc waitUntilSettled(uint32_t timeout = TIMEOUT_MAX);
-	RobotFunc waitUntilDist(double dist);
+	RobotFunc waitUntilDist(double dist) const;
 };

@@ -70,7 +70,7 @@ RobotThread Odometry::updatePosition() {
 		} else if constexpr (ports::verticalRotation != 0) {
 			// use 1 vertical deadwheel to calculate deltaX
 			double VE = verticalWheel.get_position();
-			pros::lcd::print(4, "VE: %f", VE / 36000.0 * M_PI * odometers::backDeadwheelDiameter);
+			pros::lcd::print(4, "VE: %f", VE / 36000.0 * M_PI * odometers::verticalDeadwheelDiameter);
 			v_dist = ((VE - prev_v) / 36000.0) * M_PI * odometers::verticalDeadwheelDiameter;
 			prev_v = VE;
 		} else {
@@ -103,7 +103,7 @@ RobotThread Odometry::updatePosition() {
 
 		if constexpr (ports::leftRotation == 0 && ports::rightRotation == 0 && ports::verticalRotation != 0) {
 			deltaX = v_dist + (odometers::verticalOffset * dh);
-			printf("DeltaX: %f\tV_dist: %f\n", deltaX, v_dist);
+			// printf("DeltaX: %f\tV_dist: %f\n", deltaX, v_dist);
 		}
 
 		if constexpr (ports::backRotation != 0) {

@@ -40,7 +40,7 @@ void Drive::registerTasks() {
 	        },
 	        TaskType::AUTON);
 
-	// Opctrl thread
+	// opctrl thread
 	robot->registerTask(
 	        [this]() {
 		        this->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
@@ -51,7 +51,7 @@ void Drive::registerTasks() {
 }
 
 RobotThread Drive::runner() {
-	auto odom = robot->getSubsystem<Odometry>();
+	const auto odom = robot->getSubsystem<Odometry>();
 
 	while (true) {
 		// marks the time in which we first start to run the motion
@@ -67,6 +67,8 @@ RobotThread Drive::runner() {
 			setVelocityLeft(motorVolts.left + 0.5);
 			setVelocityRight(motorVolts.right + 0.5);
 		} else {
+			// do something where it rounds it to nearest 120mV? because only changes in increments of 120mV causes any actual
+			// change on motor as mv is converted to PWM (+-100)
 			setVoltageLeft(motorVolts.left);
 			setVoltageRight(motorVolts.right);
 		}
@@ -104,7 +106,7 @@ RobotFunc Drive::waitUntilSettled(uint32_t timeout) {
 	return func;
 }
 
-RobotFunc Drive::waitUntilDist(double dist) {
+RobotFunc Drive::waitUntilDist(double dist) const {
 	auto odom = robot->getSubsystem<Odometry>();
 	Pose startingPos = odom ? odom.value()->getCurrentState().position : Pose();
 

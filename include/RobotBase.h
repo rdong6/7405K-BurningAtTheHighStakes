@@ -37,10 +37,11 @@ private:
 
 	// helper func to get access to value stored by invokeTable
 	template<typename T>
-	inline std::optional<util::reference_wrapper<T>> get() {
+	std::optional<util::reference_wrapper<T>> get() {
 		if (auto f = invokeTable.find(typeid(T*)); f != invokeTable.end()) {
 			return std::make_optional(util::reference_wrapper<T>(*(std::any_cast<std::function<T*()>>(f->second)())));
 		}
+
 		return std::nullopt;
 	}
 
@@ -57,15 +58,19 @@ public:
 
 	// gets access to each subsystem
 	template<typename T>
-	inline std::optional<util::reference_wrapper<T>> getSubsystem() {
+	std::optional<util::reference_wrapper<T>> getSubsystem() {
 		return this->get<T>();
 	}
 
 	template<typename T>
-	inline std::optional<util::reference_wrapper<typename T::flags>> getFlag() {
+	std::optional<util::reference_wrapper<typename T::flags>> getFlag() {
 		return this->get<typename T::flags>();
 	}
 
 	Auton curAuton = Auton::NONE;
 	Alliance curAlliance = Alliance::INVALID;
+
+	bool isElim = false;// whether we're running elim or qual auton
+	bool allianceStake = false;
+	uint32_t delay = 0;// in ms
 };

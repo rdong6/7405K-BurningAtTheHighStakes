@@ -51,6 +51,14 @@ void AutonSelector::Button::setStyle(lv_style_t* style) {
 	lv_obj_add_style(btn, style, 0);
 }
 
+void AutonSelector::Button::setHidden(bool en) {
+	if (en) {
+		lv_obj_add_flag(btn, LV_OBJ_FLAG_HIDDEN);
+	} else {
+		lv_obj_clear_flag(btn, LV_OBJ_FLAG_HIDDEN);
+	}
+}
+
 AutonSelector::AutonSelector() {
 	pros::lcd::initialize();
 	lcdScreen = lv_scr_act();
@@ -59,6 +67,46 @@ AutonSelector::AutonSelector() {
 void AutonSelector::run() {
 	selectorScreen = lv_obj_create(NULL);
 
+	tabview = lv_tabview_create(selectorScreen, LV_DIR_TOP, 10 /* tune height of tab */);
+	matchTypeTab = lv_tabview_add_tab(tabview, "Match Type");
+	allianceTab = lv_tabview_add_tab(tabview, "Alliance");
+	autonsTab = lv_tabview_add_tab(tabview, "Autons");
+	delayTab = lv_tabview_add_tab(tabview, "Delay");
+
+	blueAutonsParent = lv_obj_create(autonsTab);
+	redAutonsParent = lv_obj_create(autonsTab);
+
+	lv_obj_add_flag(blueAutonsParent, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_add_flag(redAutonsParent, LV_OBJ_FLAG_HIDDEN);
+
+	lv_obj_add_event_cb(
+	        tabview,
+	        [](lv_event_t* event) -> void {
+		        auto* tabviewObj = lv_event_get_target(event);
+		        AutonSelector* autonSelector = static_cast<AutonSelector*>(lv_event_get_user_data(event));
+
+		        uint16_t tabID = lv_tabview_get_tab_act(tabviewObj);
+		        if (tabID == 2) {
+			        // dynamically load what autons to show depending on what's been chosen
+			        if (robotInstance->curAlliance == Alliance::INVALID) { return; }
+
+
+			        if (robotInstance->curAlliance == Alliance::RED) {
+				        lv_obj_clear_flag(autonSelector->redAutonsParent, LV_OBJ_FLAG_HIDDEN);
+				        lv_obj_add_flag(autonSelector->blueAutonsParent, LV_OBJ_FLAG_HIDDEN);
+			        } else if (robotInstance->curAlliance == Alliance::BLUE) {
+				        lv_obj_clear_flag(autonSelector->blueAutonsParent, LV_OBJ_FLAG_HIDDEN);
+				        lv_obj_add_flag(autonSelector->redAutonsParent, LV_OBJ_FLAG_HIDDEN);
+			        }
+
+			        auto& autons =
+			                robotInstance->curAlliance == Alliance::RED ? autonSelector->redAutons : autonSelector->blueAutons;
+		        }
+	        },
+	        LV_EVENT_VALUE_CHANGED, this);
+
+
+	// setup styles
 	lv_style_init(&btnRedStyle);
 	lv_style_set_bg_color(&btnRedStyle, lv_color_hex(0xf21e0f));
 	lv_style_set_bg_opa(&btnRedStyle, LV_OPA_COVER);

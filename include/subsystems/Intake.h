@@ -25,10 +25,10 @@ private:
 
 	bool extenderEnabled = false;
 
-	bool (Intake::*blueismDetector)(void) = nullptr;
 
 	bool redRingDetector();
 	bool blueRingDetector();
+	bool (Intake::*blueismDetector)(void) = nullptr;
 
 	RobotThread runner();
 	RobotThread blueismCoro();

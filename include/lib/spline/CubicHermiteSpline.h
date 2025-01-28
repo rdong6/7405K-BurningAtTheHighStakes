@@ -46,7 +46,7 @@ private:
 	                        [-3 -2  3  -1] [P1]
 	                        [2  1   -2  1] [V1]
 
-	We want to find to find the coefficients of the spline: P(t) = a₃t³ + a₂t² + a₁t + a₀
+	We want to find the coefficients of the spline: P(t) = a₃t³ + a₂t² + a₁t + a₀
 	P(0)    = a₀
 	P'(0)   = a₁
 	P(1)    = a₃ + a₂ + a₁ + a₀

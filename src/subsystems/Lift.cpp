@@ -61,8 +61,8 @@ void Lift::registerTasks() {
 
 	controllerRef->registerCallback(
 	        [this]() {
-		        setState(State::LEVEL_1);
-		        // toggleState();
+		        // setState(State::LEVEL_1);
+		        toggleState();
 	        },
 	        []() {}, Controller::master, Controller::right, Controller::rising);
 }
@@ -76,12 +76,13 @@ RobotThread Lift::updateAngle() {
 		double rotationVel = rotation.get_velocity() / 100.0;// deg/s
 
 		// 1:3
-		double motorVel = motor.get_actual_velocity() / 60;
-		if (liftFlags->isMoving && fabs(motorVel) > 0 && util::fpEquality(fabs(rotationVel), 0.0)) {
-			counter++;
-		} else {
-			counter = 0;
-		}
+		double motorVel = motor.get_actual_velocity();
+		// if (liftFlags->isMoving && (std::fabs(motorVel) <= 5 || std::fabs(rotationVel) <= 1 ||
+		//                             rotation.get_velocity() == std::numeric_limits<int32_t>::max())) {
+		// 	counter++;
+		// } else {
+		// 	counter = 0;
+		// }
 
 		// kill lift if rotation sensor becomes unplugged (data is max) or if rotation's data freezes
 		if (pos == std::numeric_limits<int32_t>::max() || counter > 20) {
