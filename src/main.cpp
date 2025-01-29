@@ -55,7 +55,6 @@ void initialize() {
 	robot_init();
 	// autonSelector.run();
 
-
 	pros::lcd::print(6, "Alliance: %d", robotInstance->curAlliance);
 	pros::lcd::print(7, "Auton: %d", robotInstance->curAuton);
 
@@ -276,7 +275,8 @@ RobotThread redMogoSide() {
 	pnoomatics->setClamp(true);
 
 	intake->moveVoltage(12000);
-	drive->setCurrentMotion(PIDTurn(100, PID(200, 1, 45, true, 10), false, false, 0.5));
+	// original: 100
+	drive->setCurrentMotion(PIDTurn(90, PID(200, 1, 45, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 25));
 	co_yield drive->waitUntilSettled(1500);
@@ -287,26 +287,28 @@ RobotThread redMogoSide() {
 	drive->setCurrentMotion(ProfiledMotion(20, 50, 60, 25));
 	co_yield drive->waitUntilSettled(1500);
 
-	drive->setCurrentMotion(PIDTurn(50, PID(200, 1, 45, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(40, PID(200, 1, 45, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
 	drive->setCurrentMotion(ProfiledMotion(24, 50, 60, 25));
 	co_yield drive->waitUntilSettled(1500);
-	co_yield util::coroutine::delay(500);
+	drive->setCurrentMotion(TimedMotion(500, 12000));
+	co_yield drive->waitUntilSettled(500);
 
-	drive->setCurrentMotion(ProfiledMotion(-10, 50, 60, 25));
+	drive->setCurrentMotion(ProfiledMotion(-6, 50, 60, 25));
 	co_yield drive->waitUntilSettled(1500);
 
 	pnoomatics->setHammer(true);
+	co_yield util::coroutine::delay(250);
 
-	drive->setCurrentMotion(PIDTurn(230, PID(200, 1, 45, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(230, PID(120, 1, 175, true, 10), false, false, 0.5, 12000, true, false));
 	co_yield drive->waitUntilSettled(1000);
 
 	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 25));
 	co_yield drive->waitUntilSettled(1500);
 	pnoomatics->setClamp(false);
 
-	drive->setCurrentMotion(ProfiledMotion(60, 50, 60, 25));
+	/*drive->setCurrentMotion(ProfiledMotion(60, 50, 60, 25));
 
 	if (robotInstance->isElim) {
 
@@ -315,13 +317,111 @@ RobotThread redMogoSide() {
 		liftFlags->targetAngle = 100;
 		lift->setState(Lift::HOLD);
 		co_yield util::coroutine::nextCycle();
-	}
+	}*/
 	co_yield drive->waitUntilSettled(2000);
+	intake->moveVoltage(0);
 }
 
 
 RobotThread blueRingSide() {
-	//
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+	auto drive = robotInstance->getSubsystem<Drive>().value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto intakeFlags = robotInstance->getFlag<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto liftFlags = robotInstance->getFlag<Lift>().value();
+	auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
+	auto odom = robotInstance->getSubsystem<Odometry>().value();
+#pragma GCC diagnostic pop
+	
+	drive->setCurrentMotion(PIDTurn(320, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(800);
+
+	liftFlags->targetAngle = 210;
+	lift->setState(Lift::HOLD);
+	co_yield util::coroutine::nextCycle();
+	Timeout liftTimeout = Timeout(500);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
+	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 45));
+	co_yield drive->waitUntilSettled(1000);
+
+
+	lift->setState(Lift::STOW);
+	co_yield util::coroutine::nextCycle();
+
+	drive->setCurrentMotion(PIDTurn(340, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(-34.5, 50, 60, 22));
+	co_yield drive->waitUntilSettled(1500);
+
+	pnoomatics->setClamp(true);
+
+	// drive->setCurrentMotion(PIDTurn(230, PID(200, 1, 75, true, 10), false, false, 0.5)); // original
+	drive->setCurrentMotion(PIDTurn(130, PID(120, 1, 170, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	// tune
+	intake->moveVoltage(12000);
+	drive->setCurrentMotion(ProfiledMotion(16, 50, 60, 50));
+	co_yield drive->waitUntilSettled(1500);
+
+	drive->setCurrentMotion(PIDTurn(90, PID(150, 1, 75, true, 10), false, true, 0.5));
+	co_yield drive->waitUntilSettled(500);
+
+	drive->setCurrentMotion(ProfiledMotion(8, 50, 60, 50));
+	co_yield drive->waitUntilSettled(1500);
+	co_yield util::coroutine::delay(300);
+	drive->setCurrentMotion(PIDTurn(352, PID(150, 1, 125, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(ProfiledMotion(39, 50, 60, 50));
+	co_yield drive->waitUntilSettled(1500);
+
+	drive->setCurrentMotion(PIDTurn(55, PID(200, 1, 45, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+	drive->setCurrentMotion(ProfiledMotion(24.5, 15, 60, 30));
+	co_yield drive->waitUntilSettled(2000);
+	co_yield util::coroutine::delay(300);
+	drive->setCurrentMotion(TimedMotion(500,12000));
+	co_yield drive->waitUntilSettled(1500);
+
+	if (!robotInstance->isElim) {
+	    // drive->setCurrentMotion(ProfiledMotion(-74, 50, 60, 30));
+	    // co_yield util::coroutine::delay(750);
+
+	    // liftFlags->targetAngle = 45;
+	    // lift->setState(Lift::HOLD);
+	    // co_yield util::coroutine::nextCycle();
+
+		// cursed stuff to avoid red ring from earlier
+		drive->setCurrentMotion(ProfiledMotion(-50, 50, 60, 30));
+		co_yield drive->waitUntilSettled(500);
+	}
+
+	if (robotInstance->isElim) {
+		drive->setCurrentMotion(ProfiledMotion(-10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		drive->setCurrentMotion(ProfiledMotion(10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		co_yield util::coroutine::delay(500);
+		drive->setCurrentMotion(ProfiledMotion(-10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		drive->setCurrentMotion(ProfiledMotion(10, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+		co_yield util::coroutine::delay(500);
+
+		drive->setCurrentMotion(ProfiledMotion(-20, 50, 60, 50));
+		co_yield drive->waitUntilSettled(1500);
+
+		drive->setCurrentMotion(PIDTurn(90, PID(200, 1, 45, true, 10), false, false, 0.5));
+		co_yield drive->waitUntilSettled(500);
+		drive->setCurrentMotion(ProfiledMotion(50, 50, 60, 50));
+		co_yield drive->waitUntilSettled(3000);
+	}
+
+	co_yield util::coroutine::delay(2000);
+	intake->moveVoltage(0);
+
 }
 
 RobotThread blueMogoSide() {
@@ -1690,11 +1790,12 @@ RobotThread autonomousUser() {
 	// END TESTING
 
 
-	// auto coro = redRingSide();
+	// auto coro = blueRingSide();
+	auto coro = redMogoSide();
 	// auto coro = redQualRingSideAuton();
 	// auto coro = redMogoRushSafe();
 	// auto coro = testAuton();
-	auto coro = realSkillsAuton();
+	// auto coro = realSkillsAuton();
 	while (coro) { co_yield coro(); }
 
 	// if (robotInstance->curAlliance == Alliance::BLUE) {

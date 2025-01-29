@@ -16,8 +16,9 @@ ifneq (,$(wildcard ./include/liblvgl/llemu.hpp))
 	CPPFLAGS += -D_PROS_INCLUDE_LIBLVGL_LLEMU_HPP
 endif
 
+WARNFLAGS=-Wno-psabi
 #WARNFLAGS=-Wall -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wextra-semi -Wnull-dereference -Wswitch-enum -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches -Wsuggest-override
-WARNFLAGS=-Wall -Wconversion -Wsign-conversion -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wnull-dereference -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches # no suggest-override, no switch-enum, no extra-semis
+# WARNFLAGS=-Wall -Wconversion -Wsign-conversion -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wnull-dereference -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches # no suggest-override, no switch-enum, no extra-semis
 SPACE := $() $()
 COMMA := ,
 

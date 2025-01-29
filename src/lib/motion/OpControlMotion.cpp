@@ -52,7 +52,6 @@ IMotion::MotorVoltages OpControlMotion::calculate(const kinState& state) {
 	curved_turn += 9 * sign(curved_turn);
 	// Combines the turn values with the motor powers
 	// converts from +/-127 into mV as rest of the drive class works with mV
-	printf("curved_turn: %f\n", curved_turn);
 
 	double left = (power + curved_turn) / 127.0 * 12000;
 	double right = (power - curved_turn) / 127.0 * 12000;

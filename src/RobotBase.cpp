@@ -19,6 +19,12 @@ void RobotBase::queueTasks(std::list<std::pair<RobotFunc, TaskFunc>>& tasks) {
 	bool armAuton = false;
 	bool armOpCtrl = false;
 
+	if (!pros::c::competition_is_disabled() && pros::c::competition_is_autonomous()) {
+		armAuton = true;
+	} else {
+		armOpCtrl = true;
+	}
+
 	uint32_t time = pros::millis();
 
 	while (true) {
@@ -32,12 +38,13 @@ void RobotBase::queueTasks(std::list<std::pair<RobotFunc, TaskFunc>>& tasks) {
 			}
 		} else {
 			disabledLastLoop = false;
-
 			if (pros::c::competition_is_autonomous() && armAuton) {
 				queueTasks(autonomous);
 				armAuton = false;
+				armOpCtrl = true;
 			} else if (!pros::competition::is_disabled() && !pros::competition::is_autonomous() && armOpCtrl) {
 				queueTasks(opcontrol);
+				armAuton = true;
 				armOpCtrl = false;
 			}
 		}
