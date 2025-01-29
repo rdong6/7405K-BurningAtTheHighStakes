@@ -103,22 +103,6 @@ RobotThread Lift::runner() {
 	while (true) {
 		if (liftFlags->kill) { co_return; }
 
-		/*if (liftFlags->curAngle <= 300) { robot->getSubsystem<Intake>().value()->setExtender(true); }
-
-		//  lower intake extender -> lift was last to touch it and move it up
-		if (liftFlags->curAngle > 300) { robot->getSubsystem<Intake>().value()->setExtender(false); }
-
-		// test this hard clamp
-		if (liftFlags->curAngle <= 210) {
-		    liftFlags->targetAngle = 220;
-		    liftFlags->state = Lift::HOLD;
-		}*/
-
-		// SOFT STOP
-		// if (liftFlags->curAngle >= 215) {
-		// 	liftFlags->targetAngle = 215;
-		// 	setState(Lift::HOLD);
-		// }
 
 		if (liftFlags->state == State::IDLE) {
 			liftFlags->isMoving = false;
@@ -185,7 +169,7 @@ void Lift::setState(State state) {
 			break;
 		case State::STOW:
 			robot->getFlag<Lift>().value()->targetAngle = 2.5;// determine
-			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			break;
 		case State::IDLE:
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -194,15 +178,6 @@ void Lift::setState(State state) {
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 	}
-
-	// robot->getFlag<Lift>().value()->isOpen = open;
-	// robot->getFlag<Lift>().value()->isHolding = false;
-
-	// if (open) {
-	// 	robot->registerTask([this]() { return this->openLiftCoro(); }, TaskType::SENTINEL);
-	// } else {
-	// 	robot->registerTask([this]() { return this->closeLiftCoro(); }, TaskType::SENTINEL);
-	// }
 }
 
 void Lift::setClaw(double enabled) {

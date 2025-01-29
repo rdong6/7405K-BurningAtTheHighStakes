@@ -11,6 +11,7 @@
 
 using RobotFunc = std::function<bool(void)>;// lambda from each coro, indicating if it's ready to run or not
 using TaskFunc = std::function<util::coroutine::Generator<RobotFunc>(void)>;// function which serves as the "thread"
+typedef util::coroutine::Generator<RobotFunc> (*AutonFn_t)(void);// C func ptr -> specifically for auton selector only
 
 using RobotThread = util::coroutine::Generator<RobotFunc>;
 
@@ -67,7 +68,7 @@ public:
 		return this->get<typename T::flags>();
 	}
 
-	Auton curAuton = Auton::NONE;
+	AutonFn_t autonFnPtr = nullptr;
 	Alliance curAlliance = Alliance::INVALID;
 
 	bool isElim = false;// whether we're running elim or qual auton

@@ -53,10 +53,9 @@ void robot_init() {
 void initialize() {
 	AutonSelector autonSelector;// also initalizes pros::lcd
 	robot_init();
-	// autonSelector.run();
+	autonSelector.run();
 
 	pros::lcd::print(6, "Alliance: %d", robotInstance->curAlliance);
-	pros::lcd::print(7, "Auton: %d", robotInstance->curAuton);
 
 	// TODO: Fix logger so no unaligned accesses
 	// logger_initialize("test.txt", 100);
@@ -1757,6 +1756,10 @@ RobotThread blueFuckedUpAuton() {
 
 RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
+
+	// testing auton selector
+	// auto coro = robotInstance->autonFnPtr();
+	// while (coro) { co_yield coro(); }
 
 	// Spline testSpline = Spline(CubicBezier(Pose(0, 0), Pose(0, 0), Pose(48, 10), Pose(48, 48)));
 

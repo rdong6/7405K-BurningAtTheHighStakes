@@ -12,31 +12,30 @@ class Intake : public Subsystem {
 private:
 	enum class AntiJamState { IDLE, UNWIND };
 
-	pros::adi::DigitalOut extender{'F'};
 	pros::MotorGroup motors{ports::intake};
 	pros::Distance distance{ports::intakeDistance};
 	pros::Distance blueismDistance{ports::blueismDistance};
 	pros::Optical color{ports::intakeColor};
 
 	AntiJamState state = AntiJamState::IDLE;
-	bool codeOverride = false;// code takes control of intake
-	uint32_t timedMoveStartTime = 0;
 
+	bool codeOverride = false;// intake code takes control of intake -> no other subsystem/controller can override
+
+	bool (Intake::*blueismDetector)(void) = nullptr;
+	// for blueism coro -> when we eject a ring, if enabled, we will resume last intake voltage after ejecting ring
 	int lastCommandedVoltage = 0;
 
-	bool extenderEnabled = false;
-
 	bool intakeStalled = false;
-	unsigned int intakeStalledCounter = 0;
 
 
 	bool redRingDetector();
 	bool blueRingDetector();
-	bool (Intake::*blueismDetector)(void) = nullptr;
 
 	RobotThread runner();
 	RobotThread blueismCoro();
 	RobotThread ladyBrownClearanceCoro();// moves intake slightly back so lady brown clears intake as it goes to score
+	RobotThread
+	ladyBrownLoadedCoro();// if intake is intaking ring into lady brown and it stalls, kill the motor -> used in autons
 	RobotThread antiJamCoro();
 	RobotThread stalledDetectorCoro();
 
@@ -48,7 +47,7 @@ public:
 		bool distStop{false};
 		bool ladyBrownClearanceEnabled{false};// when enabled by lift, move intake back slightly
 
-		bool colorSortResumes{false};// after color sort, we resume last commanded voltage
+		bool colorSortResumes{true};// after color sort, we resume last commanded voltage
 
 		// ring status
 		bool partiallyIn{false};
@@ -60,15 +59,13 @@ public:
 
 	void registerTasks() override;
 
+	// Use these funcs! Only use pros motor api calls if code is overriding other inputs
 	void moveVoltage(int mv);
 	void moveVel(int vel);
 	void brake();
 
 	void setTorqueStop(bool val);
 	void setDistStop(bool val);
-
-	void setExtender(bool val);
-	void toggleExtender();
 
 	bool isStalled() const;
 };
