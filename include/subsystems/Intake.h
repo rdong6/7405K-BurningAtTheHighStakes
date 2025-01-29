@@ -15,6 +15,7 @@ private:
 	pros::adi::DigitalOut extender{'F'};
 	pros::MotorGroup motors{ports::intake};
 	pros::Distance distance{ports::intakeDistance};
+	pros::Distance blueismDistance{ports::blueismDistance};
 	pros::Optical color{ports::intakeColor};
 
 	AntiJamState state = AntiJamState::IDLE;
@@ -25,6 +26,9 @@ private:
 
 	bool extenderEnabled = false;
 
+	bool intakeStalled = false;
+	unsigned int intakeStalledCounter = 0;
+
 
 	bool redRingDetector();
 	bool blueRingDetector();
@@ -34,6 +38,7 @@ private:
 	RobotThread blueismCoro();
 	RobotThread ladyBrownClearanceCoro();// moves intake slightly back so lady brown clears intake as it goes to score
 	RobotThread antiJamCoro();
+	RobotThread stalledDetectorCoro();
 
 public:
 	struct flags {
@@ -64,4 +69,6 @@ public:
 
 	void setExtender(bool val);
 	void toggleExtender();
+
+	bool isStalled() const;
 };

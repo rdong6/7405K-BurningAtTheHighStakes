@@ -21,13 +21,14 @@ namespace ports {
 	constexpr int weakRightMotor = 0;
 
 	constexpr std::initializer_list<std::int8_t> intake = {1};
-	constexpr int intakeDistance = 0;
+	constexpr int intakeDistance = 5;
 	constexpr int intakeColor = 18;
+	constexpr int blueismDistance = 20;
 
 	constexpr int clampDistance = 0;
 
 	constexpr int liftMotor = -8;
-	constexpr int liftRotation = 20;
+	constexpr int liftRotation = 19;
 
 	constexpr int leftRotation = 0;
 	constexpr int rightRotation = 0;

@@ -32,6 +32,7 @@ void Intake::registerTasks() {
 	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; });
 	robot->registerTask([this]() { return this->ladyBrownClearanceCoro(); }, TaskType::AUTON,
 						[robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; });
+	// robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::AUTON);
 
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
@@ -57,6 +58,12 @@ void Intake::registerTasks() {
 	                                Controller::falling);
 }
 
+RobotThread Intake::stalledDetectorCoro() {
+	while (true) {
+		co_yield util::coroutine::nextCycle();
+	}
+}
+
 /*
 Coroutine which runs blueism code.
 
@@ -65,17 +72,17 @@ Thread Type: AUTON
 RobotThread Intake::blueismCoro() {
 	// TODO: Determine if this should be done here or elsewhere in the program
 
-	// switch (robot->curAlliance) {
-	// 	case Alliance::BLUE:
-	// 		blueismDetector = &Intake::redRingDetector;
-	// 		break;
-	// 	case Alliance::RED:
-	// 		blueismDetector = &Intake::blueRingDetector;
-	// 		break;
-	// 	default:
-	// 		blueismDetector = nullptr;
-	// 		break;
-	// }
+	switch (robot->curAlliance) {
+		case Alliance::BLUE:
+			blueismDetector = &Intake::redRingDetector;
+			break;
+		case Alliance::RED:
+			blueismDetector = &Intake::blueRingDetector;
+			break;
+		default:
+			blueismDetector = nullptr;
+			break;
+	}
 
 	// suspend coroutine until we want blueism enabled (blueismDetector points to either red or blue detector func)
 	co_yield [this]() -> bool { return this->blueismDetector; };
@@ -85,76 +92,21 @@ RobotThread Intake::blueismCoro() {
 	double motorStartPosition = 0.0;
 
 	while (true) {
-		// Checks if ring of opposite alliance is in intake. Check dist to elim false positives
-		// printf("%f\n", color.get_hue());
-		// if ((this->*blueismDetector)() && color.get_proximity() >= 80) {
-		// 	printf("vel: %f\n", motors.get_actual_velocity());
-		// 	// little p controller attempt
-		// 	// double rotationsToTravel = (700 - motors.get_actual_velocity()) * 0.005068807339;
-		// 	double rotationsToTravel = (700 - motors.get_actual_velocity()) * 0.0045568807339;// tuning this value
-		//
-		// 	uint32_t startTime = pros::millis();
-		// 	// Determines how long after seeing the ring do we stop the intake*/
-		//
-		// 	// motors.set_brake_mode_all(pros::E_MOTOR_BRAKE_BRAKE);
-		// 	motorStartPosition = motors.get_position();
-		//
-		// 	co_yield [&]() -> bool {
-		// 		return std::fabs(motors.get_position() - motorStartPosition) >= rotationsToTravel; /* TUNE THIS */
-		// 	};
-		// 	uint32_t endTime = pros::millis();
-		//
-		// 	// Now code takes over intake and stops it to eject ring
-		// 	motors.brake();
-		// 	codeOverride = true;
-		// 	// printf("Time: %d\n", endTime - startTime);
-		//
-		// 	// determines how long we stop intake for before resuming any normal operations
-		// 	co_yield util::coroutine::delay(700 /* TUNE THIS */);
-		// 	// motors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-		//
-		// 	// returns control to intake and if requested, move intake to last commanded voltage before we blueism
-		// 	codeOverride = false;
-		// 	if (intakeFlags->colorSortResumes) {
-		// 		// determines how long after we ejected ring do we resume intake's last voltage
-		// 		co_yield util::coroutine::delay(100 /* TUNE THIS */);
-		// 		moveVoltage(lastCommandedVoltage);
-		// 	}
-		// }
-
 		if ((this->*blueismDetector)() && color.get_proximity() >= 80) {
-			printf("vel: %f\n", motors.get_actual_velocity());
-			// little p controller attempt
-			// double rotationsToTravel = (700 - motors.get_actual_velocity()) * 0.005068807339;
-
-			// double rotationsToTravel = std::fmax(std::fmin((700 - motors.get_actual_velocity()) * 0.0055568807339, 1.169),
-			//                                      1.3);// tuning this value
-
-			double rotationsToTravel = std::fmax(std::fmin((700 - motors.get_actual_velocity()) * 0.0055568807339, 0.99),
-			                                     1.3);// tuning this value
-
-			uint32_t startTime = pros::millis();
-			// Determines how long after seeing the ring do we stop the intake*/
-
-			// motors.set_brake_mode_all(pros::E_MOTOR_BRAKE_BRAKE);
-			motorStartPosition = motors.get_position();
-
 			co_yield [&]() -> bool {
-				return std::fabs(motors.get_position() - motorStartPosition) >= rotationsToTravel; /* TUNE THIS */
+				return blueismDistance.get() <= 20; /* TUNE THIS */
 			};
-			uint32_t endTime = pros::millis();
+
+			co_yield util::coroutine::delay(50);
 
 			// Now code takes over intake and stops it to eject ring
-			moveVoltage(-12000);
+			motors.brake();
 			codeOverride = true;
-			// printf("Time: %d\n", endTime - startTime);
 
 			// determines how long we stop intake for before resuming any normal operations
-			co_yield util::coroutine::delay(100 /* TUNE THIS */);
-			// motors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
+			co_yield util::coroutine::delay(250 /* TUNE THIS */);
 
 			// returns control to intake and if requested, move intake to last commanded voltage before we blueism
-			motors.brake();
 			codeOverride = false;
 			if (intakeFlags->colorSortResumes) {
 				// determines how long after we ejected ring do we resume intake's last voltage
@@ -256,7 +208,7 @@ RobotThread Intake::runner() {
 		}
 
 		if (intakeFlags->distStop) {
-			if (dist <= 17.5) {
+			if (dist <= 24) {
 				intakeFlags->partiallyIn = false;
 				intakeFlags->fullyIn = true;
 			} else if (dist <= 60) {
