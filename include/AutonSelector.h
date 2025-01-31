@@ -50,6 +50,8 @@ private:
 	Button cycleLeftBtn;
 	Button cycleRightBtn;
 
+	// button to increase/decrease delay
+
 	// index of current auton to display on autonTab
 	int autonIndex = 0;
 
@@ -59,18 +61,19 @@ private:
 	std::vector<Button> redQualAutons;
 	std::vector<Button> blueQualAutons;
 
-	Button blueRingsideElim;
-	Button blueRingsideQual;
-	Button redRingsideElim;
-	Button redRingsideQual;
-
 	std::vector<Button>& getSelectedAutons();
 	lv_obj_t* getAutonParentObj();
 
 public:
+	// because it's UB to cast fn ptr to void*
+	struct AutonFnStruct {
+		AutonFn_t autonFnPtr;
+		AutonFnStruct(AutonFn_t autonFn) : autonFnPtr(autonFn) {}
+	};
+
 	AutonSelector();
 
-	void addAuton(const char* name, bool isRed, bool isQual, AutonFn_t autonFnPtr);
+	void addAuton(const char* name, bool isRed, bool isQual, AutonFnStruct* autonFnPtr);
 
 	// show auton selector
 	void run();

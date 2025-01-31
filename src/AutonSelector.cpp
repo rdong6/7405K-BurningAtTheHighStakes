@@ -70,10 +70,7 @@ void AutonSelector::Button::setHidden(bool en) {
 AutonSelector::AutonSelector() {
 	pros::lcd::initialize();
 	lcdScreen = lv_scr_act();
-}
 
-void AutonSelector::run() {
-	return;
 	// setup styles
 	lv_style_init(&btnRedStyle);
 	lv_style_set_bg_color(&btnRedStyle, lv_color_hex(0xf21e0f));
@@ -100,7 +97,7 @@ void AutonSelector::run() {
 	selectorScreen = lv_obj_create(nullptr);
 
 	// create tabview for auton
-	tabview = lv_tabview_create(selectorScreen, LV_DIR_TOP, 10 /* tune height of tab */);
+	tabview = lv_tabview_create(selectorScreen, LV_DIR_TOP, 30 /* tune height of tab */);
 	matchTypeTab = lv_tabview_add_tab(tabview, "Match Type");
 	allianceTab = lv_tabview_add_tab(tabview, "Alliance");
 	autonsTab = lv_tabview_add_tab(tabview, "Autons");
@@ -108,16 +105,16 @@ void AutonSelector::run() {
 
 	// create parent container objs for the auton buttons
 	blueQualAutonsParent = lv_obj_create(autonsTab);
-	lv_obj_set_pos(blueQualAutonsParent, 145, -10);
+	lv_obj_set_pos(blueQualAutonsParent, 145, 20);
 	lv_obj_set_size(blueQualAutonsParent, 175, 150);
-	blueQualAutonsParent = lv_obj_create(autonsTab);
-	lv_obj_set_pos(blueQualAutonsParent, 145, -10);
-	lv_obj_set_size(blueQualAutonsParent, 175, 150);
+	blueElimAutonsParent = lv_obj_create(autonsTab);
+	lv_obj_set_pos(blueElimAutonsParent, 145, 20);
+	lv_obj_set_size(blueElimAutonsParent, 175, 150);
 	redQualAutonsParent = lv_obj_create(autonsTab);
-	lv_obj_set_pos(redQualAutonsParent, 145, -10);
+	lv_obj_set_pos(redQualAutonsParent, 145, 20);
 	lv_obj_set_size(redQualAutonsParent, 175, 150);
 	redElimAutonsParent = lv_obj_create(autonsTab);
-	lv_obj_set_pos(redElimAutonsParent, 145, -10);
+	lv_obj_set_pos(redElimAutonsParent, 145, 20);
 	lv_obj_set_size(redElimAutonsParent, 175, 150);
 	// make the autons hidden by default
 	lv_obj_add_flag(blueQualAutonsParent, LV_OBJ_FLAG_HIDDEN);
@@ -134,9 +131,10 @@ void AutonSelector::run() {
 		        autonSelector->qualsBtn.setStyle(&btnGreenStyle);
 		        autonSelector->elimsBtn.setStyle(&btnGrayStyle);
 		        lv_tabview_set_act(autonSelector->tabview, 1, LV_ANIM_ON);
+		        lv_event_send(autonSelector->tabview, LV_EVENT_VALUE_CHANGED, NULL);
 	        },
 	        this);
-	qualsBtn.setPos(20, -10);
+	qualsBtn.setPos(20, 20);
 	qualsBtn.setSize(175, 150);
 	qualsBtn.setStyle(&btnRedStyle);// set to orange
 	elimsBtn = Button(
@@ -147,6 +145,7 @@ void AutonSelector::run() {
 		        autonSelector->qualsBtn.setStyle(&btnGrayStyle);
 		        autonSelector->elimsBtn.setStyle(&btnGreenStyle);
 		        lv_tabview_set_act(autonSelector->tabview, 1, LV_ANIM_ON);
+		        lv_event_send(autonSelector->tabview, LV_EVENT_VALUE_CHANGED, NULL);
 	        },
 	        this);
 	elimsBtn.setPos(275, 20);
@@ -161,9 +160,10 @@ void AutonSelector::run() {
 		        autonSelector->redAllianceBtn.setStyle(&btnGreenStyle);
 		        autonSelector->blueAllianceBtn.setStyle(&btnGrayStyle);
 		        lv_tabview_set_act(autonSelector->tabview, 2, LV_ANIM_ON);
+		        lv_event_send(autonSelector->tabview, LV_EVENT_VALUE_CHANGED, NULL);
 	        },
 	        this);
-	redAllianceBtn.setPos(20, -10);
+	redAllianceBtn.setPos(20, 20);
 	redAllianceBtn.setSize(175, 150);
 	redAllianceBtn.setStyle(&btnRedStyle);
 	blueAllianceBtn = Button(
@@ -174,6 +174,7 @@ void AutonSelector::run() {
 		        autonSelector->redAllianceBtn.setStyle(&btnGrayStyle);
 		        autonSelector->blueAllianceBtn.setStyle(&btnGreenStyle);
 		        lv_tabview_set_act(autonSelector->tabview, 2, LV_ANIM_ON);
+		        lv_event_send(autonSelector->tabview, LV_EVENT_VALUE_CHANGED, NULL);
 	        },
 	        this);
 	blueAllianceBtn.setPos(275, 20);
@@ -192,7 +193,7 @@ void AutonSelector::run() {
 		        autons[autonSelector->autonIndex].setHidden(false);
 	        },
 	        this);
-	cycleLeftBtn.setPos(0, 0);
+	cycleLeftBtn.setPos(0, 20);
 	cycleLeftBtn.setSize(130, 150);
 
 	cycleRightBtn = Button(
@@ -207,7 +208,7 @@ void AutonSelector::run() {
 		        autons[autonSelector->autonIndex].setHidden(false);
 	        },
 	        this);
-	cycleRightBtn.setPos(0, 0);
+	cycleRightBtn.setPos(330, 20);
 	cycleRightBtn.setSize(130, 150);
 
 
@@ -215,10 +216,20 @@ void AutonSelector::run() {
 	lv_obj_add_event_cb(
 	        tabview,
 	        [](lv_event_t* event) -> void {
-		        auto* tabviewObj = lv_event_get_target(event);
 		        auto* autonSelector = static_cast<AutonSelector*>(lv_event_get_user_data(event));
+		        uint16_t tabID = lv_tabview_get_tab_act(autonSelector->tabview);
+		        lv_obj_t* tabviewContainer = lv_tabview_get_content(autonSelector->tabview);
 
-		        uint16_t tabID = lv_tabview_get_tab_act(tabviewObj);
+		        // have to manually hide/show tabview content when going between tabviews in code
+		        for (int i = 0; i < lv_obj_get_child_cnt(tabviewContainer); i++) {
+			        lv_obj_t* tabviewTabContent = lv_obj_get_child(tabviewContainer, i);
+			        if (i == tabID) {
+				        lv_obj_clear_flag(tabviewTabContent, LV_OBJ_FLAG_HIDDEN);
+			        } else {
+				        lv_obj_add_flag(tabviewTabContent, LV_OBJ_FLAG_HIDDEN);
+			        }
+		        }
+
 		        if (tabID == 2) {
 			        // dynamically load what autons to show depending on what's been chosen
 			        if (robotInstance->curAlliance == Alliance::INVALID) { return; }
@@ -242,30 +253,9 @@ void AutonSelector::run() {
 		        }
 	        },
 	        LV_EVENT_VALUE_CHANGED, this);
+}
 
-
-	// create buttons
-
-	// blue -> ringside elim
-	// B -> ringside qual
-	// R -> ringside elim
-	// R -> ringisde qual
-
-	// blueRingsideElim = Button(selectorScreen, "Blue Elim", autonBtnCallback, Auton::ELIM, Alliance::BLUE);
-	// blueRingsideElim.setPos(percentX(10), percentY(5));
-	// blueRingsideElim.setSize(150, 100);
-	// blueRingsideQual = Button(selectorScreen, "Blue Qual", autonBtnCallback, Auton::QUAL, Alliance::BLUE);
-	// blueRingsideQual.setPos(percentX(65), percentY(5));
-	// blueRingsideQual.setSize(150, 100);
-	// redRingsideElim = Button(selectorScreen, "Red Elim", autonBtnCallback, Auton::ELIM, Alliance::RED);
-	// redRingsideElim.setPos(percentX(10), percentY(50));
-	// redRingsideElim.setSize(150, 100);
-	// redRingsideElim.setStyle(&btnRedStyle);
-	// redRingsideQual = Button(selectorScreen, "Red Qual", autonBtnCallback, Auton::QUAL, Alliance::RED);
-	// redRingsideQual.setPos(percentX(65), percentY(50));
-	// redRingsideQual.setSize(150, 100);
-	// redRingsideQual.setStyle(&btnRedStyle);
-
+void AutonSelector::run() {
 	lv_scr_load(selectorScreen);
 
 	// uninstalls the entire pipeline incase someone forgets to select an auton
@@ -273,27 +263,21 @@ void AutonSelector::run() {
 	lv_scr_load(lcdScreen);
 }
 
-void AutonSelector::addAuton(const char* name, bool isRed, bool isQual, AutonFn_t autonFnPtr) {
+void AutonSelector::addAuton(const char* name, bool isRed, bool isQual, AutonFnStruct* autonFnPtr) {
 	if (autonsTab == nullptr) { return; }// auton selector isn't initialized
 
 	lv_obj_t* parentObj = isQual ? (isRed ? redQualAutonsParent : blueQualAutonsParent)
 	                             : (isRed ? redElimAutonsParent : blueElimAutonsParent);
 	auto& autons = isQual ? (isRed ? redQualAutons : blueQualAutons) : (isRed ? redElimAutons : blueElimAutons);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
-#pragma GCC diagnostic ignored "-fpermissive"
-#pragma GCC diagnostic ignored "-pedantic"
 	Button button = Button(
 	        parentObj, name,
 	        [](lv_event_t* event) -> void {
-		        // robotInstance->autonFnPtr = static_cast<AutonFn_t>(lv_event_get_user_data(event));
-		        //
-	        }, nullptr
-	        /*autonFnPtr*/);
-#pragma GCC diagnostic pop
+		        robotInstance->autonFnPtr = static_cast<AutonFnStruct*>(lv_event_get_user_data(event))->autonFnPtr;
+	        },
+	        autonFnPtr);
 	button.setSize(175, 150);
-	button.setPos(0, 0);
+	button.setPos(-20, -20);
 	// button.setPos(140, -10);
 	if (isRed) {
 		button.setStyle(&btnRedStyle);

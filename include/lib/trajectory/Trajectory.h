@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
+// TODO: move this into Trajectory.cpp
 // Time parameterized trajectory. Stores states containing pose, curvature, elapsed time, vel, accel at that point.
 struct Trajectory {
 	struct State {
@@ -126,6 +127,8 @@ struct Trajectory {
 	}
 
 	[[nodiscard]] double getTotalTime() const { return totalTime; }
+
+	void dumpTrajectory(const char* filename);
 
 	bool operator==(const Trajectory&) const = default;
 
