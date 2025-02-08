@@ -160,7 +160,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			robot->getFlag<Lift>().value()->targetAngle = 31;
+			robot->getFlag<Lift>().value()->targetAngle = 28;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::LEVEL_2:

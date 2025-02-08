@@ -21,7 +21,6 @@ private:
 
 	bool codeOverride = false;// intake code takes control of intake -> no other subsystem/controller can override
 
-	bool (Intake::*blueismDetector)(void) = nullptr;
 	// for blueism coro -> when we eject a ring, if enabled, we will resume last intake voltage after ejecting ring
 	int lastCommandedVoltage = 0;
 
@@ -30,6 +29,7 @@ private:
 
 	bool redRingDetector();
 	bool blueRingDetector();
+	bool (Intake::*blueismDetector)(void) = nullptr;
 
 	RobotThread runner();
 	RobotThread blueismCoro();
