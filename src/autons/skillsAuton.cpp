@@ -21,7 +21,7 @@
 #include "subsystems/Odometry.h"
 #include "subsystems/Pnooomatics.h"
 
-RobotThread realSkillsAuton() {
+RobotThread skillsAuton() {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 	auto drive = robotInstance->getSubsystem<Drive>().value();

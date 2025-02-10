@@ -1,8 +1,10 @@
 #pragma once
 #include "RobotBase.h"
 
-RobotThread realSkillsAuton();
+RobotThread skillsAuton();
 RobotThread blueRingSide();
 RobotThread blueMogoSide();
+RobotThread blueSAWP();
 RobotThread redRingSide();
 RobotThread redMogoSide();
+RobotThread redSAWP();
