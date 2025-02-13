@@ -7,6 +7,7 @@
 #include "pros/adi.hpp"
 #include "pros/distance.hpp"
 #include "pros/motors.hpp"
+#include <sigslot/signal.h>
 
 class Intake : public Subsystem {
 private:
@@ -54,6 +55,8 @@ public:
 		bool fullyIn{false};
 		bool storeSecond{false};
 	};
+
+	sigslot::signal_st<> ladyBrownLoadedSignal;
 
 	explicit Intake(RobotBase* robot);
 

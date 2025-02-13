@@ -15,12 +15,14 @@ Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	motor.set_gearing(pros::E_MOTOR_GEAR_100);
 
+	// init rotation sensor & starting position
 	rotation.set_data_rate(5);
 	pros::delay(20);// needed so get_angle() isn't 0
+
+	// handles get_angle() being discontinous. so when we wrap around, pos becomes like -1 instead of 359
 	int32_t curPosition = rotation.get_angle();
-	rotation.set_position(curPosition);
 	rotation.set_position(curPosition >= 35000 ? curPosition - 36000 : curPosition);
-	pros::delay(20);
+	pros::delay(20);// give time for VEXos to update stuff
 }
 
 void Lift::registerTasks() {
@@ -59,12 +61,10 @@ void Lift::registerTasks() {
 
 	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2, Controller::falling);
 
-	controllerRef->registerCallback(
-	        [this]() {
-		        // setState(State::LEVEL_1);
-		        toggleState();
-	        },
-	        []() {}, Controller::master, Controller::right, Controller::rising);
+	// when roman hits the controller, register the coroutine once to run -> when he releases the button, kill the coroutine
+	// maybe change this controller callback during skills
+	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::down,
+	                                Controller::rising);
 }
 
 RobotThread Lift::updateAngle() {
@@ -90,7 +90,7 @@ RobotThread Lift::updateAngle() {
 			co_return;
 		}
 
-		liftFlags->curAngle = pos / 100.0;
+		liftFlags->curAngle = pos / 100.0;// converts centideg to deg
 		co_yield util::coroutine::nextCycle();
 	}
 }
@@ -107,7 +107,7 @@ RobotThread Lift::runner() {
 		if (liftFlags->state == State::IDLE) {
 			liftFlags->isMoving = false;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-			motor.move_velocity(0);
+			move(0);
 			co_yield [&]() -> bool { return liftFlags->state != State::IDLE; };
 			continue;
 		}
@@ -126,16 +126,32 @@ RobotThread Lift::runner() {
 				liftFlags->state = State::IDLE;
 			}
 
-			liftFlags->pid.reset();
 			move(0);
+			liftFlags->pid.reset();
 		}
 
 		co_yield util::coroutine::nextCycle();
 	}
 }
 
-void Lift::toggleState() {
+// in skills, automate the task of scoring rings onto wallstake
+/*
+ * process:
+ * roman presses a button which enables this feature -> could just override the lift controls so when he commands lift to move
+ *up, itll do all of this stuff while roman holds button down, this feature is runnning
+ *
+ * 1) lift moves to LEVEL_1
+ * 2) run intake until ring is loaded into lady brown -> let stall detection kill the intake
+ * 3)
+ *	i) enable intake's dist stop -> prevent any more rings that are being intaked from traveling up ramp into lady brown
+ *	ii) move lady brown
+ *
+ */
+RobotThread Lift::skillsWallstakeAutomation() {
+	// sets lift into loading position
+}
 
+void Lift::toggleState() {
 	switch (robot->getFlag<Lift>().value()->state) {
 		case State::LEVEL_1:
 			setState(State::LEVEL_2);
@@ -160,7 +176,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			robot->getFlag<Lift>().value()->targetAngle = 28;
+			robot->getFlag<Lift>().value()->targetAngle = 34;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::LEVEL_2:
@@ -179,11 +195,6 @@ void Lift::setState(State state) {
 			break;
 	}
 }
-
-void Lift::setClaw(double enabled) {
-	claw.set_value(enabled);
-}
-
 
 void Lift::move(int mv) {
 	double curAngle = robot->getFlag<Lift>().value()->curAngle;

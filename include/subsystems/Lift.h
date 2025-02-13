@@ -3,9 +3,9 @@
 #include "RobotBase.h"
 #include "Subsystem.h"
 #include "lib/controller/PID.h"
-#include "pros/adi.hpp"
 #include "pros/motors.hpp"
 #include "pros/rotation.hpp"
+#include "sigslot/signal.h"
 
 class Lift : public Subsystem {
 public:
@@ -19,9 +19,8 @@ public:
 private:
 	pros::Motor motor{ports::liftMotor};
 	pros::Rotation rotation{ports::liftRotation};
-	pros::adi::DigitalOut claw{'B'};
 
-
+	RobotThread skillsWallstakeAutomation();
 	RobotThread updateAngle();
 	RobotThread runner();
 
@@ -43,12 +42,11 @@ public:
 		bool isMoving{false};// is the lift currently moving by code to a place
 
 		bool kill{false};// set to true to kill entire lift subsystem
-
-		// IGNORE THESE -> will be deleted
-		bool isOpen{false};         // is the lift open
-		bool isMotionRunning{false};// is the lift running a motion (open/close lift coroutine)
-		bool isHolding{false};
 	};
+
+	// idk any good way to expose adding connections w/o doing their entire api again so this is just gonna be public 🤷‍
+	sigslot::signal_st<> liftDoneMovingSig;
+	sigslot::signal_st<> liftIsIdleSig;
 
 	explicit Lift(RobotBase* robot);
 
@@ -56,6 +54,4 @@ public:
 
 	void toggleState();
 	void setState(State state);
-
-	void setClaw(double enabled);
 };

@@ -37,7 +37,6 @@ RobotThread blueRingSide() {
 	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 45));
 	co_yield drive->waitUntilSettled(1000);
 
-
 	lift->setState(Lift::STOW);
 	co_yield util::coroutine::nextCycle();
 

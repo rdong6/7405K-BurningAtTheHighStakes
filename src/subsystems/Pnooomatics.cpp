@@ -18,8 +18,12 @@ void Pnooomatics::registerTasks() {
 	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::b,
 	                                Controller::rising);
 
-	controllerRef->registerCallback([this]() { toggleHammer(); }, []() {}, Controller::master, Controller::y,
+	// Y = right hammer
+	// Right = left hammer
+	controllerRef->registerCallback([this]() { toggleRightHammer(); }, []() {}, Controller::master, Controller::y,
 	                                Controller::rising);
+	controllerRef->registerCallback([this]() { toggleLeftHammer(); }, []() {}, Controller::master, Controller::right,
+									Controller::rising);
 
 	// controllerRef->registerCallback([this]() { toggleClaw(); }, []() {}, Controller::master, Controller::y,
 	// Controller::rising);
@@ -60,14 +64,23 @@ void Pnooomatics::toggleClamp() {
 	setClamp(!clampEnabled);
 }
 
-void Pnooomatics::setHammer(bool enable) {
-	hammerDeployed = enable;
-	hammer.set_value(enable);
+void Pnooomatics::setRightHammer(bool enable) {
+	rightHammerDeployed = enable;
+	rightHammer.set_value(enable);
 }
 
-void Pnooomatics::toggleHammer() {
-	hammerDeployed = !hammerDeployed;
-	hammer.set_value(hammerDeployed);
+void Pnooomatics::toggleRightHammer() {
+	rightHammerDeployed = !rightHammerDeployed;
+	rightHammer.set_value(rightHammerDeployed);
+}
+
+void Pnooomatics::setLeftHammer(bool enable) {
+	leftHammerDeployed = enable;
+	leftHammer.set_value(leftHammerDeployed);
+}
+
+void Pnooomatics::toggleLeftHammer() {
+	setLeftHammer(!leftHammerDeployed);
 }
 
 void Pnooomatics::setClaw(bool enable) {

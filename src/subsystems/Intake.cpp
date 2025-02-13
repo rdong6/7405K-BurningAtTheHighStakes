@@ -24,8 +24,6 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot) {
 void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
 
-	// TODO: Stalled detector should run before everything
-
 	// Stall detection coro -> should run before everything else
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::AUTON);
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::OPCTRL);
@@ -48,13 +46,6 @@ void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->ladyBrownClearanceCoro(); }, TaskType::OPCTRL,
 	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; });
 
-
-	// robot->registerTask([this]() { return this->ladyBrownLoadedCoro(); }, TaskType::OPCTRL,
-	//                     [robot = this->robot]() {
-	// 	                    auto liftFlags = robot->getFlag<Lift>().value();
-	// 	                    return liftFlags->state == Lift::LEVEL_1 /*&& liftFlags->isMoving == false &&
-	// 	                           robot->getFlag<Intake>().value()->isMoving;*/
-	//                     });
 
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
@@ -124,25 +115,25 @@ RobotThread Intake::blueismCoro() {
 	auto intakeFlags = robot->getFlag<Intake>().value();
 
 	while (true) {
+		// we detected opposite alliance's ring
+		// afterwards, wait until we detect the ring with our dist sensor at the top of the intake
+		// now blueism commences
 		if ((this->*blueismDetector)() && color.get_proximity() >= 80) {
-			co_yield [&]() -> bool {
-				return blueismDistance.get() <= 20; /* TUNE THIS */
-			};
+			co_yield [&]() -> bool { return blueismDistance.get() <= 20; };
 
 			co_yield util::coroutine::delay(50);
 
 			// Now code takes over intake and stops it to eject ring
-			motors.brake();
 			codeOverride = true;
+			motors.brake();
 
 			// determines how long we stop intake for before resuming any normal operations
 			co_yield util::coroutine::delay(250 /* TUNE THIS */);
 
-			// returns control to intake and if requested, move intake to last commanded voltage before we blueism
+			// returns control to intake and if requested, resume intake to last commanded voltage before blueism commenced
 			codeOverride = false;
 			if (intakeFlags->colorSortResumes) { moveVoltage(lastCommandedVoltage); }
 		}
-
 
 		co_yield [this]() -> bool { return this->blueismDetector; };
 	}
@@ -162,11 +153,11 @@ RobotThread Intake::ladyBrownClearanceCoro() {
 	}
 }
 
-// Code is written under the assumption that it only ran in autons -> might have some buggy behaviour in opcontrol (or not, my
-// brain isn't working rn)
+// Runs in auton. Kills the intake to prevent it stalling indefinitely after loading a ring into the lady brown.
+// also clears intake's hook from the lady brown
 RobotThread Intake::ladyBrownLoadedCoro() {
-	// this code should only run if ladybrown is at LEVEL_1, it's in position, and intake is intaking a ring
-	// maybe get rid of the liftFlags->isMoving thing?? -> because it might do minor movements
+	// this code should only run if ladybrown is at LEVEL_1, it's in position, and we're intaking a ring
+	// maybe get rid of the liftFlags->isMoving thing?? -> because it might do minor movements when ring is loaded
 	while (true) {
 		co_yield [robot = this->robot]() {
 			auto liftFlags = robot->getFlag<Lift>().value();
@@ -174,17 +165,21 @@ RobotThread Intake::ladyBrownLoadedCoro() {
 			       robot->getFlag<Intake>().value()->isMoving;
 		};
 
-		printf("Running stall detection for lady brown\n");
+		// TODO: clean up this logic -> so we don't have duplicate detections or for example, we just detected lady brown was
+		// loaded. and in next itteration, we're stalled while waiting for intake to stall
+		// which could lead to false positives
+
+		// we detected a ring in our intake that's about to be loaded into lady brown
+		// wait until intake stalls -> that indicates that the ring has been loaded into lady brown
 		if (blueismDistance.get() <= 20) {
 			co_yield util::coroutine::delay(10);
-			while (!isStalled()) {
-				printf("Waiting for motor to stall\n");
-				co_yield util::coroutine::delay(10);
-			}
+			while (!isStalled()) { co_yield util::coroutine::delay(10); }
 
-			// intake has stalled -> assuming that given lady brown is in position and we saw a ring @ top of intake, ladybrown
+			// intake has stalled -> assuming that given lady brown is in position and we saw a ring @ top of intake, lady brown
 			// now has ring in it
 			moveVoltage(0);
+
+			// automatically retract intake hook slightly -> so we don't have to manually do it in autons
 			robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = true;
 		}
 	}

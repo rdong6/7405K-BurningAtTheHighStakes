@@ -25,13 +25,13 @@ private:
 	pros::MotorGroup rightDrive{ports::middleRightMotor, ports::frontRightMotor, ports::backRightMotor};
 	pros::Motor weakRight{ports::weakRightMotor};
 
-	// motion stuff
-	bool isSettled = false;
-	bool isTimedOut = false;
-	Motion curMotion = NullMotion();
-
 	// gear ratio between normal and weak motor -> used to scale velocities accordingly for 5.5w
 	double gearRatioWeak2Normal;
+
+	// motion stuff
+	Motion curMotion = NullMotion();
+	bool isSettled = false;
+
 
 	RobotThread runner();
 
@@ -43,9 +43,7 @@ private:
 	void setVelocityRight(int velocity);
 
 public:
-	struct flags {
-		//
-	};
+	struct flags {};
 
 	explicit Drive(RobotBase* robot);
 
@@ -62,7 +60,6 @@ public:
 	void setBrakeModeRight(pros::motor_brake_mode_e_t mode);
 	pros::motor_brake_mode_e_t getBrakeMode() const;
 
-	// todo: reimpl a way to indicate if motion timed out or settled
 	RobotFunc waitUntilSettled(uint32_t timeout = TIMEOUT_MAX);
 	RobotFunc waitUntilDist(double dist) const;
 };

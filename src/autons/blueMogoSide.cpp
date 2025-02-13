@@ -57,7 +57,7 @@ RobotThread blueMogoSide() {
 	co_yield drive->waitUntilSettled(1000);
 
 	drive->setCurrentMotion(ProfiledMotion(38, 60, 60, 60));
-	pnoomatics->setHammer(true);
+	pnoomatics->setRightHammer(true);
 	co_yield drive->waitUntilSettled(2000);
 
 // turn and clear corner
@@ -71,7 +71,7 @@ RobotThread blueMogoSide() {
 	drive->setCurrentMotion(PIDTurn(160, PID(200, 1, 155, true, 10), false, false, 0.5, 12000, true, false));
 	co_yield drive->waitUntilSettled(1500);
 
-	pnoomatics->setHammer(false);
+	pnoomatics->setRightHammer(false);
 
 // TUNE THIS SPEED!!! So it aint too fast
 	drive->setCurrentMotion(ProfiledMotion(10, 65, 60, 60));
