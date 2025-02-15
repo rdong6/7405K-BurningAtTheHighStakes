@@ -33,18 +33,17 @@
 #include "lib/geometry/Transform2D.h"
 #include "lib/geometry/Translation2D.h"
 #include "lib/geometry/Twist2D.h"
+#include "lib/spline/CubicHermiteSpline.h"
 #include "lib/trajectory/TrajectoryManager.h"
-
-#include <lib/spline/CubicHermiteSpline.h>
 
 RobotThread autonomousUser();
 
 void robot_init() {
 	robotInstance = new std::decay<decltype(*robotInstance)>::type();
 	// move cur alliance into the autons -> while we figure a different way to do auton selector
-	// robotInstance->curAlliance = Alliance::RED; // for skills
+	robotInstance->curAlliance = Alliance::RED;// for skills
 
-	robotInstance->curAlliance = Alliance::BLUE;
+	// robotInstance->curAlliance = Alliance::BLUE;
 	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::AUTON);
 }
 
@@ -55,7 +54,75 @@ void robot_init() {
  * to keep execution time for this mode under a few seconds.
  */
 
+// TEST INCLUDES FOR BENCHMARK + PATH GEN
+#include "FreeRTOSFuncs.h"
+#include "lib/spline/CubicBezier.h"
+#include "lib/spline/Path.h"
+#include "lib/trajectory/Trajectory.h"
+#include "lib/trajectory/TrajectoryGenerator.h"
+#include "lib/trajectory/constraints/DifferentialDriveConstraint.h"
+
+//// testing pregen stuff
+// linker script variables
+extern uint8_t __path_data_start[];
+extern uint8_t __path_data_end[];
+Path PREGEN_TRAJECTORY testHermitePathPregen(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{72, 0}, {72, 70.941125497}}),
+                                             CubicHermiteSpline({{72, 0}, {72, 70.941125497}}, {{50, 70.941125497}, {50, 0}}));
+Path PREGEN_TRAJECTORY testHermitePathPregen2(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{48, 0}, {48, 70.941125497}}));
+
+__attribute__((constructor(200))) void pregen_trajectories1() {
+	const void* pathDataSectionStart = &__path_data_start;
+	const void* pathDataSectionEnd = &__path_data_end;
+	const uintptr_t pathDataSize =
+	        (reinterpret_cast<uintptr_t>(pathDataSectionEnd) - reinterpret_cast<uintptr_t>(pathDataSectionStart));
+
+	const Path* const pathsPregend = static_cast<const Path*>(pathDataSectionStart);
+	for (int i = 0; i < pathDataSize / sizeof(Path); i++) {
+		const Path& path = pathsPregend[i];
+
+		// sTrajectoryManager.getInstance().storeTrajectory(path, defaultTrajectoryGenerator.generate(path, ));
+		// generate trajectories and store them in trajectory manager
+		printf("Path %d: %d points\n", i, pathsPregend[i].getNumPoints());
+	}
+}
 void initialize() {
+	// BENCHMARK
+	/*TrajectoryConstraint testConstraint(DifferentialDriveConstraint(50, odometers::trackWidth));
+	TrajectoryConstraint testConstraint1(CentripetalAccelerationConstraint(10));
+	TrajectoryGenerator trajectoryGenerator({testConstraint, testConstraint1});
+
+	enter_critical();
+	uint64_t start = pros::c::micros();
+	// const Path testHermitePath(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{48, 0}, {48, 70.941125497}}));
+	const Path testHermitePath =
+	        createCubicSplinesFromWaypoints(Pose(0, 0, 0), Pose(48, 48, 0), {Translation2D(30, 30), Translation2D(78, 78)});
+	uint64_t end = pros::c::micros();
+	exit_critical();
+
+	printf("Took %f ms. Generated %d points\n", (end - start) / 1000.0, testHermitePath.getNumPoints());
+
+	enter_critical();
+	start = pros::c::micros();
+	Trajectory generatedTrajectory = trajectoryGenerator.generate(testHermitePath, 0, 0, 50, 30, false);
+	end = pros::c::micros();
+	exit_critical();
+	printf("Took %f ms. Total time: %f\n", (end - start) / 1000.0, generatedTrajectory.getTotalTime());
+
+	// end of benchmark
+
+
+	// testing out pregen stuff
+	void* pathDataStart = &__path_data_start;
+	void* pathDataEnd = &__path_data_end;
+	uintptr_t pathDataSize = ((uintptr_t) pathDataEnd - (uintptr_t) pathDataStart);
+	printf("TestHermitePath Addr: 0x%x\tTestHermitePath2 Addr: 0x%x\tPathDataStart Addr: 0x%x\tPathDataEndAddr: 0x%x\tSize: "
+	       "%d\n",
+	       &testHermitePathPregen, &testHermitePathPregen2, pathDataStart, pathDataEnd, pathDataSize);
+
+	Path* pathsPregend = (Path*) pathDataStart;
+	for (int i = 0; i < pathDataSize / sizeof(Path); i++) { printf("Path %d: %d points\n", i, pathsPregend[i].getNumPoints()); }
+	printf("%d %d\n", testHermitePathPregen.getNumPoints(), testHermitePathPregen2.getNumPoints());*/
+
 	// AutonSelector autonSelector;// also initalizes pros::lcd
 
 	// qual autons
@@ -105,8 +172,8 @@ RobotThread autonomousUser() {
 	// 	co_yield skillsCoro();
 	// }
 
-	auto blueMogoSideCoro = blueMogoSide();
-	while (blueMogoSideCoro) {co_yield blueMogoSideCoro(); }
+	auto autoCoro = sbhsMogoSideElim();
+	while (autoCoro) { co_yield autoCoro(); }
 
 	// for now defunct auton selector
 	// if (robotInstance->autonFnPtr) {

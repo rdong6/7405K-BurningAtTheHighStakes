@@ -22,8 +22,6 @@ Intake::Intake(RobotBase* robot) : Subsystem(robot) {
 }
 
 void Intake::registerTasks() {
-	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
-
 	// Stall detection coro -> should run before everything else
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::AUTON);
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::OPCTRL);
@@ -46,6 +44,8 @@ void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->ladyBrownClearanceCoro(); }, TaskType::OPCTRL,
 	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; });
 
+	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
+
 
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
@@ -61,11 +61,19 @@ void Intake::registerTasks() {
 	                                Controller::hold);
 
 	// stops the intake when neither button is pressed
-	controllerRef->registerCallback([this]() { this->moveVoltage(0); }, []() {}, Controller::master, Controller::r1,
-	                                Controller::falling);
+	controllerRef->registerCallback(
+	        [this]() {
+		        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = true;
+		        this->moveVoltage(0);
+	        },
+	        []() {}, Controller::master, Controller::r1, Controller::falling);
 
-	controllerRef->registerCallback([this]() { this->moveVoltage(0); }, []() {}, Controller::master, Controller::r2,
-	                                Controller::falling);
+	controllerRef->registerCallback(
+	        [this]() {
+		        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = true;
+		        this->moveVoltage(0);
+	        },
+	        []() {}, Controller::master, Controller::r2, Controller::falling);
 }
 
 // coroutine that runes to detect if intake is stalled
@@ -145,7 +153,7 @@ RobotThread Intake::ladyBrownClearanceCoro() {
 	while (true) {
 		codeOverride = true;
 		motors.move_voltage(-4000);
-		co_yield util::coroutine::delay(70);
+		co_yield util::coroutine::delay(90);
 		robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
 		motors.brake();
 		codeOverride = false;

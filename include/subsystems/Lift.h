@@ -20,7 +20,7 @@ private:
 	pros::Motor motor{ports::liftMotor};
 	pros::Rotation rotation{ports::liftRotation};
 
-	RobotThread skillsWallstakeAutomation();
+	RobotThread skillsWallstakeAutomationStage1();
 	RobotThread updateAngle();
 	RobotThread runner();
 

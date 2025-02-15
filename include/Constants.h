@@ -20,7 +20,7 @@ namespace ports {
 	constexpr int backRightMotor = 11;
 	constexpr int weakRightMotor = 0;
 
-	constexpr std::initializer_list<std::int8_t> intake = {-17};
+	constexpr std::initializer_list<std::int8_t> intake = {-17}; 
 	constexpr int intakeDistance = 9;// for dist stop
 	constexpr int intakeColor = 19;
 	constexpr int blueismDistance = 20;

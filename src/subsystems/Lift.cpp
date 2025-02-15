@@ -19,7 +19,7 @@ Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	rotation.set_data_rate(5);
 	pros::delay(20);// needed so get_angle() isn't 0
 
-	// handles get_angle() being discontinous. so when we wrap around, pos becomes like -1 instead of 359
+	// handles get_angle() being discontinuous. so when we wrap around, pos becomes like -1 instead of 359
 	int32_t curPosition = rotation.get_angle();
 	rotation.set_position(curPosition >= 35000 ? curPosition - 36000 : curPosition);
 	pros::delay(20);// give time for VEXos to update stuff
@@ -34,6 +34,14 @@ void Lift::registerTasks() {
 	if (!controller) { return; }
 	auto controllerRef = controller.value();
 
+#ifdef SKILLS
+	// in skills, manage lift raising control differently than any other mode
+	controllerRef->registerCallback(
+	        [this]() {
+		        //
+	        },
+	        []() {}, Controller::master, Controller::l1, Controller::rising);
+#else
 	// when lift controller inputs set, stop whatever code motion is happening
 	controllerRef->registerCallback(
 	        [this]() {
@@ -49,6 +57,7 @@ void Lift::registerTasks() {
 		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
+#endif
 
 	controllerRef->registerCallback(
 	        [this]() {
@@ -57,14 +66,29 @@ void Lift::registerTasks() {
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
 
-	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l1, Controller::falling);
+	controllerRef->registerCallback(
+	        [this]() {
+		        move(0);
+	        },
+	        []() {}, Controller::master, Controller::l1, Controller::falling);
 
-	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2, Controller::falling);
+	controllerRef->registerCallback(
+	        [this]() {
+		        move(0);
+	        },
+	        []() {}, Controller::master, Controller::l2, Controller::falling);
 
 	// when roman hits the controller, register the coroutine once to run -> when he releases the button, kill the coroutine
 	// maybe change this controller callback during skills
-	controllerRef->registerCallback([this]() { toggleState(); }, []() {}, Controller::master, Controller::down,
-	                                Controller::rising);
+	controllerRef->registerCallback(
+	        [this]() {
+#ifdef SKILLS
+		        robot->registerTask([this]() { return this->skillsWallstakeAutomationStage1(); }, TaskType::OPCTRL);
+#else
+		        toggleState();
+#endif
+	        },
+	        []() {}, Controller::master, Controller::down, Controller::rising);
 }
 
 RobotThread Lift::updateAngle() {
@@ -145,16 +169,35 @@ RobotThread Lift::runner() {
  * 3)
  *	i) enable intake's dist stop -> prevent any more rings that are being intaked from traveling up ramp into lady brown
  *	ii) move lady brown
+ * 4) repeat entire loop
  *
  */
-RobotThread Lift::skillsWallstakeAutomation() {
+RobotThread Lift::skillsWallstakeAutomationStage1() {
+	auto liftFlags = robot->getFlag<Lift>().value();
+	auto intake = robot->getSubsystem<Intake>().value();
+
 	// sets lift into loading position
+	// while waiting for lift to get into position, we will prevent ring from moving up intake
+	setState(State::LEVEL_1);
+	do {
+		intake->setDistStop(true);
+		co_yield util::coroutine::nextCycle();
+	} while (liftFlags->isMoving);
+
+	// now allow ring to be scored
+	intake->setDistStop(false);
+
+	// wait until ring is scored
+
+	// when ring is scored, re-enable dist stop and move lady brown to score ring
+
+	// then repeat the cycle again
 }
 
 void Lift::toggleState() {
 	switch (robot->getFlag<Lift>().value()->state) {
 		case State::LEVEL_1:
-			setState(State::LEVEL_2);
+			setState(State::STOW);
 			break;
 		case State::LEVEL_2:
 			setState(State::LEVEL_1);
@@ -172,19 +215,22 @@ void Lift::toggleState() {
 }
 
 void Lift::setState(State state) {
-	robot->getFlag<Lift>().value()->state = state;
+	auto liftFlags = robot->getFlag<Lift>().value();
+	liftFlags->state = state;
+	liftFlags->errorThresh = 1.5;
 
 	switch (state) {
 		case State::LEVEL_1:
-			robot->getFlag<Lift>().value()->targetAngle = 34;
+			liftFlags->targetAngle = 28.7;
+			liftFlags->errorThresh = 1;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::LEVEL_2:
-			robot->getFlag<Lift>().value()->targetAngle = 50;
+			liftFlags->targetAngle = 50;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:
-			robot->getFlag<Lift>().value()->targetAngle = 2.5;// determine
+			liftFlags->targetAngle = 2.5;// determine
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			break;
 		case State::IDLE:
