@@ -34,7 +34,7 @@
 #include "lib/geometry/Translation2D.h"
 #include "lib/geometry/Twist2D.h"
 #include "lib/spline/CubicHermiteSpline.h"
-#include "lib/trajectory/TrajectoryManager.h"
+// #include "lib/trajectory/TrajectoryManager.h"
 
 RobotThread autonomousUser();
 
@@ -64,27 +64,27 @@ void robot_init() {
 
 //// testing pregen stuff
 // linker script variables
-extern uint8_t __path_data_start[];
-extern uint8_t __path_data_end[];
-Path PREGEN_TRAJECTORY testHermitePathPregen(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{72, 0}, {72, 70.941125497}}),
-                                             CubicHermiteSpline({{72, 0}, {72, 70.941125497}}, {{50, 70.941125497}, {50, 0}}));
-Path PREGEN_TRAJECTORY testHermitePathPregen2(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{48, 0}, {48, 70.941125497}}));
+// extern uint8_t __path_data_start[];
+// extern uint8_t __path_data_end[];
+// Path PREGEN_TRAJECTORY testHermitePathPregen(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{72, 0}, {72, 70.941125497}}),
+//                                              CubicHermiteSpline({{72, 0}, {72, 70.941125497}}, {{50, 70.941125497}, {50, 0}}));
+// Path PREGEN_TRAJECTORY testHermitePathPregen2(CubicHermiteSpline({{0, 70.941125497}, {0, 0}}, {{48, 0}, {48, 70.941125497}}));
 
-__attribute__((constructor(200))) void pregen_trajectories1() {
-	const void* pathDataSectionStart = &__path_data_start;
-	const void* pathDataSectionEnd = &__path_data_end;
-	const uintptr_t pathDataSize =
-	        (reinterpret_cast<uintptr_t>(pathDataSectionEnd) - reinterpret_cast<uintptr_t>(pathDataSectionStart));
+// __attribute__((constructor(200))) void pregen_trajectories1() {
+// 	const void* pathDataSectionStart = &__path_data_start;
+// 	const void* pathDataSectionEnd = &__path_data_end;
+// 	const uintptr_t pathDataSize =
+// 	        (reinterpret_cast<uintptr_t>(pathDataSectionEnd) - reinterpret_cast<uintptr_t>(pathDataSectionStart));
 
-	const Path* const pathsPregend = static_cast<const Path*>(pathDataSectionStart);
-	for (int i = 0; i < pathDataSize / sizeof(Path); i++) {
-		const Path& path = pathsPregend[i];
+// 	const Path* const pathsPregend = static_cast<const Path*>(pathDataSectionStart);
+// 	for (int i = 0; i < pathDataSize / sizeof(Path); i++) {
+// 		const Path& path = pathsPregend[i];
 
-		// sTrajectoryManager.getInstance().storeTrajectory(path, defaultTrajectoryGenerator.generate(path, ));
-		// generate trajectories and store them in trajectory manager
-		printf("Path %d: %d points\n", i, pathsPregend[i].getNumPoints());
-	}
-}
+// 		// sTrajectoryManager.getInstance().storeTrajectory(path, defaultTrajectoryGenerator.generate(path, ));
+// 		// generate trajectories and store them in trajectory manager
+// 		printf("Path %d: %d points\n", i, pathsPregend[i].getNumPoints());
+// 	}
+// }
 void initialize() {
 	// BENCHMARK
 	/*TrajectoryConstraint testConstraint(DifferentialDriveConstraint(50, odometers::trackWidth));
@@ -172,7 +172,7 @@ RobotThread autonomousUser() {
 	// 	co_yield skillsCoro();
 	// }
 
-	auto autoCoro = sbhsMogoSideElim();
+	auto autoCoro = sbhsRedMogoSide();
 	while (autoCoro) { co_yield autoCoro(); }
 
 	// for now defunct auton selector

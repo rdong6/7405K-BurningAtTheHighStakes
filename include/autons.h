@@ -8,4 +8,7 @@ RobotThread blueSAWP();
 RobotThread redRingSide();
 RobotThread redMogoSide();
 RobotThread redSAWP();
-RobotThread sbhsMogoSideElim();
+RobotThread sbhsRedMogoSide();
+RobotThread sbhsBlueMogoSide();
+RobotThread sbhsRedRingSide();
+RobotThread sbhsBlueRingSide();
