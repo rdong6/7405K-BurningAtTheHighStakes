@@ -55,22 +55,22 @@ RobotThread skillsAuton() {
 	intake->moveVoltage(12000);
 
 	drive->setCurrentMotion(PIDTurn(172, PID(750, 0, 5500, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(700);
-	drive->setCurrentMotion(ProfiledMotion(18, 50, 60, 60));
+	co_yield drive->waitUntilSettled(650);
+	drive->setCurrentMotion(ProfiledMotion(18, 50, 80, 80));
 	co_yield drive->waitUntilSettled(1500);
 
 	drive->setCurrentMotion(PIDTurn(157, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(700);
-	drive->setCurrentMotion(ProfiledMotion(58, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(60, 50, 80, 60));
 	co_yield util::coroutine::delay(750);
 	lift->setState(Lift::LEVEL_1);
 	co_yield util::coroutine::nextCycle();
 	co_yield drive->waitUntilSettled(1250);
-	drive->setCurrentMotion(PIDTurn(168, PID(750, 0, 5500, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(167, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(500);
 
 
-	drive->setCurrentMotion(ProfiledMotion(-23, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-24.5, 50, 80, 60));
 	co_yield util::coroutine::delay(750);
 	intake->moveVoltage(0);
 	co_yield drive->waitUntilSettled(2000);
@@ -83,7 +83,7 @@ RobotThread skillsAuton() {
 	lift->setState(Lift::HOLD);
 	co_yield util::coroutine::nextCycle();
 
-	drive->setCurrentMotion(ProfiledMotion(17.5, 30, 40, 30));
+	drive->setCurrentMotion(ProfiledMotion(17.5, 30, 60, 30));
 	co_yield util::coroutine::delay(250);// delay needed as ladyBrownClearanceEnabled stops intake after 60ms
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(2000);
@@ -94,7 +94,7 @@ RobotThread skillsAuton() {
 	liftTimeout = Timeout(700);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
 
-	drive->setCurrentMotion(ProfiledMotion(-13, 30, 40, 30));
+	drive->setCurrentMotion(ProfiledMotion(-13, 30, 70, 30));
 	co_yield drive->waitUntilSettled(2000);
 
 	drive->setCurrentMotion(PIDTurn(2.5, PID(750, 0, 5500, true, 10), false, false, 0.5));
@@ -109,16 +109,16 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(PIDTurn(135, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(600);
 
-	drive->setCurrentMotion(ProfiledMotion(15, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(15, 50, 80, 60));
 	co_yield drive->waitUntilSettled(2000);
 
-	drive->setCurrentMotion(ProfiledMotion(-9.5, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-9.5, 50, 80, 60));
 	co_yield drive->waitUntilSettled(2000);
 
 	drive->setCurrentMotion(PIDTurn(225, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(600);
 
-	drive->setCurrentMotion(ProfiledMotion(-8, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-8, 50, 80, 60));
 	co_yield drive->waitUntilSettled(2000);
 
 	pnoomatics->setClamp(false);
@@ -134,7 +134,7 @@ RobotThread skillsAuton() {
 	co_yield drive->waitUntilSettled(1000);
 
 // original: -71 in
-	drive->setCurrentMotion(ProfiledMotion(-65, 50, 50, 50));
+	drive->setCurrentMotion(ProfiledMotion(-65, 50, 80, 50));
 	co_yield drive->waitUntilSettled(5000);
 
 	// grab 2nd mogo
@@ -144,22 +144,22 @@ RobotThread skillsAuton() {
 
 	drive->setCurrentMotion(PIDTurn(189, PID(750, 0, 5500, true, 10), false, false, 0.5)); // original
 	co_yield drive->waitUntilSettled(700);
-	drive->setCurrentMotion(ProfiledMotion(18, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(18, 50, 80, 60));
 	co_yield drive->waitUntilSettled(1500);
 
 	drive->setCurrentMotion(PIDTurn(205, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(500);
-	drive->setCurrentMotion(ProfiledMotion(58, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(60, 50, 80, 60));
 	co_yield util::coroutine::delay(750);
 	lift->setState(Lift::LEVEL_1);
 	co_yield util::coroutine::nextCycle();
 	co_yield drive->waitUntilSettled(1250);
-	drive->setCurrentMotion(PIDTurn(190, PID(750, 0, 5500, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(191, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(500);
 
 
 // oriignal: 23
-	drive->setCurrentMotion(ProfiledMotion(-25.5, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-27, 50, 80, 60));
 	co_yield drive->waitUntilSettled(2000);
 
 	drive->setCurrentMotion(PIDTurn(270, PID(750, 0, 5500, true, 10), false, false, 0.5));
@@ -198,17 +198,17 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(PIDTurn(225, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(700);
 
-	drive->setCurrentMotion(ProfiledMotion(15, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(15, 50, 80, 60));
 	co_yield drive->waitUntilSettled(2000);
 
-	drive->setCurrentMotion(ProfiledMotion(-6, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-6, 50, 80, 60));
 	co_yield drive->waitUntilSettled(2000);
 
 	drive->setCurrentMotion(PIDTurn(135, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
 	// original: 8
-	drive->setCurrentMotion(ProfiledMotion(-9.5, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-9.5, 50, 80, 60));
 	co_yield drive->waitUntilSettled(2000);
 
 	// drop 2nd mogo into corner
@@ -224,7 +224,7 @@ RobotThread skillsAuton() {
 	co_yield drive->waitUntilSettled(700);
 	intake->moveVoltage(0);
 	drive->setCurrentMotion(ProfiledMotion(73, 50, 60, 60));
-	co_yield util::coroutine::delay(1000);
+	co_yield util::coroutine::delay(1800);
 	intake->setDistStop(true);
 	intake->moveVoltage(10000);
 	co_yield drive->waitUntilSettled(1500);
@@ -248,10 +248,10 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(PIDTurn(92, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
-	drive->setCurrentMotion(ProfiledMotion(40, 50, 60, 30));
+	drive->setCurrentMotion(ProfiledMotion(40, 50, 80, 30));
 	co_yield drive->waitUntilSettled(2000);
 
-	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-2, 50, 60, 60));
 	co_yield drive->waitUntilSettled(2000);
 
 	drive->setCurrentMotion(PIDTurn(90, PID(750, 0, 5500, true, 10), false, false, 0.5));
@@ -269,18 +269,25 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(PIDTurn(310, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
-	drive->setCurrentMotion(ProfiledMotion(-25, 50, 60, 60));
+	drive->setCurrentMotion(ProfiledMotion(-25, 50, 100, 60));
+	co_yield util::coroutine::delay(500);
+	intake->moveVoltage(-12000);
 	co_yield drive->waitUntilSettled(1000);
 	pnoomatics->setClamp(false);
 
-	drive->setCurrentMotion(ProfiledMotion(30, 50, 60, 60));
+	drive->setCurrentMotion(PIDTurn(310, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
-	drive->setCurrentMotion(PIDTurn(250, PID(750, 0, 5500, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(ProfiledMotion(30, 50, 100, 100));
+	co_yield util::coroutine::delay(500);
+	intake->moveVoltage(0);
+	co_yield drive->waitUntilSettled(1000);
+
+	drive->setCurrentMotion(PIDTurn(70, PID(750, 0, 5500, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(800);
 
-	drive->setCurrentMotion(ProfiledMotion(150, 70, 70, 70));
-	co_yield drive->waitUntilSettled(1000);
+	drive->setCurrentMotion(TimedMotion(10000,-12000));
+	co_yield drive->waitUntilSettled(10000);
 
 
 	// lift->setState(Lift::LEVEL_1);

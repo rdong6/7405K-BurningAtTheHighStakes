@@ -3,11 +3,15 @@
 #include "subsystems/Controller.h"
 
 Pnooomatics::Pnooomatics(RobotBase* robot) : Subsystem(robot) {
-	hang.set_value(hangReleased);
 	clamp.set_value(clampEnabled);
+	rightHammer.set_value(rightHammerDeployed);
+	leftHammer.set_value(leftHammerDeployed);
 }
 
 void Pnooomatics::registerTasks() {
+	robot->registerTask([this]() { return this->autoClampCoro(); }, TaskType::AUTON,
+	                    [robot = this->robot]() { return robot->getFlag<Pnooomatics>().value()->clampMogo; });
+
 	auto controller = robot->getSubsystem<Controller>();
 
 	if (!controller) { return; }
@@ -24,12 +28,6 @@ void Pnooomatics::registerTasks() {
 	                                Controller::rising);
 	controllerRef->registerCallback([this]() { toggleLeftHammer(); }, []() {}, Controller::master, Controller::right,
 									Controller::rising);
-
-	// controllerRef->registerCallback([this]() { toggleClaw(); }, []() {}, Controller::master, Controller::y,
-	// Controller::rising);
-
-	robot->registerTask([this]() { return this->autoClampCoro(); }, TaskType::AUTON,
-	                    [robot = this->robot]() { return robot->getFlag<Pnooomatics>().value()->clampMogo; });
 }
 
 RobotThread Pnooomatics::autoClampCoro() {
@@ -41,16 +39,6 @@ RobotThread Pnooomatics::autoClampCoro() {
 
 		co_yield [robot = this->robot]() { return robot->getFlag<Pnooomatics>().value()->clampMogo; };
 	}
-}
-
-void Pnooomatics::setHang(bool release) {
-	hangReleased = release;
-	hang.set_value(release);
-}
-
-void Pnooomatics::toggleHang() {
-	hangReleased = !hangReleased;
-	hang.set_value(hangReleased);
 }
 
 void Pnooomatics::setClamp(bool enable) {
@@ -70,8 +58,7 @@ void Pnooomatics::setRightHammer(bool enable) {
 }
 
 void Pnooomatics::toggleRightHammer() {
-	rightHammerDeployed = !rightHammerDeployed;
-	rightHammer.set_value(rightHammerDeployed);
+	setRightHammer(!rightHammerDeployed);
 }
 
 void Pnooomatics::setLeftHammer(bool enable) {
@@ -81,14 +68,4 @@ void Pnooomatics::setLeftHammer(bool enable) {
 
 void Pnooomatics::toggleLeftHammer() {
 	setLeftHammer(!leftHammerDeployed);
-}
-
-void Pnooomatics::setClaw(bool enable) {
-	clawEnabled = enable;
-	claw.set_value(enable);
-}
-
-void Pnooomatics::toggleClaw() {
-	clawEnabled = !clawEnabled;
-	claw.set_value(clawEnabled);
 }

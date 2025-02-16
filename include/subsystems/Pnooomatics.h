@@ -6,18 +6,14 @@
 
 class Pnooomatics : public Subsystem {
 private:
-	pros::adi::DigitalOut hang{'0'};
 	pros::adi::DigitalOut clamp{'D'};
 	pros::adi::DigitalOut rightHammer{'B'};
 	pros::adi::DigitalOut leftHammer{'E'};
-	pros::adi::DigitalOut claw{'0'};
 	pros::Distance dist{ports::clampDistance};
 
-	bool hangReleased = false;
 	bool clampEnabled = false;
 	bool rightHammerDeployed = false;
 	bool leftHammerDeployed = false;
-	bool clawEnabled = false;
 
 	RobotThread autoClampCoro();
 
@@ -30,9 +26,6 @@ public:
 
 	void registerTasks() override;
 
-	void setHang(bool release);
-	void toggleHang();
-
 	void setClamp(bool enable);
 	void toggleClamp();
 
@@ -41,7 +34,4 @@ public:
 
 	void setLeftHammer(bool enable);
 	void toggleLeftHammer();
-
-	void setClaw(bool enable);
-	void toggleClaw();
 };

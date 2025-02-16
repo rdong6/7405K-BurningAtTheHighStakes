@@ -66,17 +66,9 @@ void Lift::registerTasks() {
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
 
-	controllerRef->registerCallback(
-	        [this]() {
-		        move(0);
-	        },
-	        []() {}, Controller::master, Controller::l1, Controller::falling);
+	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l1, Controller::falling);
 
-	controllerRef->registerCallback(
-	        [this]() {
-		        move(0);
-	        },
-	        []() {}, Controller::master, Controller::l2, Controller::falling);
+	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2, Controller::falling);
 
 	// when roman hits the controller, register the coroutine once to run -> when he releases the button, kill the coroutine
 	// maybe change this controller callback during skills

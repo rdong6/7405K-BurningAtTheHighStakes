@@ -217,7 +217,6 @@ RobotThread Intake::runner() {
 		// printf("Torque: %f  Vel: %f\n", motors.get_torque(), motors.get_actual_velocity());
 		if (intakeFlags->torqueStop &&
 		    (motors.get_torque() > 0.97 && fabs(motors.get_actual_velocity()) >= 20) /*tune later*/) {
-			printf("Stopping due to torque\n\n\n\n\n\n\n\n");
 			this->brake();
 			this->setTorqueStop(false);
 		}
@@ -247,11 +246,11 @@ RobotThread Intake::runner() {
 }
 
 bool Intake::redRingDetector() {
-	return color.get_hue() <= 17.5;
+	return color.get_hue() <= 15;
 }
 
 bool Intake::blueRingDetector() {
-	return color.get_hue() >= 75;
+	return color.get_hue() >= 150;
 }
 
 void Intake::setTorqueStop(bool val) {
