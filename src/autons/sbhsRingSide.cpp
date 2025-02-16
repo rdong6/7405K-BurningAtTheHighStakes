@@ -1,6 +1,5 @@
 #include "Robot.h"
 #include "autons.h"
-#include "lib/geometry/kinState.h"
 #include "lib/motion/PIDTurn.h"
 #include "lib/motion/ProfiledMotion.h"
 #include "lib/motion/RAMSETEMotion.h"

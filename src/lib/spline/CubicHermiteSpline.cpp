@@ -111,7 +111,7 @@ static void thomasAlgorithim(const std::vector<double>& a, const std::vector<dou
 
 	// reverse sweep to update the solution vector
 	solution[N - 1] = d_scratch[N - 1];
-	for (int i = N - 2; i >= 0; i++) { solution[i] = d_scratch[i] - c_scratch[i] * solution[i + 1]; }
+	for (int i = N - 2; i >= 0; i--) { solution[i] = d_scratch[i] - c_scratch[i] * solution[i + 1]; }
 }
 
 Path createCubicSplinesFromWaypoints(const Pose& start, const Pose& end, std::vector<Translation2D> interiorWaypoints) {

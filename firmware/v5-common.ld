@@ -68,6 +68,12 @@ SECTIONS
    __sbss2_end = .;
 } > RAM
 
+.path_data : {
+    __path_data_start = .;
+    KEEP(*(.path_data))
+    __path_data_end = .;
+} > RAM
+
 .data : {
    __data_start = .;
    *(.data)

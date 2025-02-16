@@ -2,145 +2,72 @@
 #include "Spline.h"
 #include <fstream>
 
-/*class Path {
-public:
-    template<SplineType... splines>
-    // explicit Path(splines&&... args) : pimpl(std::make_unique<PathInternal<splines...>>(std::forward<splines>(args)...)) {}
-    explicit Path(splines... args) : pimpl(std::make_unique<PathInternal<splines...>>(args...)) {}
+// Use this macro w/ Path class declarations to pregen the trajectory
+// Doesn't work with static local objs because of C++ Initialization.
+#define PREGEN_TRAJECTORY __attribute__((init_priority(105))) __attribute__((section(".path_data")))
 
-    [[nodiscard]] size_t getNumSplines() const { return pimpl->getNumSplines(); }
+class TrajectoryManager;
 
-    [[nodiscard]] size_t getNumPoints() const { return pimpl->getNumPoints(); }
-
-    [[nodiscard]] const std::vector<PoseWithCurvature>& getPoints() const { return pimpl->getPoints(); }
-
-private:
-    class IPathImpl {
-    public:
-        virtual ~IPathImpl() = 0;
-        [[nodiscard]] virtual size_t getNumSplines() const = 0;
-        [[nodiscard]] virtual size_t getNumPoints() const = 0;
-        [[nodiscard]] virtual const std::vector<PoseWithCurvature>& getPoints() const = 0;
-    };
-
-    template<SplineType... splines>
-    class PathInternal : public IPathImpl {
-    public:
-        explicit PathInternal(splines... args) : splinesTuple(args...) {
-            // insert the first point as parameterization doesn't handle it
-            splinePoints.emplace_back(std::get<0>(splinesTuple).getPoint(0.0), std::get<0>(splinesTuple).getCurvature(0.0));
-
-            util::tuple::for_each(splinesTuple, [&](const Spline& spline) {
-                // do the spline parameterization for each spline
-                auto points = spline.parameterize();
-
-                // append the points into the vector. remove the first point as it's a duplicate of the last point from the
-                // previous spline (C⁰ continuity)
-                splinePoints.insert(std::end(splinePoints), std::begin(points) + 1, std::end(points));
-            });
-
-            numSplines = std::tuple_size_v<std::tuple<splines...>>;
-            // static_assert(std::tuple_size_v<std::tuple<splines...>> - 1 > 0);
-        }
-
-        PathInternal(const PathInternal& other) {
-            //
-        }
-
-        ~PathInternal() override;
-
-        [[nodiscard]] size_t getNumSplines() const override { return numSplines; }
-        [[nodiscard]] size_t getNumPoints() const override { return splinePoints.size(); }
-
-        const std::vector<PoseWithCurvature>& getPoints() const override { return splinePoints; }
-
-    private:
-        const std::tuple<splines...> splinesTuple;
-        std::vector<PoseWithCurvature> splinePoints;// spline points from parameterizing all the splines
-        std::size_t numSplines = 1;
-    };
-
-    std::unique_ptr<IPathImpl> pimpl;// pointer to impl
-};*/
-
-
-// Initial thing
-/*template<SplineType... splines>
-class Path {
-public:
-    explicit Path(splines... args) : splinesTuple(args...) {
-        // insert the first point as parameterization doesn't handle it
-        // splinePoints.emplace_back(std::get<0>(splinesTuple).getPoint(0.0), std::get<0>(splinesTuple).getCurvature(0.0));
-        splinePoints.emplace_back(std::get<0>(splinesTuple).getPointWithCurvature(0.0));
-
-        util::tuple::for_each(splinesTuple, [&](const ISpline& spline) {
-            // do the spline parameterization for each spline
-            auto points = spline.parameterize();
-
-            // append the points into the vector. remove the first point as it's a duplicate of the last point from the previous
-            // spline (C⁰ continuity)
-            splinePoints.insert(std::end(splinePoints), std::begin(points) + 1, std::end(points));
-        });
-
-        numSplines = std::tuple_size_v<std::tuple<splines...>>;
-        // static_assert(std::tuple_size_v<std::tuple<splines...>> - 1 > 0);
-    }
-
-    [[nodiscard]] size_t getNumSplines() const { return numSplines; }
-    [[nodiscard]] size_t getNumPoints() const { return splinePoints.size(); }
-
-    [[nodiscard]] const std::vector<PoseWithCurvature>& getPoints() const { return splinePoints; }
-
-    void dumpPath(const char* filename) const {
-        std::ofstream outputFile(filename);
-        for (const auto& point : splinePoints) { outputFile << point.first.X() << ' ' << point.first.Y() << '\n'; }
-    }
-
-private:
-    const std::tuple<splines...> splinesTuple;
-    std::vector<PoseWithCurvature> splinePoints;// spline points from parameterizing all the splines
-    std::size_t numSplines = 1;
-};*/
+struct TrajectoryConfig {
+	double startVel;
+	double endVel;
+	double maxVel;
+	double maxAcc;
+	bool reversed;
+};
 
 // Simply a container that stores multiple splines to form a path
 class Path {
 public:
+	// TODO: potentially fix this. i think i have some unwanted behaviour due to type deduction
+	// TODO: lazily parameterize the splines
 	template<SplineType... splines>
-	explicit Path(splines&&... args) : splinesVector{Spline(std::forward<splines>(args))...} {
+	explicit Path(TrajectoryConfig config, splines&&... args)
+	    : splinesVector{Spline(std::forward<splines>(args))...}, id(counter++) {
 		parameterizeSplines();
 	}
 
-	explicit Path(std::vector<Spline>&& splines) : splinesVector(std::forward<std::vector<Spline>>(splines)) {
+	explicit Path(std::vector<Spline>&& splines) : splinesVector(std::forward<std::vector<Spline>>(splines)), id(counter++) {
 		parameterizeSplines();
 	}
 
-	[[nodiscard]] size_t getNumSplines() const { return splinesVector.size(); }
-	[[nodiscard]] size_t getNumPoints() const { return splinePoints.size(); }
+	[[nodiscard]] size_t getNumSplines() const;
 
-	[[nodiscard]] const std::vector<PoseWithCurvature>& getPoints() const { return splinePoints; }
+	[[nodiscard]] size_t getNumPoints() const;
+
+	[[nodiscard]] const TrajectoryConfig& getConfig() const;
+
+	[[nodiscard]] const std::vector<PoseWithCurvature>& getPoints() const;
 
 	// for debugging
-	void dumpPath(const char* filename) const {
-		std::ofstream outputFile(filename);
-		for (const auto& point : splinePoints) { outputFile << point.first.X() << ' ' << point.first.Y() << '\n'; }
-	}
+	void dumpPath(const char* filename) const;
 
 private:
+	// TODO: update this to provide an actual way of keeping track of every unique path, not just a crappy counter -> so if I
+	// create a new Path obj with same splines, it'll point to same trajectory in trajectory manager
+	//
+	// global counter -> used as an id for each unique path created (simply gets incremented in ctor)
+	static unsigned int counter;
+
 	// parameterize all the splines and store points
-	void parameterizeSplines() {
-		if (!splinePoints.empty()) { return; }
+	void parameterizeSplines();
 
-		// insert the first point as parameterization doesn't handle it
-		splinePoints.emplace_back(splinesVector.front()->getPointWithCurvature(0.0));
-
-		for (auto& spline : splinesVector) {
-			auto points = spline->parameterize();
-			// append the points into the vector. remove the first point as it's a duplicate of the last point from the previous
-			// spline (because C⁰ continuity)
-			splinePoints.insert(std::end(splinePoints), std::begin(points) + 1, std::end(points));
-		}
-	}
-
+	TrajectoryConfig config;
 	std::vector<Spline> splinesVector;
 	std::vector<PoseWithCurvature> splinePoints;// points from parameterizing all the splines
+
+	/*
+	 * why not use a ptr to a generated trajectory?
+	 * it'd work fine for all pre-gen'd trajectories as copy ctor would also copy the ptr to the generated trajectory
+	 *
+	 * but what if i make a copy of this path obj before i generated the trajectory? then the copy would have 0 clue where the
+	 * generated trajectory is
+	 *
+	 * end goal: we generate 1 trajectory for each unique path -> duplicate paths point to same generated trajectory
+	 */
+	unsigned int id;// id for this unique path -> used to obtain pre-gen'd trajectory
+
+#ifdef VEX
+	friend TrajectoryManager;
+#endif
 };

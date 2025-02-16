@@ -1,8 +1,10 @@
 ARCHTUPLE=arm-none-eabi-
 DEVICE=VEX EDR V5
 
-MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard -Os -g
-CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK -DFREERTOS
+
+# Flags/Compiler Parameters
+MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard -g -Os # use -Og for debugging
+CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK $(INC_FLAGS) -MMD -MP -DFMT_STATIC_THOUSANDS_SEPERATOR=',' -DFMT_USE_LONG_DOUBLE=0 -DFMT_USE_FLOAT128=0 -DFMT_USE_FLOAT=0 -DFMT_USE_USER_DEFINED_LITERALS=0 -DFMT_USE_FULL_CACHE_DRAGONBOX=0 -DFREERTOS -DVEX
 GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables
 
 # Check if the llemu files in libvgl exist. If they do, define macros that the
@@ -15,33 +17,85 @@ ifneq (,$(wildcard ./include/liblvgl/llemu.hpp))
 	CPPFLAGS += -D_PROS_INCLUDE_LIBLVGL_LLEMU_HPP
 endif
 
-WARNFLAGS+=-Wno-psabi
+WARNFLAGS=-Wno-psabi
+#WARNFLAGS=-Wall -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wextra-semi -Wnull-dereference -Wswitch-enum -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches -Wsuggest-override
+# WARNFLAGS=-Wall -Wconversion -Wsign-conversion -Wno-psabi -fno-elide-type -fdiagnostics-show-template-tree -Wpedantic -Wvla -Wnull-dereference -fvar-tracking-assignments -Wduplicated-cond -Wduplicated-branches # no suggest-override, no switch-enum, no extra-semis
+
+ASMFLAGS=$(MFLAGS) $(WARNFLAGS)
+CFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=gnu2x
+CXXFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=gnu++23
+LDFLAGS=$(MFLAGS) $(WARNFLAGS) -nostdlib $(GCCFLAGS)
+SIZEFLAGS=-d --common
+NUMFMTFLAGS=--to=iec --format %.2f --suffix=B
+DEPFLAGS=-MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+
 
 SPACE := $() $()
 COMMA := ,
 
-C_STANDARD?=gnu2x
-CXX_STANDARD?=gnu++23
 
-DEPDIR := .d
-$(shell mkdir -p $(DEPDIR))
-DEPFLAGS = -MT $$@ -MMD -MP -MF $(DEPDIR)/$$*.Td
-MAKEDEPFOLDER = -$(VV)mkdir -p $(DEPDIR)/$$(dir $$(patsubst $(BINDIR)/%, %, $(ROOT)/$$@))
-RENAMEDEPENDENCYFILE = -$(VV)mv -f $(DEPDIR)/$$*.Td $$(patsubst $(SRCDIR)/%, $(DEPDIR)/%.d, $(ROOT)/$$<) && touch $$@
-
+LIBAR=$(BINDIR)/$(LIBNAME).a
 LIBRARIES+=$(wildcard $(FWDIR)/*.a)
+ifeq ($(ENABLE_LIB),1)
+LIBRARIES+= $(LIBAR)
+endif
+
 # Cannot include newlib and libc because not all of the req'd stubs are implemented
 EXCLUDE_COLD_LIBRARIES+=$(FWDIR)/libc.a $(FWDIR)/libm.a
 COLD_LIBRARIES=$(filter-out $(EXCLUDE_COLD_LIBRARIES), $(LIBRARIES))
 wlprefix=-Wl,$(subst $(SPACE),$(COMMA),$1)
 LNK_FLAGS=--gc-sections --start-group $(strip $(LIBRARIES)) -lgcc -lstdc++ --end-group -T$(FWDIR)/v5-common.ld --no-warn-rwx-segments
 
-ASMFLAGS=$(MFLAGS) $(WARNFLAGS)
-CFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=$(C_STANDARD)
-CXXFLAGS=$(MFLAGS) $(CPPFLAGS) $(WARNFLAGS) $(GCCFLAGS) --std=$(CXX_STANDARD)
-LDFLAGS=$(MFLAGS) $(WARNFLAGS) -nostdlib $(GCCFLAGS)
-SIZEFLAGS=-d --common
-NUMFMTFLAGS=--to=iec --format %.2f --suffix=B
+# Directories
+INC_FLAGS:= $(addprefix -I,$(INCDIR))
+
+# Functions
+rwildcard=$(wildcard $1$2)$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
+# cross platform mechanics
+# on windows, make uses cmd.exe
+ifeq ($(shell echo "check_quotes"),"check_quotes")
+	WINDOWS := yes
+else
+	WINDOWS := no
+endif
+
+ifeq ($(WINDOWS),yes)
+#getCWD = $(subst \\,/,%cd:~-23%)
+	getCWD = $(subst \\,/,%cd:\=/%)
+	mkdir = mkdir $(subst /,\,$(1)) >nul 2>&1 || (exit 0)
+	rm = $(wordlist 2,65535,$(foreach FILE,$(subst /,\,$(1)),& del /Q $(FILE) >nul 2>&1)) || (exit 0)
+	rmdir = rmdir /S /Q $(subst /,\,$(1)) >nul 2>&1 || (exit 0)
+	cp = copy $(subst /,\,$(1)) $(subst /,\,$(2)) >nul 2>&1 || exit(0)
+	mv = move /Y $(subst /,\,$(1)) $(subst /,\,$(2)) >nul 2>&1 || exit(0)
+	echo = echo $(1)
+	ECHO_QUOTES = $()
+	SED = powershell -Command "Get-Content (Get-ChildItem -Path ./bin/src/*.cpp.o.json -Recurse -Force) -Raw | ConvertFrom-Json | ConvertTo-Json" > compile_commands.json
+	END_JSON = $()
+	UNIX_TIMESTAMP = powershell -Command "[int](Get-Date -UFormat %s -Millisecond 0)
+	UNIX_TIMEZONE = powershell -Command "[int](Get-Date -UFormat %Z -Millisecond 0) * 100"
+else
+#getCWD = $(shell pwd | tail -c 23)
+	getCWD = $(shell pwd)
+	mkdir = mkdir -p $(1)
+	rm = rm -f $(1) > /dev/null 2>&1 || true
+	rmdir = rm -rf $(1) > /dev/null 2>&1 || true
+	cp = cp $(1) $(2)
+	mv = mv -f $(1) $(2)
+	echo = echo "$(subst ",\",$(1))"
+	ECHO_QUOTES = '
+# GNU Sed
+#SED = sed -e '1s/^/[\n/' -e '$s/,$/\n]/' $(BINDIR)/*.o.json > compile_commands.json
+# Bash/Zsh/Ksh Sed
+# SED = sed -e '1s/^/[\'$'\n''/' -e '$s/,$/\'$'\n'']/' ./bin/src/*/**.o.json > compile_commands.json
+	SED = ./makeCompileDB.sh
+	END_JSON = ,
+	UNIX_TIMESTAMP = date +%s
+	UNIX_TIMEZONE = date +%-z
+endif
+
+MAKEDEPFOLDER=$(call mkdir, $(DEPDIR)/$(dir $(patsubst $(BINDIR)/%, %, $(ROOT)/$@)))
+RENAMEDEPENDENCYFILE=$(call mv, $(DEPDIR)/$*.d, $(patsubst $(SRCDIR)/%, $(DEPDIR)/%.d, $(ROOT)/$<))
 
 AR:=$(ARCHTUPLE)ar
 # using arm-none-eabi-as generates a listing by default. This produces a super verbose output.
@@ -55,111 +109,20 @@ SIZETOOL:=$(ARCHTUPLE)size
 READELF:=$(ARCHTUPLE)readelf
 STRIP:=$(ARCHTUPLE)strip
 
-ifneq (, $(shell command -v gnumfmt 2> /dev/null))
-	SIZES_NUMFMT:=| gnumfmt --field=-4 --header $(NUMFMTFLAGS)
+
+SRCS:=$(call rwildcard,$(SRCDIR),*.cpp) $(call rwildcard,$(SRCDIR),*.c) $(call rwildcard,$(SRCDIR),*.s) # src files for everything
+OBJS:=$(SRCS:%=$(BINDIR)/%.o) # obj files for all src files
+ifeq ($(ENABLE_LIB),1)
+HOT_OBJS:=$(filter-out $(LIB_OBJS), $(OBJS))
 else
-ifneq (, $(shell command -v numfmt 2> /dev/null))
-	SIZES_NUMFMT:=| numfmt --field=-4 --header $(NUMFMTFLAGS)
-else
-	SIZES_NUMFMT:=
+HOT_OBJS:=$(OBJS)
 endif
-endif
-
-ifneq (, $(shell command -v sed 2> /dev/null))
-SIZES_SED:=| sed -e 's/  dec/total/'
-else
-SIZES_SED:=
-endif
-
-rwildcard=$(foreach d,$(filter-out $3,$(wildcard $1*)),$(call rwildcard,$d/,$2,$3)$(filter $(subst *,%,$2),$d))
-
-# Colors
-NO_COLOR=$(shell printf "%b" "\033[0m")
-OK_COLOR=$(shell printf "%b" "\033[32;01m")
-ERROR_COLOR=$(shell printf "%b" "\033[31;01m")
-WARN_COLOR=$(shell printf "%b" "\033[33;01m")
-STEP_COLOR=$(shell printf "%b" "\033[37;01m")
-OK_STRING=$(OK_COLOR)[OK]$(NO_COLOR)
-DONE_STRING=$(OK_COLOR)[DONE]$(NO_COLOR)
-ERROR_STRING=$(ERROR_COLOR)[ERRORS]$(NO_COLOR)
-WARN_STRING=$(WARN_COLOR)[WARNINGS]$(NO_COLOR)
-ECHO=/bin/printf "%s\n"
-echo=@$(ECHO) "$2$1$(NO_COLOR)"
-echon=@/bin/printf "%s" "$2$1$(NO_COLOR)"
-
-define test_output_2
-@if test $(BUILD_VERBOSE) -eq $(or $4,1); then printf "%s\n" "$2"; fi;
-@output="$$($2 2>&1)"; exit=$$?;           \
-if test 0 -ne $$exit; then                 \
-  printf "%s%s\n" "$1" "$(ERROR_STRING)";  \
-  printf "%s\n" "$$output";                \
-  exit $$exit;                             \
-elif test -n "$$output"; then              \
-  printf "%s%s\n" "$1" "$(WARN_STRING)";   \
-  printf "%s\n" "$$output";                \
-else                                       \
-  printf "%s%s\n" "$1" "$3";               \
-fi;
-endef
-
-define test_output
-@output=$$($1 2>&1); exit=$$?;            \
-if test 0 -ne $$exit; then                \
-  printf "%s\n" "$(ERROR_STRING)" $$?;    \
-  printf "%s\n" $$output;                 \
-  exit $$exit;                            \
-elif test -n "$$output"; then             \
-  printf "%s\n" "$(WARN_STRING)";         \
-  printf "%s" $$output;                   \
-else                                      \
-  printf "%s\n" "$2";                     \
-fi;
-endef
-
-# Makefile Verbosity
-ifeq ("$(origin VERBOSE)", "command line")
-BUILD_VERBOSE = $(VERBOSE)
-endif
-ifeq ("$(origin V)", "command line")
-BUILD_VERBOSE = $(V)
-endif
-
-ifndef BUILD_VERBOSE
-BUILD_VERBOSE = 0
-endif
-
-# R is reduced (default messages) - build verbose = 0
-# V is verbose messages - verbosity = 1
-# VV is super verbose - verbosity = 2
-ifeq ($(BUILD_VERBOSE), 0)
-R = @echo
-D = @
-VV = @
-endif
-ifeq ($(BUILD_VERBOSE), 1)
-R = @echo
-D =
-VV = @
-endif
-ifeq ($(BUILD_VERBOSE), 2)
-R =
-D =
-VV =
-endif
-
-INCLUDE=$(foreach dir,$(INCDIR) $(EXTRA_INCDIR),-iquote"$(dir)")
-
-ASMSRC=$(foreach asmext,$(ASMEXTS),$(call rwildcard, $(SRCDIR),*.$(asmext), $1))
-ASMOBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call ASMSRC,$1)))
-CSRC=$(foreach cext,$(CEXTS),$(call rwildcard, $(SRCDIR),*.$(cext), $1))
-COBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call CSRC, $1)))
-CXXSRC=$(foreach cxxext,$(CXXEXTS),$(call rwildcard, $(SRCDIR),*.$(cxxext), $1))
-CXXOBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call CXXSRC,$1)))
-
-GETALLOBJ=$(sort $(call ASMOBJ,$1) $(call COBJ,$1) $(call CXXOBJ,$1))
+LIB_SRCS:=$(foreach dir, $(LIB_SRC_DIRS), $(call rwildcard,$(dir),*.cpp) $(call rwildcard, $(dir),*.c) $(call rwildcard, $(dir),*.s)) $(EXTRA_LIB_SRC_FILES) # src for only the library files
+LIB_OBJS:=$(LIB_SRCS:%=$(BINDIR)/%.o)
+#DEPS:=$(SRCS:%=$(DEPDIR)/%.d)
+DEPS:=$(patsubst $(SRCDIR)/%,$(DEPDIR)/%.d,$(SRCS))
 
 ARCHIVE_TEXT_LIST=$(subst $(SPACE),$(COMMA),$(notdir $(basename $(LIBRARIES))))
-
 LDTIMEOBJ:=$(BINDIR)/_pros_ld_timestamp.o
 
 MONOLITH_BIN:=$(BINDIR)/monolith.bin
@@ -170,141 +133,137 @@ HOT_ELF:=$(basename $(HOT_BIN)).elf
 COLD_BIN:=$(BINDIR)/cold.package.bin
 COLD_ELF:=$(basename $(COLD_BIN)).elf
 
-# Check if USE_PACKAGE is defined to check for migration steps from purduesigbots/pros#87
-ifndef USE_PACKAGE
-$(error Your Makefile must be migrated! Visit https://pros.cs.purdue.edu/v5/releases/kernel3.1.6.html to learn how)
-endif
-
-DEFAULT_BIN=$(MONOLITH_BIN)
-ifeq ($(USE_PACKAGE),1)
 DEFAULT_BIN=$(HOT_BIN)
-endif
+INCLUDE:=$(foreach dir,$(INCDIR),-iquote"$(dir)")
+ESCAPED_INCLUDE:=$(foreach dir,$(INCDIR),-iquote\"$(dir)\")
+
+
+# Compile Commands Database
+COMPDB_ENTRIES = $(OBJS:%=%.json)
+COMPDB_ENTRY = $@.json
+ABSPATH:=$(abspath $(dir $(ROOT)))
+
+
+.PHONY: all clean quick library
 
 -include $(wildcard $(FWDIR)/*.mk)
 
-.PHONY: all clean quick
-
 quick: $(DEFAULT_BIN)
-
-all: clean $(DEFAULT_BIN)
 
 monolith: $(MONOLITH_BIN)
 
-clean::
+all: clean $(DEFAULT_BIN)
+
+clean:
 	@echo Cleaning project
-	-$Drm -rf $(BINDIR)
-	-$Drm -rf $(DEPDIR)
+	@$(call rmdir,$(BINDIR)/)
+	@$(call rmdir,$(DEPDIR)/)
+	@$(call rm,$(ROOT)/compile_commands.json)
 
-ifeq ($(IS_LIBRARY),1)
-ifeq ($(LIBNAME),libbest)
-$(error "You should rename your library! libbest is the default library name and should be changed")
-endif
+makeDirectory: $(DEPDIR)
+	@$(call mkdir,$(DEPDIR))
 
-LIBAR=$(BINDIR)/$(LIBNAME).a
-TEMPLATE_DIR=$(ROOT)/template
-
-clean-template:
-	@echo Cleaning $(TEMPLATE_DIR)
-	-$Drm -rf $(TEMPLATE_DIR)
-
-$(LIBAR): $(call GETALLOBJ,$(EXCLUDE_SRC_FROM_LIB)) $(EXTRA_LIB_DEPS)
-	-$Drm -f $@
-	$(call test_output_2,Creating $@ ,$(AR) rcs $@ $^, $(DONE_STRING))
-
-.PHONY: library
-library: $(LIBAR)
-
-.PHONY: template
-template:: clean-template $(LIBAR)
-	$Dpros c create-template . $(LIBNAME) $(VERSION) $(foreach file,$(TEMPLATE_FILES) $(LIBAR),--system "$(file)") --target v5 $(CREATE_TEMPLATE_FLAGS)
-endif
-
-# if project is a library source, compile the archive and link output.elf against the archive rather than source objects
-ifeq ($(IS_LIBRARY),1)
-ELF_DEPS+=$(filter-out $(call GETALLOBJ,$(EXCLUDE_SRC_FROM_LIB)), $(call GETALLOBJ,$(EXCLUDE_SRCDIRS)))
-LIBRARIES+=$(LIBAR)
-else
-ELF_DEPS+=$(call GETALLOBJ,$(EXCLUDE_SRCDIRS))
-endif
+$(LIBAR): $(LIB_OBJS)
+	@$Drm -f $@
+	@echo Creating $@
+	@$(AR) rcs $@ $^
 
 $(MONOLITH_BIN): $(MONOLITH_ELF) $(BINDIR)
-	$(call test_output_2,Creating $@ for $(DEVICE) ,$(OBJCOPY) $< -O binary -R .hot_init $@,$(DONE_STRING))
+	@echo Creating monolith elf for $(DEVICE)
+	@$(OBJCOPY) $< -O binary -R .hot_init $@
 
-$(MONOLITH_ELF): $(ELF_DEPS) $(LIBRARIES)
-	$(call _pros_ld_timestamp)
-	$(call test_output_2,Linking project with $(ARCHIVE_TEXT_LIST) ,$(LD) $(LDFLAGS) $(ELF_DEPS) $(LDTIMEOBJ) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS)) -o $@,$(OK_STRING))
+$(MONOLITH_ELF): $(OBJS) $(LIBRARIES)
+	@$(call createCompileCommands)
+	@$(call _pros_ld_timestamp)
+	@echo Linking project with $(ARCHIVE_TEXT_LIST)
+	@$(LD) $(LDFLAGS) $(LDFLAGS) $(OBJS) $(LDTIMEOBJ) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS) -o $@)
 	@echo Section sizes:
-	-$(VV)$(SIZETOOL) $(SIZEFLAGS) $@ $(SIZES_SED) $(SIZES_NUMFMT)
+	@$(SIZETOOL) $(SIZEFLAGS) $@ $(SIZES_NUMFMT)
 
 $(COLD_BIN): $(COLD_ELF)
-	$(call test_output_2,Creating cold package binary for $(DEVICE) ,$(OBJCOPY) $< -O binary -R .hot_init $@,$(DONE_STRING))
+	@echo Creating cold package binary for $(DEVICE)
+	@$(OBJCOPY) $< -O binary -R .hot_init $@
 
 $(COLD_ELF): $(COLD_LIBRARIES)
-	$(VV)mkdir -p $(dir $@)
-	$(call test_output_2,Creating cold package with $(ARCHIVE_TEXT_LIST) ,$(LD) $(LDFLAGS) $(call wlprefix,--gc-keep-exported --whole-archive $^ -lstdc++ --no-whole-archive) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS) -o $@),$(OK_STRING))
-	$(call test_output_2,Stripping cold package ,$(OBJCOPY) --strip-symbol=install_hot_table --strip-symbol=__libc_init_array --strip-symbol=_PROS_COMPILE_DIRECTORY --strip-symbol=_PROS_COMPILE_TIMESTAMP --strip-symbol=_PROS_COMPILE_TIMESTAMP_INT $@ $@, $(DONE_STRING))
+	@$(call mkdir,$(dir $@))
+	@echo Creating cold package with $(ARCHIVE_TEXT_LIST)
+	@$(LD) $(LDFLAGS) $(call wlprefix,--gc-keep-exported --whole-archive $^ -lstdc++ --no-whole-archive) $(call wlprefix,-T$(FWDIR)/v5.ld $(LNK_FLAGS) -o $@)
+	@echo Stripping cold package
+	@$(OBJCOPY) --strip-symbol=install_hot_table --strip-symbol=__libc_init_array --strip-symbol=_PROS_COMPILE_DIRECTORY --strip-symbol=_PROS_COMPILE_TIMESTAMP --strip-symbol=_PROS_COMPILE_TIMESTAMP_INT $@ $@
 	@echo Section sizes:
-	-$(VV)$(SIZETOOL) $(SIZEFLAGS) $@ $(SIZES_SED) $(SIZES_NUMFMT)
+	@$(SIZETOOL) $(SIZEFLAGS) $@ $(SIZES_NUMFMT)
 
 $(HOT_BIN): $(HOT_ELF) $(COLD_BIN)
-	$(call test_output_2,Creating $@ for $(DEVICE) ,$(OBJCOPY) $< -O binary $@,$(DONE_STRING))
+	@echo Creating $@ for $(DEVICE)
+	@$(OBJCOPY) $< -O binary $@
 
-$(HOT_ELF): $(COLD_ELF) $(ELF_DEPS)
-	$(call _pros_ld_timestamp)
-	$(call test_output_2,Linking hot project with $(COLD_ELF) and $(ARCHIVE_TEXT_LIST) ,$(LD) -nostartfiles $(LDFLAGS) $(call wlprefix,-R $<) $(filter-out $<,$^) $(LDTIMEOBJ) $(LIBRARIES) $(call wlprefix,-T$(FWDIR)/v5-hot.ld $(LNK_FLAGS) -o $@),$(OK_STRING))
-	@printf "%s\n" "Section sizes:"
-	-$(VV)$(SIZETOOL) $(SIZEFLAGS) $@ $(SIZES_SED) $(SIZES_NUMFMT)
+$(HOT_ELF): $(COLD_ELF) $(HOT_OBJS)
+	@$(call createCompileCommands)
+	@$(call _pros_ld_timestamp)
+	@echo Linking hot project with $(COLD_ELF) and $(ARCHIVE_TEXT_LIST)
+	@$(LD) -nostartfiles $(LDFLAGS) $(call wlprefix,-R $<) $(filter-out $<,$^) $(LDTIMEOBJ) $(LIBRARIES) $(call wlprefix,-T$(FWDIR)/v5-hot.ld $(LNK_FLAGS) -o $@)
 
-define asm_rule
-$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1
-	$(VV)mkdir -p $$(dir $$@)
-	$$(call test_output_2,Compiled $$< ,$(AS) -c $(ASMFLAGS) -o $$@ $$<,$(OK_STRING))
+$(BINDIR)/%.s.o: %.s
+	@$(call mkdir,$(dir $@))
+	@$(call rm,$(COMPDB_ENTRY))
+	@echo     {>> $(COMPDB_ENTRY)
+	@echo         "directory": "$(ABSPATH)",>> $(COMPDB_ENTRY)
+	@echo         "command": "$(AS) -c $(ASMFLAGS) -o $@ $<",>> $(COMPDB_ENTRY)
+	@echo         "file": "$<">>$(COMPDB_ENTRY)
+	@echo     }$(END_JSON)>>$(COMPDB_ENTRY)
+	@echo Compiling $<
+	@$(AS) -c $(ASMFLAGS) -o $@ $<
+
+$(BINDIR)/%.c.o: %.c
+$(BINDIR)/%.c.o: %.c $(DEPDIR)/%.d
+	@$(call mkdir,$(dir $@))
+	@$(call rm,$(COMPDB_ENTRY))
+	@echo $(ECHO_QUOTES)    {$(ECHO_QUOTES)>> $(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)        "directory": "$(ABSPATH)",$(ECHO_QUOTES)>> $(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)        "command": "$(CC) -c $(ESCAPED_INCLUDE) -iquote\"$(INCDIR)/$(dir $*)\" $(CFLAGS) $(DEPFLAGS) -o $@ $<",$(ECHO_QUOTES)>> $(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)        "file": "$<"$(ECHO_QUOTES)>>$(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)    }$(END_JSON)$(ECHO_QUOTES)>>$(COMPDB_ENTRY)
+	@$(MAKEDEPFOLDER)
+	@echo Compiling $<
+	@$(CC) -c $(INCLUDE) -iquote"$(INCDIR)/$(dir $*)" $(CFLAGS) $(DEPFLAGS) -o $@ $<
+	@$(RENAMEDEPENDENCYFILE)
+
+$(BINDIR)/%.cpp.o: %.cpp
+$(BINDIR)/%.cpp.o: %.cpp $(DEPDIR)/%.d
+	@$(call mkdir,$(dir $@))
+	@$(call rm,$(COMPDB_ENTRY))
+	@echo $(ECHO_QUOTES)    {$(ECHO_QUOTES)>> $(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)        "directory": "$(ABSPATH)",$(ECHO_QUOTES)>> $(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)        "command": "$(CXX) -c $(ESCAPED_INCLUDE) -iquote\"$(INCDIR)/$(dir $*)\" $(CXXFLAGS) $(DEPFLAGS) -o $@ $<",$(ECHO_QUOTES)>> $(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)        "file": "$<"$(ECHO_QUOTES)>>$(COMPDB_ENTRY)
+	@echo $(ECHO_QUOTES)    }$(END_JSON)$(ECHO_QUOTES)>>$(COMPDB_ENTRY)
+	@$(MAKEDEPFOLDER)
+	@echo Compiling $<
+	@$(CXX) -c $(INCLUDE) -iquote"$(INCDIR)/$(dir $*)" $(CXXFLAGS) $(DEPFLAGS) -o $@ $<
+	@$(RENAMEDDEPENDENCYFILE)
+
+define createCompileCommands
+@echo Creating compile_commands.json
+$(SED)
 endef
-$(foreach asmext,$(ASMEXTS),$(eval $(call asm_rule,$(asmext))))
 
-define c_rule
-$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1
-$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1 $(DEPDIR)/$(basename %).d
-	$(VV)mkdir -p $$(dir $$@)
-	$(MAKEDEPFOLDER)
-	$$(call test_output_2,Compiled $$< ,$(CC) -c $(INCLUDE) -iquote"$(INCDIR)/$$(dir $$*)" $(CFLAGS) $(EXTRA_CFLAGS) $(DEPFLAGS) -o $$@ $$<,$(OK_STRING))
-	$(RENAMEDEPENDENCYFILE)
-endef
-$(foreach cext,$(CEXTS),$(eval $(call c_rule,$(cext))))
-
-define cxx_rule
-$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1
-$(BINDIR)/%.$1.o: $(SRCDIR)/%.$1 $(DEPDIR)/$(basename %).d
-	$(VV)mkdir -p $$(dir $$@)
-	$(MAKEDEPFOLDER)
-	$$(call test_output_2,Compiled $$< ,$(CXX) -c $(INCLUDE) -iquote"$(INCDIR)/$$(dir $$*)" $(CXXFLAGS) $(EXTRA_CXXFLAGS) $(DEPFLAGS) -o $$@ $$<,$(OK_STRING))
-	$(RENAMEDEPENDENCYFILE)
-endef
-$(foreach cxxext,$(CXXEXTS),$(eval $(call cxx_rule,$(cxxext))))
-
+# Pipe a line of code defining _PROS_COMPILE_TOOLSTAMP and _PROS_COMPILE_DIRECTORY into GCC,
+# which allows compilation from stdin. We define _PROS_COMPILE_DIRECTORY using a command line-defined macro
+# which is the pwd | tail bit, which will truncate the path to the last 23 characters
+#
+# const int _PROS_COMPILE_TIMESTAMP_INT = $(( $(date +%s) - $(date +%z) * 3600 ))
+# char const * const _PROS_COMPILE_TIEMSTAMP = __DATE__ " " __TIME__
+# char const * const _PROS_COMPILE_DIRECTORY = "$(shell pwd | tail -c 23)";
+#
+# The shell command $$(($$(date +%s)+($$(date +%-z)/100*3600))) fetches the current
+# unix timestamp, and then adds the UTC timezone offset to account for time zones.
 define _pros_ld_timestamp
-$(VV)mkdir -p $(dir $(LDTIMEOBJ))
-@# Pipe a line of code defining _PROS_COMPILE_TOOLSTAMP and _PROS_COMPILE_DIRECTORY into GCC,
-@# which allows compilation from stdin. We define _PROS_COMPILE_DIRECTORY using a command line-defined macro
-@# which is the pwd | tail bit, which will truncate the path to the last 23 characters
-@# 
-@# const int _PROS_COMPILE_TIMESTAMP_INT = $(( $(date +%s) - $(date +%z) * 3600 ))
-@# char const * const _PROS_COMPILE_TIEMSTAMP = __DATE__ " " __TIME__
-@# char const * const _PROS_COMPILE_DIRECTORY = "$(shell pwd | tail -c 23)";
-@#
-@# The shell command $$(($$(date +%s)+($$(date +%-z)/100*3600))) fetches the current
-@# unix timestamp, and then adds the UTC timezone offset to account for time zones.
-
-$(call test_output_2,Adding timestamp ,echo 'const int _PROS_COMPILE_TIMESTAMP_INT = $(shell echo $$(($$(date +%s)+($$(date +%-z)/100*3600)))); char const * const _PROS_COMPILE_TIMESTAMP = __DATE__ " " __TIME__; char const * const _PROS_COMPILE_DIRECTORY = "$(wildcard $(shell pwd | tail -c 23))";' | $(CC) -c -x c $(CFLAGS) $(EXTRA_CFLAGS) -o $(LDTIMEOBJ) -,$(OK_STRING))
+@$(call mkdir,$(dir $(LDTIMEOBJ)))
+@echo Adding timestamp
+@echo $(ECHO_QUOTES)const int _PROS_COMPILE_TIMESTAMP_INT = 0; char const * const _PROS_COMPILE_TIMESTAMP = __DATE__ " " __TIME__; char const * const _PROS_COMPILE_DIRECTORY = "$(wildcard $(getCWD))";$(ECHO_QUOTES) | $(CC) -c -x c $(CFLAGS) -o $(LDTIMEOBJ) -
 endef
-
-# these rules are for build-compile-commands, which just print out sysroot information
-cc-sysroot:
-	@echo | $(CC) -c -x c $(CFLAGS) $(EXTRA_CFLAGS) --verbose -o /dev/null -
-cxx-sysroot:
-	@echo | $(CXX) -c -x c++ $(CXXFLAGS) $(EXTRA_CXXFLAGS) --verbose -o /dev/null -
 
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
-
+-include $(DEPS)
 include $(wildcard $(patsubst $(SRCDIR)/%,$(DEPDIR)/%.d,$(CSRC) $(CXXSRC)))

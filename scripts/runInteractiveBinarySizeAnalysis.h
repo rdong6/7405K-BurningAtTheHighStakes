@@ -1,0 +1,1 @@
+puncover --no-open-browser --elf_file bin/hot.package.elf

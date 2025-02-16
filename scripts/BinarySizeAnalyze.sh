@@ -1,0 +1,1 @@
+elf-size-analyze -H -t arm-none-eabi- -F -W bin/hot.package.elf > BinarySizeAnalysis.html
