@@ -65,3 +65,22 @@ public:
 
 	ISpline* operator->() { return std::addressof(getter(storage)); }
 };
+
+// For PathEditor project -> need to expose stuff for interoperability between C++ & javascript
+// custom serialization for Path
+
+// #ifdef PATH_EDITOR
+// #include <glaze/glaze.hpp>
+// template<> struct glz::meta<Pose> {
+// 	using T = Pose;
+// 	// JSON -> C++
+// 	static constexpr auto read_x = [](Pose& pose, const std::string& input) { pose = Pose(std::stod(input), pose.Y(), pose.rotation()); };
+// 	static constexpr auto read_y = [](Pose& pose, const std::string& input) { pose = Pose(pose.X(), std::stod(input), pose.rotation()); };
+//
+// 	// C++ -> JSON
+// 	static constexpr auto write_x = [](const Pose& pose) { return pose.X(); };
+// 	static constexpr auto write_y = [](const Pose& pose) { return pose.Y(); };
+//
+// 	static constexpr auto value = object("x", custom<read_x, write_x>, "y", custom<read_y, write_y>);
+// };
+// #endif

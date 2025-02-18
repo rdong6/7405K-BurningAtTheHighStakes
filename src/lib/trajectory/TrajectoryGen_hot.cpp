@@ -1,7 +1,8 @@
+#ifdef VEX
 #include "lib/spline/Path.h"
+#include "lib/trajectory/TrajectoryGenerator.h"
 #include "lib/trajectory/TrajectoryManager.h"
 #include <cstdint>
-#include "lib/trajectory/TrajectoryGenerator.h"
 
 extern uint8_t __path_data_start[];
 extern uint8_t __path_data_end[];
@@ -19,3 +20,4 @@ __attribute__((constructor(200))) void pregen_trajectories() {
 		sTrajectoryManager.getInstance().storeTrajectory(path, defaultTrajectoryGenerator.generate(path));
 	}
 }
+#endif

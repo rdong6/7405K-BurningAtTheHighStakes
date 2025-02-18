@@ -25,7 +25,7 @@ public:
 
 private:
 	// each row is coefficients for different func
-	// ex: row 0 = coefficients of P(t) for X-axis
+	// row 0 = coefficients of P(t) for X-axis
 	// row 1 = coefficients of P(t) for Y-axis
 	// row 2 = coefficients of P'(t) for X-axis
 	// row 3 = coefficients of P'(t) for Y-axis
