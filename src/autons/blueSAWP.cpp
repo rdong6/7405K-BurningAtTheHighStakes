@@ -13,5 +13,6 @@
 #include "subsystems/Pnooomatics.h"
 
 RobotThread blueSAWP() {
+	robotInstance->curAlliance = Alliance::BLUE;
 	co_yield util::coroutine::nextCycle();
 }

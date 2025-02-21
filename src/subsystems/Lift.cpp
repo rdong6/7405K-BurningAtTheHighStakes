@@ -8,7 +8,7 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
-#define UPPER_BOUNDS 185
+#define UPPER_BOUNDS 220
 #define LOWER_BOUNDS 1.5
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
@@ -113,6 +113,7 @@ RobotThread Lift::updateAngle() {
 
 RobotThread Lift::runner() {
 	auto liftFlags = robot->getFlag<Lift>().value();
+	liftFlags->pid = PID(263, 10, 0, true, 10);
 	liftFlags->isMoving = true;
 	liftFlags->pid.reset();
 
@@ -238,9 +239,6 @@ void Lift::move(int mv) {
 	double curAngle = robot->getFlag<Lift>().value()->curAngle;
 	if (mv > 0 && curAngle > UPPER_BOUNDS) { mv = 0; }
 	if (mv < 0 && curAngle < LOWER_BOUNDS) { mv = 0; }
-
-	//// for soft stop
-	// if (mv > 0) { mv *= (300 - curAngle) / 300.0; }
 
 	if (mv == 0) {
 		motor.brake();

@@ -19,6 +19,8 @@
 
 // TODO: change all the headings
 RobotThread redRingSide() {
+	robotInstance->curAlliance = Alliance::RED;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 	auto drive = robotInstance->getSubsystem<Drive>().value();

@@ -22,6 +22,8 @@
 #include "subsystems/Pnooomatics.h"
 
 RobotThread skillsAuton() {
+	robotInstance->curAlliance = Alliance::RED;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 	auto drive = robotInstance->getSubsystem<Drive>().value();
@@ -33,7 +35,6 @@ RobotThread skillsAuton() {
 	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
 	auto odom = robotInstance->getSubsystem<Odometry>().value();
 #pragma GCC diagnostic pop
-	robotInstance->curAlliance = Alliance::RED;
 
 
 	liftFlags->targetAngle = 210;

@@ -99,32 +99,31 @@ RobotThread Intake::stalledDetectorCoro() {
 	}
 }
 
-/*
-Coroutine which runs blueism code.
-*/
+
+// Runs only in AUTON
 RobotThread Intake::blueismCoro() {
-	// TODO: Determine if this should be done here or elsewhere in the program
-
-	switch (robot->curAlliance) {
-		case Alliance::BLUE:
-			blueismDetector = &Intake::redRingDetector;
-			break;
-		case Alliance::RED:
-			blueismDetector = &Intake::blueRingDetector;
-			break;
-		default:
-			blueismDetector = nullptr;
-			break;
-	}
-
-	// suspend coroutine until we want blueism enabled (blueismDetector points to either red or blue detector func)
-	co_yield [this]() -> bool { return this->blueismDetector; };
-
 	auto intakeFlags = robot->getFlag<Intake>().value();
 
 	while (true) {
+		// block blueism coro from running until we're set to an alliance and want to color sort
+		while (!blueismDetector) {
+			switch (robot->curAlliance) {
+				case Alliance::BLUE:
+					blueismDetector = &Intake::redRingDetector;
+					break;
+				case Alliance::RED:
+					blueismDetector = &Intake::blueRingDetector;
+					break;
+				default:
+					blueismDetector = nullptr;
+					break;
+			}
+
+			co_yield util::coroutine::nextCycle();
+		}
+
 		// we detected opposite alliance's ring
-		// afterwards, wait until we detect the ring with our dist sensor at the top of the intake
+		// afterward, wait until we detect the ring with our dist sensor at the top of the intake
 		// now blueism commences
 		if ((this->*blueismDetector)() && color.get_proximity() >= 80) {
 			co_yield [&]() -> bool { return blueismDistance.get() <= 20; };
@@ -143,9 +142,10 @@ RobotThread Intake::blueismCoro() {
 			if (intakeFlags->colorSortResumes) { moveVoltage(lastCommandedVoltage); }
 		}
 
-		co_yield [this]() -> bool { return this->blueismDetector; };
+		co_yield util::coroutine::nextCycle();
 	}
 }
+
 
 // coro to make sure that when lady brown goes to score from LEVEL_1 state, the ring in the lift doesn't get caught on the
 // intake's hook
@@ -160,6 +160,7 @@ RobotThread Intake::ladyBrownClearanceCoro() {
 		co_yield [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; };
 	}
 }
+
 
 // Runs in auton. Kills the intake to prevent it stalling indefinitely after loading a ring into the lady brown.
 // also clears intake's hook from the lady brown
@@ -246,11 +247,11 @@ RobotThread Intake::runner() {
 }
 
 bool Intake::redRingDetector() {
-	return color.get_hue() <= 15;
+	return color.get_hue() <= 11;
 }
 
 bool Intake::blueRingDetector() {
-	return color.get_hue() >= 150;
+	return color.get_hue() >= 210;
 }
 
 void Intake::setTorqueStop(bool val) {

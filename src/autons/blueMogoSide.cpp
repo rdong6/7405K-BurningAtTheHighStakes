@@ -13,6 +13,8 @@
 #include "subsystems/Pnooomatics.h"
 
 RobotThread blueMogoSide() {
+	robotInstance->curAlliance = Alliance::BLUE;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 	auto drive = robotInstance->getSubsystem<Drive>().value();

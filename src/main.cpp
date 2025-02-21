@@ -31,10 +31,6 @@ RobotThread autonomousUser();
 
 void robot_init() {
 	robotInstance = new std::decay<decltype(*robotInstance)>::type();
-	// move cur alliance into the autons -> while we figure a different way to do auton selector
-	// robotInstance->curAlliance = Alliance::RED;// for skills
-
-	robotInstance->curAlliance = Alliance::BLUE;
 	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::AUTON);
 }
 
@@ -87,12 +83,6 @@ RobotThread autonomousUser() {
 
 	auto autoCoro = sbhsBlueRingSide();
 	while (autoCoro) { co_yield autoCoro(); }
-
-	// for now defunct auton selector
-	// if (robotInstance->autonFnPtr) {
-	// 	auto coro = robotInstance->autonFnPtr();
-	// 	while (coro) { co_yield coro(); }
-	// }
 
 	// auto coro = redRingSide();
 	// auto coro = blueMogoSide();

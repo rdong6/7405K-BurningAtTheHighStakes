@@ -16,6 +16,8 @@
 
 
 RobotThread sbhsRedMogoSide() {
+	robotInstance->curAlliance = Alliance::RED;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 	auto drive = robotInstance->getSubsystem<Drive>().value();
@@ -115,6 +117,8 @@ RobotThread sbhsRedMogoSide() {
 }
 
 RobotThread sbhsBlueMogoSide() {
+	robotInstance->curAlliance = Alliance::BLUE;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 	auto drive = robotInstance->getSubsystem<Drive>().value();
