@@ -71,6 +71,5 @@ public:
 // Controller = OPCTRL
 
 // ODOM, DRIVE, LIFT, INTAKE, PNOOMATICS, LIFT, CONTROLLER
-// inline Robot<Odometry, Drive, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
-inline Robot<Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
+inline Robot<Odometry, Drive, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;
