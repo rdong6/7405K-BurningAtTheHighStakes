@@ -33,12 +33,11 @@ RobotThread sbhsRedMogoSide() {
 	co_yield drive->waitUntilSettled(2000);
 
 	// score on alliance stake w/ preload
-	/*liftFlags->targetAngle = 220;
+	liftFlags->targetAngle = 220;
 	lift->setState(Lift::HOLD);
 	co_yield util::coroutine::nextCycle();
 	Timeout liftTimeout = Timeout(255);
-	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };*/
-	co_yield util::coroutine::delay(500);// in place of alliance stake so we don't hit adi's wall
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
 
 	// move back first to get mogo
 	drive->setCurrentMotion(ProfiledMotion(-35.7, 50, 100, 60));
@@ -49,21 +48,23 @@ RobotThread sbhsRedMogoSide() {
 	pnoomatics->setClamp(true);
 
 	// mogo clamped, turn + move to get the 2 rings under the tower
-	drive->setCurrentMotion(PIDTurn(265, PID(120, 1, 170, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(800);
-	drive->setCurrentMotion(ProfiledMotion(20.5, 50, 100, 100));
+	drive->setCurrentMotion(PIDTurn(266.75, PID(120, 1, 170, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(700);
+	drive->setCurrentMotion(ProfiledMotion(19, 50, 100, 100));
 	co_yield drive->waitUntilSettled(1100);
 
 	// ring rush hamer get the 2 rings
 	// get one, hammer
 	pnoomatics->setRightHammer(true);
 	co_yield util::coroutine::delay(150);
-	drive->setCurrentMotion(PIDTurn(270, PID(200, 1, 150, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(500);
+	// drive->setCurrentMotion(PIDTurn(270, PID(200, 1, 150, true, 10), false, false, 0.5));
+	// co_yield drive->waitUntilSettled(500);
 	drive->setCurrentMotion(PIDTurn(225, PID(450, 1, 100, true, 10), false, true, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setLeftHammer(true);
-	co_yield util::coroutine::delay(100);
+	co_yield util::coroutine::delay(150);
+	drive->setCurrentMotion(PIDTurn(255, PID(200, 1, 150, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
 
 	// move back, and drop the rings to intake all 3 of them
 	drive->setCurrentMotion(ProfiledMotion(-38, 50, 100, 100));
@@ -73,15 +74,15 @@ RobotThread sbhsRedMogoSide() {
 	// then arc turn to align ring in left hammer to other one
 	// turn more to the right
 	// original heading: 189
-	drive->setCurrentMotion(PIDTurn(181.5, PID(350, 1, 100, true, 10), true, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(197.5, PID(200, 1, 100, true, 10), true, false, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setLeftHammer(false);
 	// turn back to the now aligned 2 rings
 	// this turn might shoot
-	drive->setCurrentMotion(PIDTurn(203, PID(200, 1, 100, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(222, PID(200, 1, 100, true, 10), false, false, 0.5));
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(550);
-	drive->setCurrentMotion(ProfiledMotion(25, 50, 100, 70));
+	drive->setCurrentMotion(ProfiledMotion(25, 50, 100, 60));
 	co_yield drive->waitUntilSettled(1300);
 	co_yield util::coroutine::delay(500);
 
@@ -100,8 +101,8 @@ RobotThread sbhsRedMogoSide() {
 	intake->moveVoltage(12000);
 	pnoomatics->setLeftHammer(true);
 	co_yield drive->waitUntilSettled(1500);
-
 	pnoomatics->setClamp(false);
+
 	drive->setCurrentMotion(PIDTurn(255, PID(120, 1, 200, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
@@ -153,7 +154,7 @@ RobotThread sbhsBlueMogoSide() {
 
 	// mogo clamped, turn + move to get the 2 rings under the tower
 	// original: 103
-	drive->setCurrentMotion(PIDTurn(101, PID(120, 1, 170, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(99.25, PID(120, 1, 170, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	drive->setCurrentMotion(ProfiledMotion(20.5, 50, 100, 100));
 	co_yield drive->waitUntilSettled(1100);
@@ -162,12 +163,14 @@ RobotThread sbhsBlueMogoSide() {
 	// get one, hammer
 	pnoomatics->setLeftHammer(true);
 	co_yield util::coroutine::delay(150);
-	drive->setCurrentMotion(PIDTurn(106, PID(200, 1, 150, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(500);
+	// drive->setCurrentMotion(PIDTurn(106, PID(200, 1, 150, true, 10), false, false, 0.5));
+	// co_yield drive->waitUntilSettled(500);
 	drive->setCurrentMotion(PIDTurn(131, PID(450, 1, 100, true, 10), true, false, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setRightHammer(true);
-	co_yield util::coroutine::delay(100);
+	co_yield util::coroutine::delay(150);
+	drive->setCurrentMotion(PIDTurn(111, PID(111, 1, 150, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
 
 	// move back, and drop the rings to intake all 3 of them
 	drive->setCurrentMotion(ProfiledMotion(-38, 50, 100, 100));
@@ -175,14 +178,14 @@ RobotThread sbhsBlueMogoSide() {
 	pnoomatics->setLeftHammer(false);
 
 	// then arc turn to align ring in left hammer to other one
-	drive->setCurrentMotion(PIDTurn(176, PID(350, 1, 100, true, 10), false, true, 0.5));
+	drive->setCurrentMotion(PIDTurn(160, PID(350, 1, 100, true, 10), false, true, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setRightHammer(false);
 	// turn back to the now aligned 2 rings
-	drive->setCurrentMotion(PIDTurn(157, PID(200, 1, 100, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(138, PID(200, 1, 100, true, 10), false, false, 0.5));
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(550);
-	drive->setCurrentMotion(ProfiledMotion(25, 50, 100, 70));
+	drive->setCurrentMotion(ProfiledMotion(25, 50, 100, 60));
 	co_yield drive->waitUntilSettled(1300);
 	co_yield util::coroutine::delay(500);
 

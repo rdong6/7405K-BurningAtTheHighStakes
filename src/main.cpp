@@ -81,7 +81,7 @@ RobotThread autonomousUser() {
 	// auto skillsCoro = skillsAuton();
 	// while (skillsCoro) { co_yield skillsCoro(); }
 
-	auto autoCoro = sbhsBlueMogoSide();
+	auto autoCoro = sbhsRedRingSide();
 	while (autoCoro) { co_yield autoCoro(); }
 
 	// auto coro = redRingSide();

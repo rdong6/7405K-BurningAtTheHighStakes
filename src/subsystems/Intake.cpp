@@ -288,6 +288,15 @@ void Intake::brake() {
 	motors.brake();
 }
 
+void Intake::setExtender(bool extended) {
+	isExtended = extended;
+	extender.set_value(isExtended);
+}
+
+void Intake::toggleExtender() {
+	setExtender(!isExtended);
+}
+
 bool Intake::isStalled() const {
 	return intakeStalled;
 }

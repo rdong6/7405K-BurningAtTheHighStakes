@@ -17,8 +17,11 @@ private:
 	pros::Distance distance{ports::intakeDistance};
 	pros::Distance blueismDistance{ports::blueismDistance};
 	pros::Optical color{ports::intakeColor};
+	pros::adi::DigitalOut extender{'H'};
 
 	AntiJamState state = AntiJamState::IDLE;
+
+	bool isExtended = false;
 
 	bool codeOverride = false;// intake code takes control of intake -> no other subsystem/controller can override
 
@@ -69,6 +72,9 @@ public:
 
 	void setTorqueStop(bool val);
 	void setDistStop(bool val);
+
+	void setExtender(bool extended);
+	void toggleExtender();
 
 	bool isStalled() const;
 };
