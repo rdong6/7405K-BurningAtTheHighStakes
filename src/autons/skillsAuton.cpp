@@ -47,7 +47,55 @@ RobotThread skillsAuton() {
 
 	lift->setState(Lift::STOW);
 
-	drive->setCurrentMotion(PIDTurn(265, PID(200, 1, 45, true, 10), false, false, 0.5));
+
+	Pose firstMogo(-8.3, 19.6);
+	Pose curPose = odom->getCurrentState().position;
+
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(firstMogo).degrees(), PID(), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(800);
+
+	curPose = odom->getCurrentState().position;
+	double distToTravel = curPose.translation().distanceTo(firstMogo.translation());
+	drive->setCurrentMotion(ProfiledMotion(distToTravel, 60, 100, 100));
+	co_yield drive->waitUntilSettled(5000);
+
+	Pose firstRing(-27.1, 23.9);
+
+	Pose secondRing(-77.2, 45.2);
+
+	Pose thirdRing(-100.2, 56.7);
+
+	Pose lineUpWallStake1(-56.9, 40.2);
+
+	Pose wallStake1(-56.9, 62.5);
+
+	// move back after scoring on wallstake to align with the row of rings
+	Pose moveBack1(-56.5, 48.3);
+
+	Pose rowOfRings(2.6, 50.2);
+
+	Pose alignCornerPoint(-7.5, 60.3);
+
+	Pose cornerPoint(-3.4, 62.5);
+
+	Pose alignMogo2(-10.9, 58.6);
+
+	Pose mogo2(-3.2, -18.2);
+
+	Pose fourthRing(-23.3, -24.7);
+
+	Pose fifthRing(-69.9, -53.1);
+
+	Pose sixthRing(-92.0, -67.0);
+
+	Pose lineupWallStake2(-48.6, -48.4);
+
+	Pose wallStake2(-45.6, -64.0);
+
+	Pose backWallStake(-46.9, -50.7);
+
+
+	/*drive->setCurrentMotion(PIDTurn(265, PID(200, 1, 45, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	drive->setCurrentMotion(ProfiledMotion(-18.5, 50, 60, 25));
 	co_yield drive->waitUntilSettled(1500);
@@ -172,7 +220,7 @@ RobotThread skillsAuton() {
 	co_yield util::coroutine::nextCycle();
 
 	drive->setCurrentMotion(ProfiledMotion(20, 30, 40, 30));
-	
+
 	co_yield util::coroutine::delay(250);// delay needed as ladyBrownClearanceEnabled stops intake after 60ms
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(2000);
@@ -215,7 +263,7 @@ RobotThread skillsAuton() {
 	// drop 2nd mogo into corner
 	pnoomatics->setClamp(false);
 	intake->moveVoltage(-12000);
-	
+
 
 	// original: 8
 	// drive->setCurrentMotion(ProfiledMotion(9.5, 25, 40, 30));
@@ -288,7 +336,7 @@ RobotThread skillsAuton() {
 	co_yield drive->waitUntilSettled(800);
 
 	drive->setCurrentMotion(TimedMotion(10000,-12000));
-	co_yield drive->waitUntilSettled(10000);
+	co_yield drive->waitUntilSettled(10000);*/
 
 
 	// lift->setState(Lift::LEVEL_1);
