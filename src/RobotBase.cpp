@@ -129,5 +129,5 @@ void robot_init() {
 	        [](void* robot) {
 		        if (robot) { static_cast<decltype(robotInstance)>(robot)->run(); }
 	        },
-	        robotInstance, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Scheduler");
+	        robotInstance, TASK_PRIORITY_DEFAULT, 0x4000, "Scheduler");
 }

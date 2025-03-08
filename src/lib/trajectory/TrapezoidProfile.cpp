@@ -1,6 +1,7 @@
 #include "lib/trajectory/TrapezoidProfile.h"
 #include "lib/utils/Math.h"
 #include <cmath>
+#include <cstdio>
 
 TrapezoidProfile::TrapezoidProfile()
     : start_vel(0), dist(0), acc_max(0), dec_max(0), v_max(0), t_acc(0), t_coast(0), t_dec(0), d_acc(0), d_coast(0), d_dec(0),
@@ -14,6 +15,7 @@ TrapezoidProfile::TrapezoidProfile(double distance, double max_acceleration, dou
 	acc_max = max_acceleration;
 	dec_max = max_deceleration;
 	v_max = fmin(fmin(vsqrtd(acc_max * dist) + start_vel * start_vel, vsqrtd(dec_max * dist)), max_velocity);
+	printf("[Trapezoid Profile] Max Vel: %f\n", v_max);
 
 	// generate variables
 

@@ -34,7 +34,7 @@ void initialize() {
 	pros::lcd::initialize();
 	robot_init();
 
-	// robotInstance->curAlliance = Alliance::BLUE;
+	robotInstance->curAlliance = Alliance::BLUE;
 
 	// NOTE: This is bad code! There's always potential for data races because scheduler is running, so any other part of
 	// codebase could register a task at the same time the initialize thread is registering the autonomousUser thread

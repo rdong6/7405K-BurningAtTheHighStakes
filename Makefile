@@ -16,7 +16,7 @@ LIB_SRC_DIRS:=$(SRCDIR)/fmt $(SRCDIR)/lib $(SRCDIR)/subsystems
 
 # specify individual lib src files
 EXTRA_LIB_SRC_FILES:=$(SRCDIR)/RobotBase.cpp
-#EXTRA_LIB_SRC_FILES=$(SRCDIR)/RobotBase.cpp $(SRCDIR)/subsystems/Odometry.cpp $(SRCDIR)/subsystems/Drive.cpp $(SRCDIR)/subsystems/Controller.cpp $(SRCDIR)/subsystems/Pnooomatics.cpp
+#EXTRA_LIB_SRC_FILES=$(SRCDIR)/RobotBase.cpp $(SRCDIR)/subsystems/Odometry.cpp $(SRCDIR)/subsystems/Drive.cpp $(SRCDIR)/subsystems/Controller.cpp $(SRCDIR)/subsystems/Pnooomatics.cpp $(SRCDIR)/subsystems/Lift.cpp
 
 # files to include in hot package, even if they're in LIB_SRC_DIRS
 EXCLUDE_LIB_SRC_FILES:=$(SRCDIR)/lib/trajectory/TrajectoryGen_hot.cpp

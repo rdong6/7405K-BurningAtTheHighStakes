@@ -26,8 +26,8 @@ void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::OPCTRL);
 
 	// blueism coro -> only runs in auton
-	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::AUTON);
-	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::AUTON);
+	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::OPCTRL);
+	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::OPCTRL);
 
 	// antijam
 	robot->registerTask([this]() { return this->antiJamCoro(); }, TaskType::AUTON,
@@ -86,7 +86,7 @@ RobotThread Intake::stalledDetectorCoro() {
 			intakeStalledCounter = 0;
 		}
 
-		if (intakeStalledCounter >= 6) {
+		if (intakeStalledCounter >= 25) {
 			intakeStalled = true;
 		} else {
 			intakeStalled = false;
@@ -115,13 +115,15 @@ RobotThread Intake::ringDetectorCoro() {
 			if (hueMA <= 15) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::RED);
-			} else if (hueMA >= 100) {
+				printf("Seen red ring. %d\n", ringsInIntake());
+			} else if (hueMA >= 218) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::BLUE);
+				printf("Seen blue ring. %d\n", ringsInIntake());
 			}
 		} else {
 			// already seen ring or no ring is in front of color sensor
-			if (25 <= hueMA <= 75 && proximity < 100) { counter++; }
+			if (25 <= hueMA <= 212 && proximity < 100) { counter++; }
 
 			if (counter > 3) {
 				counter = 0;
@@ -181,7 +183,7 @@ RobotThread Intake::blueismCoro() {
 RobotThread Intake::ladyBrownClearanceCoro() {
 	while (true) {
 		codeOverride = true;
-		motors.move_voltage(-6000);
+		motors.move_voltage(-4000);
 
 		co_yield util::coroutine::delay(70);
 		robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;

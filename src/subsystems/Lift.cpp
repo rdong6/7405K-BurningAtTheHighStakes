@@ -198,7 +198,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 28;// mmeant to be 26 pre-smudge
+			liftFlags->targetAngle = 27;// mmeant to be 26 pre-smudge
 			liftFlags->errorThresh = 1;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
