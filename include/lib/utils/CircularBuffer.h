@@ -1,7 +1,6 @@
 #pragma once
 #include "Math.h"
 #include <cstddef>
-#include <iostream>
 #include <vector>
 
 namespace util {
@@ -121,30 +120,30 @@ namespace util {
 		}
 
 		void push_front(T val) {
-			if (data.size() == 0) { return; }
+			if (data.empty()) { return; }
 
-			m_front = ModuloDec(m_front);
+			m_front = moduloDec(m_front);
 			data[m_front] = val;
 
 			if (length < data.size()) { length++; }
 		}
 
 		void push_back(T val) {
-			if (data.size() == 0) { return; }
+			if (data.empty()) { return; }
 
 			data[(m_front + length) % data.size()] = val;
 			if (length < data.size()) {
 				length++;
 			} else {
-				m_front = ModuloDec(m_front);
+				m_front = moduloInc(m_front);
 			}
 		}
 
 		template<typename... Args>
 		void emplace_front(Args&&... args) {
-			if (data.size() == 0) { return; }
+			if (data.empty()) { return; }
 
-			m_front = ModuloDec(m_front);
+			m_front = moduloDec(m_front);
 			data[m_front] = T{args...};
 			if (length < data.size()) { length++; }
 		}
@@ -159,14 +158,14 @@ namespace util {
 				length++;
 			} else {
 				// Increment m_front if buffer is full to maintain size
-				m_front = ModuloInc(m_front);
+				m_front = moduloInc(m_front);
 			}
 		}
 
 		// UB when nothing at m_front of buffer
 		T pop_front() {
 			T& temp = data[m_front];
-			m_front = ModuloInc(m_front);
+			m_front = moduloInc(m_front);
 			length--;
 			return temp;
 		}
@@ -204,11 +203,9 @@ namespace util {
 			return util::normalize(index + amt, data.max_size());
 		}
 
-		size_t ModuloInc(size_t index) {
-			return (index + 1) % data.size();
-		}
+		size_t moduloInc(size_t index) { return (index + 1) % data.size(); }
 
-		size_t ModuloDec(size_t index) {
+		size_t moduloDec(size_t index) {
 			if (index == 0) {
 				return data.size() - 1;
 			} else {

@@ -1,4 +1,5 @@
 #include "RobotBase.h"
+#include "Robot.h"
 #include "lib/utils/CoroutineGenerator.h"
 #include "pros/misc.h"
 #include "pros/misc.hpp"
@@ -120,4 +121,13 @@ void RobotBase::registerTask(TaskFunc func, TaskType type, const RobotFunc& pred
 		default:
 			break;
 	}
+}
+
+void robot_init() {
+	robotInstance = new std::decay<decltype(*robotInstance)>::type();
+	robotTask = pros::c::task_create(
+	        [](void* robot) {
+		        if (robot) { static_cast<decltype(robotInstance)>(robot)->run(); }
+	        },
+	        robotInstance, TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "Scheduler");
 }

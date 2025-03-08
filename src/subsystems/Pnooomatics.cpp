@@ -9,8 +9,8 @@ Pnooomatics::Pnooomatics(RobotBase* robot) : Subsystem(robot) {
 }
 
 void Pnooomatics::registerTasks() {
-	robot->registerTask([this]() { return this->autoClampCoro(); }, TaskType::AUTON,
-	                    [robot = this->robot]() { return robot->getFlag<Pnooomatics>().value()->clampMogo; });
+	// robot->registerTask([this]() { return this->autoClampCoro(); }, TaskType::AUTON,
+	//                     [robot = this->robot]() { return robot->getFlag<Pnooomatics>().value()->clampMogo; });
 
 	auto controller = robot->getSubsystem<Controller>();
 
@@ -45,7 +45,7 @@ void Pnooomatics::setClamp(bool enable) {
 	clampEnabled = enable;
 	clamp.set_value(enable);
 	if (clampEnabled) { pros::c::controller_rumble(pros::E_CONTROLLER_MASTER, "."); }
-	pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Clamp: %d", clampEnabled);
+	pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Clamp: %d", enable);
 }
 
 void Pnooomatics::toggleClamp() {

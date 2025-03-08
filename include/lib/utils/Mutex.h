@@ -135,19 +135,5 @@ namespace util {
 			auto guard = ConstGuard(*this);
 			return func(*guard);
 		}
-
-		/*
-		You SHOULD REALLY KNOW what your doing if you were to call this function.
-		There is no synchronization in place when accessing the underlying datum.
-
-		I included this as sometimes, there is no point in locking, but it really is a design flaw to have a mutex allow
-		unguarded access to the data.
-		*/
-		__attribute__((
-		        warning("You SHOULD REALLY KNOW what your doing. Unsafe read that does not have any synchronization.")))
-		const T&
-		unsafeRead() const {
-			return data;
-		}
 	};
 }// namespace util

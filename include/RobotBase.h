@@ -15,8 +15,7 @@ typedef util::coroutine::Generator<RobotFunc> (*AutonFn_t)(void);// C func ptr -
 
 using RobotThread = util::coroutine::Generator<RobotFunc>;
 
-enum class Auton : uint16_t { NONE = 0, QUAL, ELIM };
-enum class Alliance : uint16_t { INVALID = 0, BLUE, RED };
+enum class Alliance : uint8_t { INVALID = 0, BLUE, RED };
 enum class TaskType { AUTON, OPCTRL, DISABLED, SENTINEL };
 
 class RobotBase {
@@ -75,3 +74,6 @@ public:
 	bool allianceStake = false;
 	uint32_t delay = 0;// in ms
 };
+
+// Initializes all robotics code + starts the scheduler
+void robot_init();

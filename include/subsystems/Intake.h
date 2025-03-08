@@ -3,10 +3,12 @@
 #include "Logger.h"
 #include "RobotBase.h"
 #include "Subsystem.h"
+#include "lib/filters/MA.h"
 #include "main.h"
 #include "pros/adi.hpp"
 #include "pros/distance.hpp"
 #include "pros/motors.hpp"
+#include <queue>
 #include <sigslot/signal.h>
 
 class Intake : public Subsystem {
@@ -19,23 +21,21 @@ private:
 	pros::Optical color{ports::intakeColor};
 	pros::adi::DigitalOut extender{'H'};
 
+	bool codeOverride = false;// intake code takes control of intake -> no other subsystem/controller can override
+
 	AntiJamState state = AntiJamState::IDLE;
 
 	bool isExtended = false;
 
-	bool codeOverride = false;// intake code takes control of intake -> no other subsystem/controller can override
+	bool intakeStalled = false;
 
 	// for blueism coro -> when we eject a ring, if enabled, we will resume last intake voltage after ejecting ring
 	int lastCommandedVoltage = 0;
-
-	bool intakeStalled = false;
-
-
-	bool redRingDetector();
-	bool blueRingDetector();
-	bool (Intake::*blueismDetector)(void) = nullptr;
+	MA<int> ringColorMA{3};
+	std::queue<Alliance> ringsSeen{};// list of rings our intake has seen
 
 	RobotThread runner();
+	RobotThread ringDetectorCoro();// coro that detects colored rings passing through the intake
 	RobotThread blueismCoro();
 	RobotThread ladyBrownClearanceCoro();// moves intake slightly back so lady brown clears intake as it goes to score
 	RobotThread
@@ -77,4 +77,6 @@ public:
 	void toggleExtender();
 
 	bool isStalled() const;
+
+	int ringsInIntake() const;// returns # of rings in our intake -> only works in auton due to ringDetectorCoro
 };

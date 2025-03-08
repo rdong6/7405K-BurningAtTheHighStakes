@@ -82,26 +82,25 @@ RobotThread sbhsRedRingSide() {
 	drive->setCurrentMotion(ProfiledMotion(37, 50, 100, 120));
 	co_yield drive->waitUntilSettled(2500);
 
-	co_yield util::coroutine::delay(400);
-	intake->setExtender(true);
-
-	drive->setCurrentMotion(ProfiledMotion(16, 50, 100, 120));
-	co_yield drive->waitUntilSettled(2500);
-	intake->setExtender(false);
 	co_yield util::coroutine::delay(100);
+	pnoomatics->setRightHammer(true);
 
-	drive->setCurrentMotion(ProfiledMotion(-10, 50, 100, 120));
-	co_yield drive->waitUntilSettled(2500);
+	drive->setCurrentMotion(PIDTurn(238.5, PID(145, 1, 140, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
 
-	drive->setCurrentMotion(PIDTurn(315, PID(120, 1, 170, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(800);
+	drive->setCurrentMotion(ProfiledMotion(70, 50, 100, 40));
+	co_yield drive->waitUntilSettled(3000);
 
-	liftFlags->targetAngle = 175;
-	lift->setState(Lift::HOLD);
-	co_yield drive->waitUntilSettled(300);
 
-	drive->setCurrentMotion(ProfiledMotion(15, 50, 100, 120));
-	co_yield drive->waitUntilSettled(2500);
+	// drive->setCurrentMotion(PIDTurn(315, PID(120, 1, 170, true, 10), false, false, 0.5));
+	// co_yield drive->waitUntilSettled(800);
+	//
+	// liftFlags->targetAngle = 175;
+	// lift->setState(Lift::HOLD);
+	// co_yield drive->waitUntilSettled(300);
+	//
+	// drive->setCurrentMotion(ProfiledMotion(15, 50, 100, 120));
+	// co_yield drive->waitUntilSettled(2500);
 
 
 	// elims with no ring ah
@@ -201,33 +200,45 @@ RobotThread sbhsBlueRingSide() {
     drive->setCurrentMotion(PIDTurn(224, PID(120, 1, 170, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(700);
 
-    drive->setCurrentMotion(ProfiledMotion(44, 50, 100, 80));
+	drive->setCurrentMotion(ProfiledMotion(44, 50, 100, 100));
+	co_yield util::coroutine::delay(400);
+	intake->moveVoltage(0);
 	co_yield drive->waitUntilSettled(1500);
 
-    drive->setCurrentMotion(ProfiledMotion(10, 50, 100, 100));
+
+	drive->setCurrentMotion(ProfiledMotion(10, 50, 100, 100));
+	co_yield util::coroutine::delay(400);
+	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(500);
 
-    drive->setCurrentMotion(ProfiledMotion(-7, 50, 100, 100));
+
+	drive->setCurrentMotion(ProfiledMotion(-8.5, 50, 100, 100));
 	co_yield drive->waitUntilSettled(700);
 
     intake->moveVoltage(12000);
 
-    drive->setCurrentMotion(PIDTurn(115, PID(120, 1, 170, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(111.5, PID(120, 1, 170, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
-    drive->setCurrentMotion(ProfiledMotion(39, 50, 100, 120));
+	drive->setCurrentMotion(ProfiledMotion(37, 50, 100, 120));
 	co_yield drive->waitUntilSettled(2500);
 
-	drive->setCurrentMotion(PIDTurn(125, PID(120, 1, 170, true, 10), false, false, 0.5));
+	co_yield util::coroutine::delay(100);
+
+	pnoomatics->setLeftHammer(true);
+
+	drive->setCurrentMotion(PIDTurn(121.5, PID(145, 1, 140, true, 10), false, false, 0.5));
+	co_yield drive->waitUntilSettled(500);
+
+	drive->setCurrentMotion(ProfiledMotion(70, 50, 100, 40));
+	co_yield drive->waitUntilSettled(3000);
+
+	/*drive->setCurrentMotion(PIDTurn(125, PID(120, 1, 170, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(1000);
 
 	pnoomatics->setLeftHammer(true);
 	intake->moveVoltage(-12000);
 
 	drive->setCurrentMotion(ProfiledMotion(30, 50, 100, 120));
-	co_yield drive->waitUntilSettled(2500);
-
-
-
-
+	co_yield drive->waitUntilSettled(2500);*/
 }

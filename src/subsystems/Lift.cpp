@@ -8,7 +8,7 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
-#define UPPER_BOUNDS 220
+#define UPPER_BOUNDS 250
 #define LOWER_BOUNDS 1.5
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
@@ -53,7 +53,7 @@ void Lift::registerTasks() {
 			        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
 		        }
 
-		        curState = State::IDLE;
+		        setState(State::IDLE);
 		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
@@ -61,7 +61,8 @@ void Lift::registerTasks() {
 
 	controllerRef->registerCallback(
 	        [this]() {
-		        robot->getFlag<Lift>().value()->state = State::IDLE;
+		        // robot->getFlag<Lift>().value()->state = State::IDLE;
+		        setState(State::IDLE);
 		        move(-12000);
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
@@ -117,8 +118,11 @@ RobotThread Lift::runner() {
 	liftFlags->isMoving = true;
 	liftFlags->pid.reset();
 
+	// code specific for slewing
+	double slewOutput = 0;// slew output = pid's voltage when slew is disabled
+
 	while (true) {
-		if (liftFlags->kill) { co_return; }
+		if (liftFlags->kill) { break; }
 
 
 		if (liftFlags->state == State::IDLE) {
@@ -133,8 +137,24 @@ RobotThread Lift::runner() {
 		if (fabs(error) >= liftFlags->errorThresh) {
 			liftFlags->isMoving = true;
 			double pwr = liftFlags->pid(error);
-			move(pwr);
-			printf("Running. Error: %f  CurAngle: %f\n", error, liftFlags->curAngle);
+
+			// slew or not
+			if (liftFlags->slewEnabled) {
+				double diff = pwr - slewOutput;
+
+				if (std::abs(diff) <= liftFlags->slewRate) {
+					slewOutput = pwr;
+				} else {
+					slewOutput += util::sign(diff) * liftFlags->slewRate;
+				}
+
+			} else {
+				slewOutput = pwr;
+			}
+
+
+			move(slewOutput);
+			// printf("Running. Error: %f  CurAngle: %f\n", error, liftFlags->curAngle);
 		} else {
 			liftFlags->isMoving = false;
 
@@ -149,42 +169,6 @@ RobotThread Lift::runner() {
 
 		co_yield util::coroutine::nextCycle();
 	}
-}
-
-// in skills, automate the task of scoring rings onto wallstake
-/*
- * process:
- * roman presses a button which enables this feature -> could just override the lift controls so when he commands lift to move
- *up, itll do all of this stuff while roman holds button down, this feature is runnning
- *
- * 1) lift moves to LEVEL_1
- * 2) run intake until ring is loaded into lady brown -> let stall detection kill the intake
- * 3)
- *	i) enable intake's dist stop -> prevent any more rings that are being intaked from traveling up ramp into lady brown
- *	ii) move lady brown
- * 4) repeat entire loop
- *
- */
-RobotThread Lift::skillsWallstakeAutomationStage1() {
-	auto liftFlags = robot->getFlag<Lift>().value();
-	auto intake = robot->getSubsystem<Intake>().value();
-
-	// sets lift into loading position
-	// while waiting for lift to get into position, we will prevent ring from moving up intake
-	setState(State::LEVEL_1);
-	do {
-		intake->setDistStop(true);
-		co_yield util::coroutine::nextCycle();
-	} while (liftFlags->isMoving);
-
-	// now allow ring to be scored
-	intake->setDistStop(false);
-
-	// wait until ring is scored
-
-	// when ring is scored, re-enable dist stop and move lady brown to score ring
-
-	// then repeat the cycle again
 }
 
 void Lift::toggleState() {
@@ -214,7 +198,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 28.7;
+			liftFlags->targetAngle = 28;// mmeant to be 26 pre-smudge
 			liftFlags->errorThresh = 1;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;

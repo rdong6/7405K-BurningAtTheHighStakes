@@ -25,9 +25,6 @@ private:
 
 public:
 	struct flags {
-		kinState curState{};
-		double leftVel = 0;
-		double rightVel = 0;
 	};
 
 	explicit Odometry(RobotBase* robot);
@@ -37,7 +34,7 @@ public:
 	void reset();
 	void setPose(Pose pose);
 
-	kinState getCurrentState() const;
+	const kinState& getCurrentState() const;
 	double getRotation() const;
 	double getLeftVel() const;
 	double getLeftPos() const;

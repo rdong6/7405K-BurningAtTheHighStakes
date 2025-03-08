@@ -1,12 +1,11 @@
 #include "subsystems/Intake.h"
 #include "Logger.h"
+#include "Robot.h"
 #include "RobotBase.h"
 #include "lib/utils/CoroutineGenerator.h"
-#include "lib/utils/Timeout.h"
 #include "pros/motors.h"
 #include "subsystems/Controller.h"
 #include "subsystems/Lift.h"
-
 #include <cmath>
 
 Intake::Intake(RobotBase* robot) : Subsystem(robot) {
@@ -27,6 +26,7 @@ void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::OPCTRL);
 
 	// blueism coro -> only runs in auton
+	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::AUTON);
 	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::AUTON);
 
 	// antijam
@@ -68,17 +68,14 @@ void Intake::registerTasks() {
 	        },
 	        []() {}, Controller::master, Controller::r1, Controller::falling);
 
-	controllerRef->registerCallback(
-	        [this]() {
-		        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = true;
-		        this->moveVoltage(0);
-	        },
-	        []() {}, Controller::master, Controller::r2, Controller::falling);
+	controllerRef->registerCallback([this]() { this->moveVoltage(0); }, []() {}, Controller::master, Controller::r2,
+	                                Controller::falling);
 }
 
 // coroutine that runes to detect if intake is stalled
 RobotThread Intake::stalledDetectorCoro() {
 	unsigned int intakeStalledCounter = 0;
+
 	while (true) {
 		// Can't use torque -> check if blueism triggers this
 		// need something to check that we command the motor to actually move and it aint
@@ -89,7 +86,7 @@ RobotThread Intake::stalledDetectorCoro() {
 			intakeStalledCounter = 0;
 		}
 
-		if (intakeStalledCounter >= 3) {
+		if (intakeStalledCounter >= 6) {
 			intakeStalled = true;
 		} else {
 			intakeStalled = false;
@@ -99,35 +96,66 @@ RobotThread Intake::stalledDetectorCoro() {
 	}
 }
 
+// Detects color of ring passing through intake and above the color sensor
+// Pushes ring into queue of rings that are currently in the intake but haven't passed the dist sensor yet
+RobotThread Intake::ringDetectorCoro() {
+	// TODO: THIS HAS A BUG IN IT! On initialization, as the MA's is populated w/ values from the sensor, it will rise from 0 to
+	// whatever ambient value it is this will trigger the sensor to think it's seen a red ring when there is none.
 
-// Runs only in AUTON
+	// whether or not we've currently already seen the current ring to decide if we append to the queue
+	bool alreadySeenRing = true;// set to true to maybe prevent the bug mentioned in the TODO
+	int counter = 0;
+
+	while (true) {
+		// round to int as the decimal don't really matter. math is quicker + no round off errors to cause drift from MA filter
+		int hueMA = ringColorMA.update(std::lround(color.get_hue()));
+		int proximity = color.get_proximity();
+
+		if (!alreadySeenRing && proximity >= 200) {
+			if (hueMA <= 15) {
+				alreadySeenRing = true;
+				ringsSeen.push(Alliance::RED);
+			} else if (hueMA >= 100) {
+				alreadySeenRing = true;
+				ringsSeen.push(Alliance::BLUE);
+			}
+		} else {
+			// already seen ring or no ring is in front of color sensor
+			if (25 <= hueMA <= 75 && proximity < 100) { counter++; }
+
+			if (counter > 3) {
+				counter = 0;
+				alreadySeenRing = false;
+			}
+		}
+
+		// delay of 15ms to ensure this thread runs every 2 cycles (20ms)
+		// if it was 20ms, there's not 100% guarantee that this thread will run every 2 cycles. it might run every 3rd cycle if
+		// other code runs quicker and 20ms hasn't been reached till this thread is getting scheduled
+		co_yield util::coroutine::delay(15);
+	}
+}
+
+
 RobotThread Intake::blueismCoro() {
 	auto intakeFlags = robot->getFlag<Intake>().value();
 
+
+	// TODO: implement a queue -> so we eject the right ring and not the wrong ring
+	// Logic happening in parallel
+	// 1) Detect color of ring passing through intake -> append it to a queue of rings seen
+	// 2) Each time the dist sensor sees a ring, look at queue to see what color the ring is. If it's the color we want to
+	// eject, initiate the ejection
+
 	while (true) {
-		// block blueism coro from running until we're set to an alliance and want to color sort
-		while (!blueismDetector) {
-			switch (robot->curAlliance) {
-				case Alliance::BLUE:
-					blueismDetector = &Intake::redRingDetector;
-					break;
-				case Alliance::RED:
-					blueismDetector = &Intake::blueRingDetector;
-					break;
-				default:
-					blueismDetector = nullptr;
-					break;
-			}
+		// wait until we detect a ring w/ dist sensor
+		co_yield [this]() -> bool { return !ringsSeen.empty() && blueismDistance.get() <= 20; };
 
-			co_yield util::coroutine::nextCycle();
-		}
-
-		// we detected opposite alliance's ring
-		// afterward, wait until we detect the ring with our dist sensor at the top of the intake
-		// now blueism commences
-		if ((this->*blueismDetector)() && color.get_proximity() >= 80) {
-			co_yield [&]() -> bool { return blueismDistance.get() <= 20; };
-
+		// if we see a ring, check what color it is and if it's the one we want, eject it
+		//
+		// we put the check here for if an alliance is set because regardless of if color sort is enabled, we want to continue
+		// to remove rings from the queue as we see them
+		if (robot->curAlliance != Alliance::INVALID && ringsSeen.front() != robot->curAlliance) {
 			co_yield util::coroutine::delay(50);
 
 			// Now code takes over intake and stops it to eject ring
@@ -135,14 +163,15 @@ RobotThread Intake::blueismCoro() {
 			motors.brake();
 
 			// determines how long we stop intake for before resuming any normal operations
-			co_yield util::coroutine::delay(250 /* TUNE THIS */);
+			co_yield util::coroutine::delay(250);
 
 			// returns control to intake and if requested, resume intake to last commanded voltage before blueism commenced
 			codeOverride = false;
 			if (intakeFlags->colorSortResumes) { moveVoltage(lastCommandedVoltage); }
 		}
 
-		co_yield util::coroutine::nextCycle();
+		// remove ring from queue as we've now detected it by dist sensor
+		ringsSeen.pop();
 	}
 }
 
@@ -152,10 +181,12 @@ RobotThread Intake::blueismCoro() {
 RobotThread Intake::ladyBrownClearanceCoro() {
 	while (true) {
 		codeOverride = true;
-		motors.move_voltage(-4000);
-		co_yield util::coroutine::delay(90);
+		motors.move_voltage(-6000);
+
+		co_yield util::coroutine::delay(70);
 		robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
-		motors.brake();
+
+		motors.move_voltage(0);
 		codeOverride = false;
 		co_yield [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; };
 	}
@@ -181,13 +212,13 @@ RobotThread Intake::ladyBrownLoadedCoro() {
 		// we detected a ring in our intake that's about to be loaded into lady brown
 		// wait until intake stalls -> that indicates that the ring has been loaded into lady brown
 		if (blueismDistance.get() <= 20) {
-			co_yield util::coroutine::delay(10);
-			while (!isStalled()) { co_yield util::coroutine::delay(10); }
+			co_yield util::coroutine::nextCycle();
+			while (!isStalled()) { co_yield util::coroutine::nextCycle(); }
 
 			// intake has stalled -> assuming that given lady brown is in position and we saw a ring @ top of intake, lady brown
 			// now has ring in it
 			moveVoltage(0);
-
+			printf("Lady brown has been loaded\n");
 			// automatically retract intake hook slightly -> so we don't have to manually do it in autons
 			robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = true;
 		}
@@ -246,14 +277,6 @@ RobotThread Intake::runner() {
 	}
 }
 
-bool Intake::redRingDetector() {
-	return color.get_hue() <= 11;
-}
-
-bool Intake::blueRingDetector() {
-	return color.get_hue() >= 210;
-}
-
 void Intake::setTorqueStop(bool val) {
 	auto intakeFlags = robot->getFlag<Intake>().value();
 	intakeFlags->torqueStop = val;
@@ -299,4 +322,7 @@ void Intake::toggleExtender() {
 
 bool Intake::isStalled() const {
 	return intakeStalled;
+}
+int Intake::ringsInIntake() const {
+	return ringsSeen.size();
 }
