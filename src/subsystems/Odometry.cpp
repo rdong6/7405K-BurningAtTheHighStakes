@@ -76,11 +76,11 @@ RobotThread Odometry::updatePosition() {
 		} else {
 			// use motor encoders
 			double LE = drive ? drive.value()->getLeftPosition() : 0;
-			l_dist = ((LE - prev_l) / 360.0) * M_PI * odometers::leftDeadwheelDiameter;
+			l_dist = ((LE - prev_l) / 360.0) * M_PI * odometers::driveGearRatio;
 			prev_l = LE;
 
 			double RE = drive ? drive.value()->getRightPosition() : 0;
-			r_dist = ((RE - prev_r) / 360.0) * M_PI * odometers::rightDeadwheelDiameter;
+			r_dist = ((RE - prev_r) / 360.0) * M_PI * odometers::driveGearRatio;
 			prev_r = RE;
 
 			deltaX = (l_dist + r_dist) / 2.0;
@@ -88,7 +88,9 @@ RobotThread Odometry::updatePosition() {
 
 
 		if constexpr (ports::imu > 0) {
+			// negative as CCW is positive, while for VEX CCW is negative
 			double curRotation = -imu.get_rotation() * imuScalar;
+			pros::lcd::print(5, "Unscaled IMU: %f", imu.get_rotation());
 			dh = util::toRad(curRotation - prevRotation);
 			prevRotation = curRotation;
 		} else {
@@ -96,8 +98,9 @@ RobotThread Odometry::updatePosition() {
 			if constexpr (ports::rightRotation != 0) {
 				trackWidth = odometers::deadwheelTrackWidth;
 			} else {
-				trackWidth = odometers::trackWidth;
+				trackWidth = odometers::trackWidth;// trackwidth of drivetrain
 			}
+
 			dh = (l_dist - r_dist) / (trackWidth);
 		}
 
@@ -164,6 +167,6 @@ void Odometry::printOdom(kinState state) {
 	//               util::toDeg(state.position.theta()));
 }
 
-kinState Odometry::getCurrentState() const {
+const kinState& Odometry::getCurrentState() const {
 	return curState;
 }

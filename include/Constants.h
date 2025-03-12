@@ -32,16 +32,15 @@ namespace ports {
 
 	constexpr int leftRotation = 0;
 	constexpr int rightRotation = 0;
-	constexpr int backRotation = 0;
-	constexpr int verticalRotation = 0; // this will only ever be used if we have 1 vertical deadwheel on the bot
+	constexpr int backRotation = 5;
+	constexpr int verticalRotation = -6;// this will only ever be used if we have 1 vertical deadwheel on the bot
 	constexpr int imu = 1;
 }// namespace ports
 
 namespace odometers {
-	constexpr double driveGearRatio = 2.75;// diameter + gear ratio included
+	constexpr double driveGearRatio = 2.75;// wheel diameter + gear ratio included
 
-	// distance between left and right wheels of drivetrain
-	constexpr double trackWidth = 11.75;
+	constexpr double trackWidth = 11.75;// distance between left and right wheels of drivetrain
 	constexpr double deadwheelTrackWidth =
 	        0.0;// dist between left & right deadwheels -> only used if deadwheels used to calc heading
 
@@ -49,9 +48,11 @@ namespace odometers {
 	constexpr double rightDeadwheelDiameter = 2.75;
 	constexpr double backDeadwheelDiameter = 2.75;// ignored if backRotation is 0
 	constexpr double verticalDeadwheelDiameter = 2; // used only if vertical deadwheel
-	// constexpr double backOffset = 0.1;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
-	// constexpr double backOffset = 0.236;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
-	constexpr double backOffset = 1.84;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
-	// constexpr double verticalOffset = 0.41; // only used if we have 1 vertical deadwheel (no left & right deadwheels)
-	constexpr double verticalOffset = 0.07778; // only used if we have 1 vertical deadwheel (no left & right deadwheels)
+
+	constexpr double backOffset = 2.35183757807;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
+	constexpr double verticalOffset = 0.107209776566;// only used if we have 1 vertical deadwheel (no left & right deadwheels)
+
+	// constexpr double backOffset = 2.30037430088;// ignored if backRotation is 0 (offset of back deadwheel to center of
+	// rotation) constexpr double verticalOffset = 0.0380916051888;// only used if we have 1 vertical deadwheel (no left & right
+	// deadwheels)
 }// namespace odometers

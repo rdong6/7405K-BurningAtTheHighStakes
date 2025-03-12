@@ -59,7 +59,7 @@ RobotThread sbhsRedMogoSide() {
 	co_yield util::coroutine::delay(150);
 	// drive->setCurrentMotion(PIDTurn(270, PID(200, 1, 150, true, 10), false, false, 0.5));
 	// co_yield drive->waitUntilSettled(500);
-	drive->setCurrentMotion(PIDTurn(225, PID(450, 1, 100, true, 10), false, true, 0.5));
+	drive->setCurrentMotion(PIDTurn(225.2, PID(435, 1, 100, true, 10), false, true, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setLeftHammer(true);
 	co_yield util::coroutine::delay(150);
@@ -74,17 +74,17 @@ RobotThread sbhsRedMogoSide() {
 	// then arc turn to align ring in left hammer to other one
 	// turn more to the right
 	// original heading: 189
-	drive->setCurrentMotion(PIDTurn(197.5, PID(200, 1, 100, true, 10), true, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(195.5, PID(200, 1, 100, true, 10), true, false, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setLeftHammer(false);
 	// turn back to the now aligned 2 rings
 	// this turn might shoot
-	drive->setCurrentMotion(PIDTurn(222, PID(200, 1, 100, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(225, PID(200, 1, 100, true, 10), false, false, 0.5));
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(550);
 	drive->setCurrentMotion(ProfiledMotion(25, 50, 100, 60));
 	co_yield drive->waitUntilSettled(1300);
-	co_yield util::coroutine::delay(500);
+	co_yield util::coroutine::delay(300);
 
 	// now intake last ring
 
@@ -104,14 +104,14 @@ RobotThread sbhsRedMogoSide() {
 	pnoomatics->setClamp(false);
 
 	drive->setCurrentMotion(PIDTurn(255, PID(120, 1, 200, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(1000);
+	co_yield drive->waitUntilSettled(800);
 
 	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 	// drive->setCurrentMotion(ProfiledMotion(45, 50, 100, 30));
 	drive->setCurrentMotion(TimedMotion(600, 8000));
 	intake->moveVoltage(0);
 	pnoomatics->setLeftHammer(false);
-	liftFlags->targetAngle = 170;
+	liftFlags->targetAngle = 175;
 	lift->setState(Lift::HOLD);
 	co_yield drive->waitUntilSettled(600);
 
@@ -165,11 +165,11 @@ RobotThread sbhsBlueMogoSide() {
 	co_yield util::coroutine::delay(150);
 	// drive->setCurrentMotion(PIDTurn(106, PID(200, 1, 150, true, 10), false, false, 0.5));
 	// co_yield drive->waitUntilSettled(500);
-	drive->setCurrentMotion(PIDTurn(131, PID(450, 1, 100, true, 10), true, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(132.8, PID(450, 1, 100, true, 10), true, false, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setRightHammer(true);
 	co_yield util::coroutine::delay(150);
-	drive->setCurrentMotion(PIDTurn(111, PID(111, 1, 150, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(109, PID(111, 1, 150, true, 10), false, false, 0.5));
 	co_yield drive->waitUntilSettled(500);
 
 	// move back, and drop the rings to intake all 3 of them
@@ -178,16 +178,16 @@ RobotThread sbhsBlueMogoSide() {
 	pnoomatics->setLeftHammer(false);
 
 	// then arc turn to align ring in left hammer to other one
-	drive->setCurrentMotion(PIDTurn(160, PID(350, 1, 100, true, 10), false, true, 0.5));
+	drive->setCurrentMotion(PIDTurn(165, PID(350, 1, 100, true, 10), false, true, 0.5));
 	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setRightHammer(false);
 	// turn back to the now aligned 2 rings
-	drive->setCurrentMotion(PIDTurn(138, PID(200, 1, 100, true, 10), false, false, 0.5));
+	drive->setCurrentMotion(PIDTurn(142, PID(200, 1, 100, true, 10), false, false, 0.5));
 	intake->moveVoltage(12000);
 	co_yield drive->waitUntilSettled(550);
 	drive->setCurrentMotion(ProfiledMotion(25, 50, 100, 60));
 	co_yield drive->waitUntilSettled(1300);
-	co_yield util::coroutine::delay(500);
+	co_yield util::coroutine::delay(300);
 
 	// now intake last ring
 
@@ -207,14 +207,14 @@ RobotThread sbhsBlueMogoSide() {
 
 	pnoomatics->setClamp(false);
 	drive->setCurrentMotion(PIDTurn(105, PID(120, 1, 200, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(1000);
+	co_yield drive->waitUntilSettled(800);
 
 	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 	// drive->setCurrentMotion(ProfiledMotion(45, 50, 100, 30));
 	drive->setCurrentMotion(TimedMotion(600, 8000));
 	intake->moveVoltage(0);
 	pnoomatics->setRightHammer(false);
-	liftFlags->targetAngle = 170;
+	liftFlags->targetAngle = 175;
 	lift->setState(Lift::HOLD);
 	co_yield drive->waitUntilSettled(600);
 

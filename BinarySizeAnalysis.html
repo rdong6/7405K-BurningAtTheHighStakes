@@ -1,0 +1,967 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>ELF size information for hot.package.elf - ROM</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>tr:nth-child(even) {
+    background-color: #efefef;
+}
+
+tr:nth-child(odd) {
+    background-color: #e0e0e0;
+}
+
+table {
+    border-spacing: 0px;
+    table-layout:fixed;
+    width: 100%;
+}
+
+h3 {
+    font-family: "Verdana";
+    font-size: 14pt;
+}
+
+td {
+    font-family: "Verdana";
+    font-size: 10pt;
+}
+
+tr:hover {
+    background: #adf0c2 !important;
+}
+
+tr.collapsed {
+    background-color: #c0dbc9;
+    font-style: italic;
+}
+
+tr.collapsed td:first-child::after {
+    content: " …";
+}
+
+.collapse-buttons {
+    margin: 1px 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+</style>
+        <script>// Build a tree out of table rows to easily manipulate rows as tree elements
+function buildTree() {
+  const tree = { elem: null, parent: null, children: [] };
+  const current = {
+    node: tree,
+    level: 0,
+    max_level: 0,
+  };
+
+  for (const elem of document.getElementsByClassName('collapsible')) {
+    const level = getLevel(elem);
+    if (level == undefined) continue;
+
+    current.max_level = Math.max(current.max_level, level);
+
+    if (level > current.level) {
+      if (level != current.level + 1) throw Error('Expected level+1 - invalid rows list');
+      current.level = level;
+      current.node = current.node.children[current.node.children.length - 1];
+      if (!current.node) throw Error('what?')
+    } else if (level < current.level) {
+      for (let i = 0; i < current.level - level; i++) {
+        current.node = current.node.parent;
+      }
+      current.level = level;
+    }
+
+    const node = { element: elem, parent: current.node, children: [] };
+    current.node.children.push(node);
+  }
+
+  return { tree, max_level: current.max_level };
+}
+
+function updateChildren(node, collapsed) {
+  for (const child of node.children) {
+    // Remove this class because it is used for the visible element with collapsed children
+    child.element.classList.remove('collapsed');
+    child.element.hidden = collapsed;
+    updateChildren(child, collapsed);
+  }
+}
+
+function setCollapsed(node, collapsed) {
+  if (node.children.length == 0) return;
+  const method = collapsed ? 'add' : 'remove';
+  node.element.classList[method]('collapsed');
+  updateChildren(node, collapsed);
+}
+
+function addOnClick(node) {
+  // root node has no parent, nor elements
+  if (node.element) {
+    node.element.addEventListener('click', () => {
+      setCollapsed(node, !node.element.classList.contains('collapsed'));
+    })
+  }
+
+  node.children.forEach(addOnClick);
+}
+
+// Find row level from element classes
+function getLevel(elem) {
+  const pattern = /level-(\d+)/
+  for (const cls of elem.classList) {
+    const match = cls.match(pattern);
+    if (match) {
+      return Number(match[1]);
+    }
+  }
+  return undefined;
+}
+
+function collapseAtLevel(tree, level) {
+  updateChildren(tree, false);
+
+  const collapse = (node) => {
+    if (node.element && getLevel(node.element) == level) {
+      setCollapsed(node, true);
+    }
+    for (const child of node.children) {
+      collapse(child, level);
+    }
+  }
+
+  collapse(tree);
+}
+
+function onLoaded() {
+  const { tree, max_level } = buildTree();
+  addOnClick(tree);
+
+  let level = max_level;
+
+  const class_change = {
+    more: () => (level = Math.max(level - 1, 0)),
+    less: () => (level = Math.min(level + 1, max_level)),
+    all: () => (level = 0),
+    none: () => (level = max_level),
+  };
+
+  const buttons = document.getElementsByClassName('collapse-buttons')[0];
+  for (const cls of Object.keys(class_change)) {
+    const action = class_change[cls];
+    for (const elem of buttons.getElementsByClassName(cls)) {
+      elem.addEventListener('click', () => {
+        action();
+        collapseAtLevel(tree, level);
+      });
+
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', onLoaded);
+</script>
+    </head>
+    <body>
+        <h3>ELF size information for hot.package.elf - ROM</h3>
+        <div class="collapse-buttons">
+            <span>Collapse</span>
+            <button class="all">All</button>
+            <button class="none">None</button>
+            <button class="less">Less</button>
+            <button class="more">More</button>
+            <span>or click on rows</span>
+        </div>
+        <table>
+            <tr class="collapsible level-0">
+                <td style='padding-left:0px;word-break:break-all;word-wrap:break-word'>/</td>
+                <td width='200px' align='right'>18212</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>Users/richard/Documents/Projects/robotics</td>
+                <td width='200px' align='right'>15060</td>
+            </tr>
+    
+            <tr class="collapsible level-2">
+                <td style='padding-left:20px;word-break:break-all;word-wrap:break-word'>7405K-BurningAtTheHighStakesCoroutine</td>
+                <td width='200px' align='right'>14720</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>src</td>
+                <td width='200px' align='right'>13964</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>autons/skillsAuton.cpp</td>
+                <td width='200px' align='right'>12944</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton(skillsAuton()::_Z11skillsAutonv.Frame*) [clone .actor]</td>
+                <td width='200px' align='right'>12424</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton()</td>
+                <td width='200px' align='right'>184</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton()::{lambda()#1}::operator()() const</td>
+                <td width='200px' align='right'>64</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton()::{lambda()#7}::operator()() const</td>
+                <td width='200px' align='right'>64</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton()::{lambda()#5}::operator()() const</td>
+                <td width='200px' align='right'>64</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton()::{lambda()#4}::operator()() const</td>
+                <td width='200px' align='right'>64</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton()::{lambda()#2}::operator()() const</td>
+                <td width='200px' align='right'>64</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>skillsAuton(skillsAuton()::_Z11skillsAutonv.Frame*) [clone .destroy]</td>
+                <td width='200px' align='right'>16</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>main.cpp</td>
+                <td width='200px' align='right'>848</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>autonomousUser(autonomousUser()::_Z14autonomousUserv.Frame*) [clone .actor]</td>
+                <td width='200px' align='right'>564</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>initialize</td>
+                <td width='200px' align='right'>152</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>autonomousUser()</td>
+                <td width='200px' align='right'>100</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>autonomousUser(autonomousUser()::_Z14autonomousUserv.Frame*) [clone .destroy]</td>
+                <td width='200px' align='right'>16</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>autonomous</td>
+                <td width='200px' align='right'>4</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>disabled</td>
+                <td width='200px' align='right'>4</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>competition_initialize</td>
+                <td width='200px' align='right'>4</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>opcontrol</td>
+                <td width='200px' align='right'>4</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>Logger.cpp</td>
+                <td width='200px' align='right'>172</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>_GLOBAL__sub_I__ZN8LogEntryC2Ev</td>
+                <td width='200px' align='right'>60</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>Logger::~Logger()</td>
+                <td width='200px' align='right'>56</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>include</td>
+                <td width='200px' align='right'>508</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>RobotBase.h</td>
+                <td width='200px' align='right'>424</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>std::optional<util::reference_wrapper<Pnooomatics> > RobotBase::get<Pnooomatics>()</td>
+                <td width='200px' align='right'>212</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>std::optional<util::reference_wrapper<Lift> > RobotBase::get<Lift>()</td>
+                <td width='200px' align='right'>212</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>lib/geometry/Pose.h</td>
+                <td width='200px' align='right'>84</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>Pose::headingTo(Pose const&) const</td>
+                <td width='200px' align='right'>84</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>extern</td>
+                <td width='200px' align='right'>236</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>readerwritercircularbuffer.h</td>
+                <td width='200px' align='right'>208</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>moodycamel::BlockingReaderWriterCircularBuffer<LogEntry>::~BlockingReaderWriterCircularBuffer()</td>
+                <td width='200px' align='right'>104</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>fmt/format-inl.h</td>
+                <td width='200px' align='right'>28</td>
+            </tr>
+    
+            <tr class="collapsible level-5">
+                <td style='padding-left:50px;word-break:break-all;word-wrap:break-word'>_GLOBAL__sub_I__ZN3fmt3v116detail11assert_failEPKciS3_</td>
+                <td width='200px' align='right'>28</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'><stdin></td>
+                <td width='200px' align='right'>12</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>_PROS_COMPILE_TIMESTAMP</td>
+                <td width='200px' align='right'>4</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>_PROS_COMPILE_TIMESTAMP_INT</td>
+                <td width='200px' align='right'>4</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>_PROS_COMPILE_DIRECTORY</td>
+                <td width='200px' align='right'>4</td>
+            </tr>
+    
+            <tr class="collapsible level-2">
+                <td style='padding-left:20px;word-break:break-all;word-wrap:break-word'>CompileablePros/src/system/hot.c</td>
+                <td width='200px' align='right'>340</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>install_hot_table</td>
+                <td width='200px' align='right'>324</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>get_timestamp_int</td>
+                <td width='200px' align='right'>16</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>opt/local/arm-none-eabi/include/c++/14.2.0</td>
+                <td width='200px' align='right'>3152</td>
+            </tr>
+    
+            <tr class="collapsible level-2">
+                <td style='padding-left:20px;word-break:break-all;word-wrap:break-word'>bits</td>
+                <td width='200px' align='right'>1648</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>std_function.h</td>
+                <td width='200px' align='right'>1440</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#7}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>124</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#5}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>124</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#4}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>124</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#2}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>124</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#1}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>124</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::function<bool ()>::operator=(std::function<bool ()>&&) [clone .isra.0]</td>
+                <td width='200px' align='right'>100</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::function<Pnooomatics* ()>::function(std::function<Pnooomatics* ()> const&)</td>
+                <td width='200px' align='right'>100</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::function<Lift* ()>::function(std::function<Lift* ()> const&)</td>
+                <td width='200px' align='right'>100</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#6}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>56</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#3}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>56</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::function<bool ()>::function()</td>
+                <td width='200px' align='right'>40</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<util::coroutine::Generator<std::function<bool ()> > (), initialize::{lambda()#1}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)</td>
+                <td width='200px' align='right'>36</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<util::coroutine::Generator<std::function<bool ()> > (), initialize::{lambda()#1}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>20</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#3}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>16</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#6}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>16</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#2}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#4}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#5}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#7}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::_Function_handler<bool (), skillsAuton()::{lambda()#1}>::_M_invoke(std::_Any_data const&)</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>unique_ptr.h</td>
+                <td width='200px' align='right'>208</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::unique_ptr<Logger, std::default_delete<Logger> >::~unique_ptr()</td>
+                <td width='200px' align='right'>48</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::unique_ptr<moodycamel::spsc_sema::LightweightSemaphore, std::default_delete<moodycamel::spsc_sema::LightweightSemaphore> >::~unique_ptr()</td>
+                <td width='200px' align='right'>48</td>
+            </tr>
+    
+            <tr class="collapsible level-4">
+                <td style='padding-left:40px;word-break:break-all;word-wrap:break-word'>std::unique_ptr<char [], std::default_delete<char []> >::~unique_ptr() [clone .isra.0]</td>
+                <td width='200px' align='right'>16</td>
+            </tr>
+    
+            <tr class="collapsible level-2">
+                <td style='padding-left:20px;word-break:break-all;word-wrap:break-word'>any</td>
+                <td width='200px' align='right'>1504</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>_GLOBAL__sub_I__ZNK19TrajectoryGenerator8generateERK4Path</td>
+                <td width='200px' align='right'>512</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>std::any::_Manager_external<PIDTurn>::_S_manage(std::any::_Op, std::any const*, std::any::_Arg*)</td>
+                <td width='200px' align='right'>284</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>std::any::_Manager_external<ProfiledMotion>::_S_manage(std::any::_Op, std::any const*, std::any::_Arg*)</td>
+                <td width='200px' align='right'>268</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>void std::any::_Manager_external<PIDTurn>::_S_create<PIDTurn>(std::any::_Storage&, PIDTurn&&)</td>
+                <td width='200px' align='right'>156</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>void std::any::_Manager_external<ProfiledMotion>::_S_create<ProfiledMotion>(std::any::_Storage&, ProfiledMotion&&)</td>
+                <td width='200px' align='right'>140</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>Motion::Motion<PIDTurn>(PIDTurn&&)::{lambda(std::any&)#1}::_FUN(std::any&)</td>
+                <td width='200px' align='right'>72</td>
+            </tr>
+    
+            <tr class="collapsible level-3">
+                <td style='padding-left:30px;word-break:break-all;word-wrap:break-word'>Motion::Motion<ProfiledMotion>(ProfiledMotion&&)::{lambda(std::any&)#1}::_FUN(std::any&)</td>
+                <td width='200px' align='right'>72</td>
+            </tr>
+    
+            <tr class="collapsible level-0">
+                <td style='padding-left:0px;word-break:break-all;word-wrap:break-word'>?</td>
+                <td width='200px' align='right'>880</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>std::function<bool ()>::operator=(std::function<bool ()>&&) [clone .isra.0]</td>
+                <td width='200px' align='right'>148</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for skillsAuton()::{lambda()#2}</td>
+                <td width='200px' align='right'>24</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for skillsAuton()::{lambda()#3}</td>
+                <td width='200px' align='right'>24</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for skillsAuton()::{lambda()#4}</td>
+                <td width='200px' align='right'>24</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for skillsAuton()::{lambda()#5}</td>
+                <td width='200px' align='right'>24</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for skillsAuton()::{lambda()#6}</td>
+                <td width='200px' align='right'>24</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for skillsAuton()::{lambda()#7}</td>
+                <td width='200px' align='right'>24</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for skillsAuton()::{lambda()#1}</td>
+                <td width='200px' align='right'>23</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo name for initialize::{lambda()#1}</td>
+                <td width='200px' align='right'>21</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for initialize::{lambda()#1}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for skillsAuton()::{lambda()#7}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for skillsAuton()::{lambda()#6}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for skillsAuton()::{lambda()#5}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for skillsAuton()::{lambda()#4}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for skillsAuton()::{lambda()#3}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for skillsAuton()::{lambda()#2}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>typeinfo for skillsAuton()::{lambda()#1}</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt14_Function_baseC2Ev_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt14_Function_baseD2Ev_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4util9coroutine9GeneratorISt8functionIFbvEEE12promise_type19unhandled_exceptionEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN9RobotBase3getI6IntakeEESt8optionalIN4util17reference_wrapperIT_EEEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt8_Rb_treeISt10type_indexSt4pairIKS0_St3anyESt10_Select1stIS4_ESt4lessIS0_ESaIS4_EE4findERS2__veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4util9coroutine9GeneratorISt8functionIFbvEEED1Ev_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>____cxa_end_cleanup_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4pros4rtos4Task4joinEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__sin_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZSt25__throw_bad_function_callv_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt8functionIFbvEEC1IZN4util9coroutine9nextCycleEvEUlvE_vEEOT__veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4util9coroutine9GeneratorISt8functionIFbvEEE12promise_typeD1Ev_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN9RobotBase3getIN11Pnooomatics5flagsEEESt8optionalIN4util17reference_wrapperIT_EEEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt8functionIFbvEE4swapERS1__veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN9RobotBase12registerTaskESt8functionIFN4util9coroutine9GeneratorIS0_IFbvEEEEvEE8TaskTypeRKS5__veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__fclose_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt15__exception_ptr13exception_ptrD1Ev_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN14ProfiledMotionC1Eddddd_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZSt20__throw_bad_any_castv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4Lift8setStateENS_5StateE_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>____cxa_begin_catch_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN9RobotBase3getIN6Intake5flagsEEESt8optionalIN4util17reference_wrapperIT_EEEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZdlPv_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>____aeabi_atexit_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__memcpy_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__sem_delete_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN6Intake11setDistStopEb_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>____cxa_rethrow_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4util9coroutine9GeneratorISt8functionIFbvEEE4fillEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN5Drive16setCurrentMotionE6Motion_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN7PIDTurnC1Ed3PIDbbddbb_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__millis_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>____cxa_end_catch_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN9RobotBase3getI5DriveEESt8optionalIN4util17reference_wrapperIT_EEEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__atan2_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN3PIDC1Edddbd_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4pros3lcd10initializeEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZdaPv_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZSt27__throw_bad_optional_accessv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZdlPvj_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN9RobotBase3getI8OdometryEESt8optionalIN4util17reference_wrapperIT_EEEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNKSt3any4typeEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__cos_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN5Drive16waitUntilSettledEm_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt3any5resetEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN9RobotBase3getIN4Lift5flagsEEESt8optionalIN4util17reference_wrapperIT_EEEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN8Odometry5resetEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN11Pnooomatics8setClampEb_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNKSt9type_infoeqERKS__from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNK13Translation2D10distanceToERKS__veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZSt17current_exceptionv_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN6Intake11moveVoltageEi_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___Z10robot_initv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__free_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZN4util9coroutine5delayEm_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNSt6vectorI20TrajectoryConstraintSaIS0_EED1Ev_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___ZNK8Odometry15getCurrentStateEv_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>___Znwj_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__memset_from_arm</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr class="collapsible level-1">
+                <td style='padding-left:10px;word-break:break-all;word-wrap:break-word'>__set_get_timestamp_int_func_veneer</td>
+                <td width='200px' align='right'>8</td>
+            </tr>
+    
+            <tr>
+                <td align="right"><b>Overall size in bytes</b></td>
+                <td align="right">19092</td>
+            </tr>
+        </table>
+    </body>
+</html>
+

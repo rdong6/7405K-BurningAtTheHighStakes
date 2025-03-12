@@ -3,6 +3,7 @@
 #include "RobotBase.h"
 #include "Subsystem.h"
 #include "lib/controller/PID.h"
+#include "lib/utils/Timeout.h"
 #include "pros/motors.hpp"
 #include "pros/rotation.hpp"
 #include "sigslot/signal.h"
@@ -20,9 +21,12 @@ private:
 	pros::Motor motor{ports::liftMotor};
 	pros::Rotation rotation{ports::liftRotation};
 
-	RobotThread skillsWallstakeAutomationStage1();
+	Timeout liftIgnoreDriverInputTimeout = Timeout(0);
+
 	RobotThread updateAngle();
 	RobotThread runner();
+
+	RobotThread driverSkillsMacro();
 
 	void move(int mv);
 
@@ -36,8 +40,9 @@ public:
 		double targetAngle{5};// TBD - Angle lift should move to if code's controlling
 		double errorThresh{2};
 
-		bool liftActivatedExtender{false};// if true, lift will lower extender when lift arm is in size again -> disabled when
-		                                  // any other part of code touches intake extender
+		// slew how quickly lift moves up -> very specific for skills only when scoring on wallstake
+		bool slewEnabled{false};
+		double slewRate = 1000;// max change every 10ms
 
 		bool isMoving{false};// is the lift currently moving by code to a place
 

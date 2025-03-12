@@ -8,7 +8,7 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
-#define UPPER_BOUNDS 220
+#define UPPER_BOUNDS 250
 #define LOWER_BOUNDS 1.5
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
@@ -30,6 +30,10 @@ void Lift::registerTasks() {
 	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
 	robot->registerTask([this]() { return this->runner(); }, TaskType::OPCTRL);
 
+#ifdef SKILLS
+	robot->registerTask([this]() { return this->driverSkillsMacro(); }, TaskType::OPCTRL);// for skills only
+#endif
+
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
 	auto controllerRef = controller.value();
@@ -38,13 +42,25 @@ void Lift::registerTasks() {
 	// in skills, manage lift raising control differently than any other mode
 	controllerRef->registerCallback(
 	        [this]() {
-		        //
+		        auto liftFlags = robot->getFlag<Lift>().value();
+
+		        if (liftFlags->curAngle < 40) {
+			        liftIgnoreDriverInputTimeout = Timeout(100);
+			        liftFlags->targetAngle = 60;
+			        setState(Lift::HOLD);
+			        robotInstance->getSubsystem<Intake>().value()->setDistStop(true);
+		        } else {
+			        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
+		        }
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::rising);
-#else
+#endif
+
 	// when lift controller inputs set, stop whatever code motion is happening
 	controllerRef->registerCallback(
 	        [this]() {
+		        if (!liftIgnoreDriverInputTimeout.timedOut()) { return; }
+
 		        Lift::State& curState = robot->getFlag<Lift>().value()->state;
 		        if (curState == State::LEVEL_1) {
 			        // move intake slightly back so it doesn't get caught in ring
@@ -53,15 +69,21 @@ void Lift::registerTasks() {
 			        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
 		        }
 
-		        curState = State::IDLE;
+#ifdef SKILLS
+		        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
+#endif 
+		        setState(State::IDLE);
 		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
-#endif
 
 	controllerRef->registerCallback(
 	        [this]() {
-		        robot->getFlag<Lift>().value()->state = State::IDLE;
+		        // robot->getFlag<Lift>().value()->state = State::IDLE;
+#ifdef SKILLS
+		        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
+#endif
+		        setState(State::IDLE);
 		        move(-12000);
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
@@ -74,13 +96,19 @@ void Lift::registerTasks() {
 	// maybe change this controller callback during skills
 	controllerRef->registerCallback(
 	        [this]() {
-#ifdef SKILLS
-		        robot->registerTask([this]() { return this->skillsWallstakeAutomationStage1(); }, TaskType::OPCTRL);
-#else
 		        toggleState();
-#endif
 	        },
 	        []() {}, Controller::master, Controller::down, Controller::rising);
+}
+
+RobotThread Lift::driverSkillsMacro() {
+	auto liftFlags = robot->getFlag<Lift>().value();
+	liftFlags->targetAngle = 210;
+	setState(Lift::HOLD);
+	co_yield util::coroutine::nextCycle();
+	Timeout liftTimeout = Timeout(500);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
+	setState(Lift::STOW);
 }
 
 RobotThread Lift::updateAngle() {
@@ -117,8 +145,11 @@ RobotThread Lift::runner() {
 	liftFlags->isMoving = true;
 	liftFlags->pid.reset();
 
+	// code specific for slewing
+	double slewOutput = 0;// slew output = pid's voltage when slew is disabled
+
 	while (true) {
-		if (liftFlags->kill) { co_return; }
+		if (liftFlags->kill) { break; }
 
 
 		if (liftFlags->state == State::IDLE) {
@@ -133,8 +164,24 @@ RobotThread Lift::runner() {
 		if (fabs(error) >= liftFlags->errorThresh) {
 			liftFlags->isMoving = true;
 			double pwr = liftFlags->pid(error);
-			move(pwr);
-			printf("Running. Error: %f  CurAngle: %f\n", error, liftFlags->curAngle);
+
+			// slew or not
+			if (liftFlags->slewEnabled) {
+				double diff = pwr - slewOutput;
+
+				if (std::abs(diff) <= liftFlags->slewRate) {
+					slewOutput = pwr;
+				} else {
+					slewOutput += util::sign(diff) * liftFlags->slewRate;
+				}
+
+			} else {
+				slewOutput = pwr;
+			}
+
+
+			move(slewOutput);
+			// printf("Running. Error: %f  CurAngle: %f\n", error, liftFlags->curAngle);
 		} else {
 			liftFlags->isMoving = false;
 
@@ -149,42 +196,6 @@ RobotThread Lift::runner() {
 
 		co_yield util::coroutine::nextCycle();
 	}
-}
-
-// in skills, automate the task of scoring rings onto wallstake
-/*
- * process:
- * roman presses a button which enables this feature -> could just override the lift controls so when he commands lift to move
- *up, itll do all of this stuff while roman holds button down, this feature is runnning
- *
- * 1) lift moves to LEVEL_1
- * 2) run intake until ring is loaded into lady brown -> let stall detection kill the intake
- * 3)
- *	i) enable intake's dist stop -> prevent any more rings that are being intaked from traveling up ramp into lady brown
- *	ii) move lady brown
- * 4) repeat entire loop
- *
- */
-RobotThread Lift::skillsWallstakeAutomationStage1() {
-	auto liftFlags = robot->getFlag<Lift>().value();
-	auto intake = robot->getSubsystem<Intake>().value();
-
-	// sets lift into loading position
-	// while waiting for lift to get into position, we will prevent ring from moving up intake
-	setState(State::LEVEL_1);
-	do {
-		intake->setDistStop(true);
-		co_yield util::coroutine::nextCycle();
-	} while (liftFlags->isMoving);
-
-	// now allow ring to be scored
-	intake->setDistStop(false);
-
-	// wait until ring is scored
-
-	// when ring is scored, re-enable dist stop and move lady brown to score ring
-
-	// then repeat the cycle again
 }
 
 void Lift::toggleState() {
@@ -214,8 +225,8 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 28.7;
-			liftFlags->errorThresh = 1;
+			liftFlags->targetAngle = 27;// mmeant to be 26 pre-smudge
+			liftFlags->errorThresh = 0.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::LEVEL_2:
