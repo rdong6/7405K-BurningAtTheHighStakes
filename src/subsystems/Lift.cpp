@@ -30,6 +30,10 @@ void Lift::registerTasks() {
 	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
 	robot->registerTask([this]() { return this->runner(); }, TaskType::OPCTRL);
 
+#ifdef SKILLS
+	robot->registerTask([this]() { return this->driverSkillsMacro(); }, TaskType::OPCTRL);// for skills only
+#endif
+
 	auto controller = robot->getSubsystem<Controller>();
 	if (!controller) { return; }
 	auto controllerRef = controller.value();
@@ -38,13 +42,25 @@ void Lift::registerTasks() {
 	// in skills, manage lift raising control differently than any other mode
 	controllerRef->registerCallback(
 	        [this]() {
-		        //
+		        auto liftFlags = robot->getFlag<Lift>().value();
+
+		        if (liftFlags->curAngle < 40) {
+			        liftIgnoreDriverInputTimeout = Timeout(100);
+			        liftFlags->targetAngle = 60;
+			        setState(Lift::HOLD);
+			        robotInstance->getSubsystem<Intake>().value()->setDistStop(true);
+		        } else {
+			        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
+		        }
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::rising);
-#else
+#endif
+
 	// when lift controller inputs set, stop whatever code motion is happening
 	controllerRef->registerCallback(
 	        [this]() {
+		        if (!liftIgnoreDriverInputTimeout.timedOut()) { return; }
+
 		        Lift::State& curState = robot->getFlag<Lift>().value()->state;
 		        if (curState == State::LEVEL_1) {
 			        // move intake slightly back so it doesn't get caught in ring
@@ -53,15 +69,20 @@ void Lift::registerTasks() {
 			        robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
 		        }
 
+#ifdef SKILLS
+		        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
+#endif 
 		        setState(State::IDLE);
 		        move(12000);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
-#endif
 
 	controllerRef->registerCallback(
 	        [this]() {
 		        // robot->getFlag<Lift>().value()->state = State::IDLE;
+#ifdef SKILLS
+		        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
+#endif
 		        setState(State::IDLE);
 		        move(-12000);
 	        },
@@ -75,13 +96,19 @@ void Lift::registerTasks() {
 	// maybe change this controller callback during skills
 	controllerRef->registerCallback(
 	        [this]() {
-#ifdef SKILLS
-		        robot->registerTask([this]() { return this->skillsWallstakeAutomationStage1(); }, TaskType::OPCTRL);
-#else
 		        toggleState();
-#endif
 	        },
 	        []() {}, Controller::master, Controller::down, Controller::rising);
+}
+
+RobotThread Lift::driverSkillsMacro() {
+	auto liftFlags = robot->getFlag<Lift>().value();
+	liftFlags->targetAngle = 210;
+	setState(Lift::HOLD);
+	co_yield util::coroutine::nextCycle();
+	Timeout liftTimeout = Timeout(500);
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
+	setState(Lift::STOW);
 }
 
 RobotThread Lift::updateAngle() {
@@ -198,7 +225,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 26;// mmeant to be 26 pre-smudge
+			liftFlags->targetAngle = 27;// mmeant to be 26 pre-smudge
 			liftFlags->errorThresh = 0.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;

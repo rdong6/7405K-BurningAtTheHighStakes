@@ -3,6 +3,7 @@
 #include "RobotBase.h"
 #include "Subsystem.h"
 #include "lib/controller/PID.h"
+#include "lib/utils/Timeout.h"
 #include "pros/motors.hpp"
 #include "pros/rotation.hpp"
 #include "sigslot/signal.h"
@@ -20,8 +21,12 @@ private:
 	pros::Motor motor{ports::liftMotor};
 	pros::Rotation rotation{ports::liftRotation};
 
+	Timeout liftIgnoreDriverInputTimeout = Timeout(0);
+
 	RobotThread updateAngle();
 	RobotThread runner();
+
+	RobotThread driverSkillsMacro();
 
 	void move(int mv);
 

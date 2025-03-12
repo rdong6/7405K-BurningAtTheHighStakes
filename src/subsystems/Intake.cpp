@@ -26,8 +26,8 @@ void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::OPCTRL);
 
 	// blueism coro -> only runs in auton
-	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::OPCTRL);
-	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::OPCTRL);
+	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::AUTON);
+	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::AUTON);
 
 	// antijam
 	robot->registerTask([this]() { return this->antiJamCoro(); }, TaskType::AUTON,
@@ -45,6 +45,10 @@ void Intake::registerTasks() {
 	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; });
 
 	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
+
+#ifdef SKILLS
+	robot->registerTask([this]() { return this->runner(); }, TaskType::OPCTRL);
+#endif
 
 
 	auto controller = robot->getSubsystem<Controller>();
@@ -163,6 +167,7 @@ RobotThread Intake::blueismCoro() {
 			// Now code takes over intake and stops it to eject ring
 			codeOverride = true;
 			motors.brake();
+			printf("Color sorting\n");
 
 			// determines how long we stop intake for before resuming any normal operations
 			co_yield util::coroutine::delay(250);
@@ -272,6 +277,9 @@ RobotThread Intake::runner() {
 			if (!intakeFlags->storeSecond && intakeFlags->fullyIn) {
 				this->brake();
 				this->setDistStop(false);
+#ifdef SKILLS
+				codeOverride = true;
+#endif
 			}
 		}
 
@@ -286,6 +294,11 @@ void Intake::setTorqueStop(bool val) {
 
 void Intake::setDistStop(bool val) {
 	auto intakeFlags = robot->getFlag<Intake>().value();
+
+#ifdef SKILLS
+	if (!val) { codeOverride = false; }
+#endif
+
 	intakeFlags->distStop = val;
 	int32_t dist = distance.get();
 	if (dist < 55) { intakeFlags->storeSecond = true; }
