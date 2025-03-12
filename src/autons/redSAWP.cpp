@@ -48,27 +48,27 @@ RobotThread redSAWP() {
 	pnoomatics->setClamp(true);
 	intake->moveVoltage(12000);
 
-	Pose preRings(0,0);
+	Pose preRings(-50.3,-1.17);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(PIDTurn(180+curPose.headingTo(preRings).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(preRings).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(preRings.translation()), 60, 100, 85));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(preRings.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
-	Pose intakeRings(0,0);
+	Pose intakeRings(-63.9,-18.6);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(PIDTurn(curPose.headingTo(intakeRings).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(intakeRings).degrees(),PID(620, 1, 6500), true, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(intakeRings.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
-	Pose ring3(0,0);
+	Pose ring3(-47.5,-21.6);
 	//pre ring stack
 
 	curPose = odom->getCurrentState().position;
@@ -80,7 +80,7 @@ RobotThread redSAWP() {
 	co_yield drive->waitUntilSettled(2000);
 
 
-	Pose ringStack(49,0);
+	Pose ringStack(-3.2,9.3);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(ringStack).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -96,7 +96,7 @@ RobotThread redSAWP() {
 	drive->setCurrentMotion(ProfiledMotion(20, 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
-	Pose alliancePreload(49,0);
+	Pose alliancePreload(14.6,40.7);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(alliancePreload).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -110,7 +110,7 @@ RobotThread redSAWP() {
 	//maybe when the ring has gone onto the mogo (check the flag for the top dst sensor)
 	co_yield drive->waitUntilSettled(2000);
 
-	Pose mogo2(49,0);
+	Pose mogo2(-6.8,42.1);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(mogo2).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -123,7 +123,7 @@ RobotThread redSAWP() {
 	pnoomatics->setClamp(true);
 	intake->moveVoltage(12000);
    
-	Pose m2Ring1(49,0);
+	Pose m2Ring1(-0.7,62.8);
 	
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(m2Ring1).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -133,7 +133,7 @@ RobotThread redSAWP() {
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(m2Ring1.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
-	Pose ladder(49,0);
+	Pose ladder(-26.6,41.7);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(180+curPose.headingTo(ladder).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));

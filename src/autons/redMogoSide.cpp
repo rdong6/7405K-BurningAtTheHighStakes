@@ -48,7 +48,7 @@ RobotThread redMogoSide() {
 
 	pnoomatics->setClamp(true);
 
-	Pose ring1(49,0);
+	Pose ring1(-40.2,-19.3);
 	
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(ring1).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -61,7 +61,7 @@ RobotThread redMogoSide() {
 	pnoomatics->setRightHammer(true);
 	co_yield util::coroutine::delay(150);
 
-	Pose setupRingIntake(49,0);
+	Pose setupRingIntake(-20.7,12.6);
 	
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(setupRingIntake).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -71,20 +71,20 @@ RobotThread redMogoSide() {
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(setupRingIntake.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
-	Pose ringIntake(49,0);
+	Pose ringIntake(-47.4,25.2);
 	
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(ringIntake).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield util::coroutine::delay(120);
+	co_yield util::coroutine::delay(300);
 	pnoomatics->setRightHammer(false);
-	co_yield drive->waitUntilSettled(480);
+	co_yield drive->waitUntilSettled(300);
 
 	intake->moveVoltage(12000);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ringIntake.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
-	Pose corner(49,0);
+	Pose corner(-20,60.2);
 	
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(corner).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -109,7 +109,7 @@ RobotThread redMogoSide() {
 	drive->setCurrentMotion(ProfiledMotion(17, 50, 100, 85));
 	co_yield drive->waitUntilSettled(900);
 
-	Pose ladder(49,0);
+	Pose ladder(-35.2,-5.14);
 	
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(curPose.headingTo(ladder).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
