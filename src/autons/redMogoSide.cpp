@@ -37,80 +37,92 @@ RobotThread redMogoSide() {
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
 
 	// move back first to get mogo
-	drive->setCurrentMotion(ProfiledMotion(-35.7, 50, 100, 60));
+
+	Pose mogo1(-35.7,0);
+
+	Pose curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 85));
 	co_yield util::coroutine::delay(600);
 	lift->setState(Lift::STOW);
 	co_yield drive->waitUntilSettled(1500);
 
 	pnoomatics->setClamp(true);
 
-	// mogo clamped, turn + move to get the 2 rings under the tower
-	drive->setCurrentMotion(PIDTurn(266.75,PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	Pose ring1(49,0);
+	
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(ring1).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
-	drive->setCurrentMotion(ProfiledMotion(19, 50, 100, 80));
-	co_yield drive->waitUntilSettled(1100);
 
-	// ring rush hamer get the 2 rings
-	// get one, hammer
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ring1.translation()), 60, 100, 85));
+	co_yield drive->waitUntilSettled(2000);
+
 	pnoomatics->setRightHammer(true);
 	co_yield util::coroutine::delay(150);
-	drive->setCurrentMotion(ProfiledMotion(-38, 50, 100, 80));
+
+	Pose setupRingIntake(49,0);
+	
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(setupRingIntake).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(600);
+
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(setupRingIntake.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
+
+	Pose ringIntake(49,0);
+	
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(ringIntake).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	co_yield util::coroutine::delay(120);
 	pnoomatics->setRightHammer(false);
+	co_yield drive->waitUntilSettled(480);
 
-	drive->setCurrentMotion(PIDTurn(222,PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	intake->moveVoltage(12000);
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ringIntake.translation()), 60, 100, 85));
+	co_yield drive->waitUntilSettled(2000);
+
+	Pose corner(49,0);
+	
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(corner).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
-	co_yield drive->waitUntilSettled(550);
-	drive->setCurrentMotion(ProfiledMotion(25, 50, 100, 60));
-	co_yield drive->waitUntilSettled(1300);
+
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()), 50, 100, 65));
 	co_yield util::coroutine::delay(500);
-
-	// now intake last ring
-
-	drive->setCurrentMotion(PIDTurn(123.5,PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
-	// drive->setCurrentMotion(ProfiledMotion(22, 50, 100, 100));
-	drive->setCurrentMotion(ProfiledMotion(20, 50, 100, 40));
+	intake->moveVoltage(0);
+	co_yield util::coroutine::delay(400);
 	intake->moveVoltage(12000);
+	co_yield drive->waitUntilSettled(800);
 
-	drive->setCurrentMotion(PIDTurn(50,PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	drive->setCurrentMotion(TimedMotion(400, 12000));
+	co_yield drive->waitUntilSettled(195);
 
-	drive->setCurrentMotion(ProfiledMotion(40, 50, 100, 45));
-	intake->moveVoltage(12000);
-	// pnoomatics->setLeftHammer(true);
-	co_yield drive->waitUntilSettled(1500);
-
-	drive->setCurrentMotion(ProfiledMotion(-20, 50, 100, 80));
-	co_yield drive->waitUntilSettled(1500);
+	drive->setCurrentMotion(ProfiledMotion(-25, 50, 80, 65));
+	co_yield drive->waitUntilSettled(900);
 
 	pnoomatics->setLeftHammer(true);
-	drive->setCurrentMotion(ProfiledMotion(15, 50, 100, 80));
-	co_yield drive->waitUntilSettled(1500);
-	// pnoomatics->setClamp(false);
 
-	drive->setCurrentMotion(PIDTurn(255,PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	drive->setCurrentMotion(ProfiledMotion(17, 50, 100, 85));
+	co_yield drive->waitUntilSettled(900);
+
+	Pose ladder(49,0);
+	
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(PIDTurn(curPose.headingTo(ladder).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
-	drive->setCurrentMotion(ProfiledMotion(5, 50, 100, 80));
-	co_yield drive->waitUntilSettled(1500);
-
-	drive->setCurrentMotion(PIDTurn(255,PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
-
-
-
+	curPose = odom->getCurrentState().position;
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 50, 100, 65));
 	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-	// drive->setCurrentMotion(ProfiledMotion(45, 50, 100, 30));
-	drive->setCurrentMotion(TimedMotion(600, 8000));
 	intake->moveVoltage(0);
 	pnoomatics->setLeftHammer(false);
+	co_yield util::coroutine::delay(500);
 	liftFlags->targetAngle = 170;
 	lift->setState(Lift::HOLD);
-	co_yield drive->waitUntilSettled(600);
-
-	// arc turn with right side of drive going backwards
-	// drive->setCurrentMotion(PIDTurn(240, PID(200, 1, 45, true, 10), true, false, 0.5));
-	// co_yield drive->waitUntilSettled(500);
-	intake->moveVoltage(0);
+	pnoomatics->setClamp(false);
+	co_yield drive->waitUntilSettled(1500);
 }

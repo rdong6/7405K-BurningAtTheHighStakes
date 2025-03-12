@@ -14,77 +14,114 @@
 
 RobotThread blueMogoSide() {
 	robotInstance->curAlliance = Alliance::BLUE;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-	auto drive = robotInstance->getSubsystem<Drive>().value();
-	auto intake = robotInstance->getSubsystem<Intake>().value();
-	auto intakeFlags = robotInstance->getFlag<Intake>().value();
-	auto lift = robotInstance->getSubsystem<Lift>().value();
-	auto liftFlags = robotInstance->getFlag<Lift>().value();
-	auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
-	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
-	auto odom = robotInstance->getSubsystem<Odometry>().value();
-#pragma GCC diagnostic pop
-
-	drive->setCurrentMotion(PIDTurn(45, PID(200, 1, 100, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(1000);
-
-	liftFlags->targetAngle = 210;
-	lift->setState(Lift::HOLD);
-	co_yield util::coroutine::nextCycle();
-	Timeout liftTimeout = Timeout(700);
-	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut();};
-	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 45));
-	co_yield drive->waitUntilSettled(1500);
-
-	lift->setState(Lift::STOW);
-	co_yield util::coroutine::nextCycle();
-
-	drive->setCurrentMotion(PIDTurn(20, PID(200, 1, 45, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(500);
-	drive->setCurrentMotion(ProfiledMotion(-34, 50, 60, 25));
-	co_yield drive->waitUntilSettled(1500);
-
-	pnoomatics->setClamp(true);
-
-	intake->moveVoltage(12000);
-	// original: 100
-	drive->setCurrentMotion(PIDTurn(285, PID(150, 1, 200, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(1000);
-	drive->setCurrentMotion(ProfiledMotion(24, 60, 60, 60));
-	co_yield drive->waitUntilSettled(2000);
-
-	drive->setCurrentMotion(PIDTurn(335, PID(150, 1, 200, true, 10), false, false, 0.5));
-	co_yield drive->waitUntilSettled(1000);
-
-	drive->setCurrentMotion(ProfiledMotion(38, 60, 60, 60));
-	pnoomatics->setRightHammer(true);
-	co_yield drive->waitUntilSettled(2000);
-
-// turn and clear corner
-
-// comment out the intaking of corner (only clear now)
-	// drive->setCurrentMotion(ProfiledMotion(24, 50, 60, 25));
-	// co_yield drive->waitUntilSettled(1500);
-	// drive->setCurrentMotion(TimedMotion(500, 12000));
-	// co_yield drive->waitUntilSettled(500);
-
-	drive->setCurrentMotion(PIDTurn(160, PID(200, 1, 155, true, 10), false, false, 0.5, 12000, true, false));
-	co_yield drive->waitUntilSettled(1500);
-
-	pnoomatics->setRightHammer(false);
-
-// TUNE THIS SPEED!!! So it aint too fast
-	drive->setCurrentMotion(ProfiledMotion(10, 65, 60, 60));
-	co_yield drive->waitUntilSettled(1500);
-	pnoomatics->setClamp(false);
-
-	drive->setCurrentMotion(PIDTurn(10, PID(120, 1, 155, true, 10), false, false, 0.5, 12000, true, false));
-	co_yield drive->waitUntilSettled(1500);
-
-	drive->setCurrentMotion(ProfiledMotion(-20, 65, 60, 60));
-	co_yield drive->waitUntilSettled(1500);
-
-	intake->moveVoltage(0);
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+		auto drive = robotInstance->getSubsystem<Drive>().value();
+		auto intake = robotInstance->getSubsystem<Intake>().value();
+		auto intakeFlags = robotInstance->getFlag<Intake>().value();
+		auto lift = robotInstance->getSubsystem<Lift>().value();
+		auto liftFlags = robotInstance->getFlag<Lift>().value();
+		auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+		auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
+		auto odom = robotInstance->getSubsystem<Odometry>().value();
+	#pragma GCC diagnostic pop
+		drive->setCurrentMotion(ProfiledMotion(2.5, 60, 100, 60));
+		co_yield drive->waitUntilSettled(2000);
+	
+		// score on alliance stake w/ preload
+		liftFlags->targetAngle = 220;
+		lift->setState(Lift::HOLD);
+		co_yield util::coroutine::nextCycle();
+		Timeout liftTimeout = Timeout(255);
+		co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
+	
+		// move back first to get mogo
+	
+		Pose mogo1(-35.7,0);
+	
+		Pose curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 85));
+		co_yield util::coroutine::delay(600);
+		lift->setState(Lift::STOW);
+		co_yield drive->waitUntilSettled(1500);
+	
+		pnoomatics->setClamp(true);
+	
+		Pose ring1(49,0);
+		
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(PIDTurn(curPose.headingTo(ring1).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+		co_yield drive->waitUntilSettled(600);
+	
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ring1.translation()), 60, 100, 85));
+		co_yield drive->waitUntilSettled(2000);
+	
+		pnoomatics->setLeftHammer(true);
+		co_yield util::coroutine::delay(150);
+	
+		Pose setupRingIntake(49,0);
+		
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(PIDTurn(curPose.headingTo(setupRingIntake).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+		co_yield drive->waitUntilSettled(600);
+	
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(setupRingIntake.translation()), 60, 100, 85));
+		co_yield drive->waitUntilSettled(2000);
+	
+		Pose ringIntake(49,0);
+		
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(PIDTurn(curPose.headingTo(ringIntake).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+		co_yield util::coroutine::delay(120);
+		pnoomatics->setLeftHammer(false);
+		co_yield drive->waitUntilSettled(480);
+	
+		intake->moveVoltage(12000);
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ringIntake.translation()), 60, 100, 85));
+		co_yield drive->waitUntilSettled(2000);
+	
+		Pose corner(49,0);
+		
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(PIDTurn(curPose.headingTo(corner).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+		co_yield drive->waitUntilSettled(600);
+	
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()), 50, 100, 65));
+		co_yield util::coroutine::delay(500);
+		intake->moveVoltage(0);
+		co_yield util::coroutine::delay(400);
+		intake->moveVoltage(12000);
+		co_yield drive->waitUntilSettled(800);
+	
+		drive->setCurrentMotion(TimedMotion(400, 12000));
+		co_yield drive->waitUntilSettled(195);
+	
+		drive->setCurrentMotion(ProfiledMotion(-25, 50, 80, 65));
+		co_yield drive->waitUntilSettled(900);
+	
+		pnoomatics->setRightHammer(true);
+	
+		drive->setCurrentMotion(ProfiledMotion(17, 50, 100, 85));
+		co_yield drive->waitUntilSettled(900);
+	
+		Pose ladder(49,0);
+		
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(PIDTurn(curPose.headingTo(ladder).degrees(),PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+		co_yield drive->waitUntilSettled(600);
+	
+		curPose = odom->getCurrentState().position;
+		drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 50, 100, 65));
+		drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+		intake->moveVoltage(0);
+		pnoomatics->setRightHammer(false);
+		co_yield util::coroutine::delay(500);
+		liftFlags->targetAngle = 170;
+		lift->setState(Lift::HOLD);
+		pnoomatics->setClamp(false);
+		co_yield drive->waitUntilSettled(1500);
 }
