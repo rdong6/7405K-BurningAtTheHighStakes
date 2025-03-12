@@ -34,7 +34,7 @@ void initialize() {
 	pros::lcd::initialize();
 	robot_init();
 
-	robotInstance->curAlliance = Alliance::BLUE;
+	// robotInstance->curAlliance = Alliance::BLUE;
 
 	// NOTE: This is bad code! There's always potential for data races because scheduler is running, so any other part of
 	// codebase could register a task at the same time the initialize thread is registering the autonomousUser thread
@@ -140,11 +140,12 @@ RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
 
 	// for skills
-	auto skillsCoro = skillsAuton();
-	while (skillsCoro) { co_yield skillsCoro(); }
 
-	// auto autoCoro = sbhsBlueRingSide();
-	// while (autoCoro) { co_yield autoCoro(); }
+	// auto skillsCoro = skillsAuton();
+	// while (skillsCoro) { co_yield skillsCoro(); }
+
+	auto autoCoro = redRingSide();
+	while (autoCoro) { co_yield autoCoro(); }
 
 	// auto coro = redRingSide();
 	// auto coro = blueMogoSide();

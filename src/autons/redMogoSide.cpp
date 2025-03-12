@@ -83,7 +83,6 @@ RobotThread redMogoSide() {
 
 	drive->setCurrentMotion(ProfiledMotion(-20, 50, 100, 80));
 	co_yield drive->waitUntilSettled(1500);
-	co_yield
 
 	pnoomatics->setLeftHammer(true);
 	drive->setCurrentMotion(ProfiledMotion(15, 50, 100, 80));
