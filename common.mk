@@ -165,7 +165,8 @@ makeDirectory: $(DEPDIR)
 	@$(call mkdir,$(DEPDIR))
 
 $(LIBAR): $(LIB_OBJS)
-	@$Drm -f $@
+#	@$Drm -f $@
+	@$(call rm, $@)
 	@echo Creating $@
 	@$(AR) rcs $@ $^
 
