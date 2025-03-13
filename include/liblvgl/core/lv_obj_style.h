@@ -89,13 +89,10 @@ void lv_obj_remove_style(struct _lv_obj_t * obj, lv_style_t * style, lv_style_se
  * Remove all styles from an object
  * @param obj       pointer to an object
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
 static inline void lv_obj_remove_style_all(struct _lv_obj_t * obj)
 {
     lv_obj_remove_style(obj, NULL, LV_PART_ANY | LV_STATE_ANY);
 }
-#pragma GCC diagnostic pop
 
 /**
  * Notify all object if a style is modified
