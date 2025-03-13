@@ -74,6 +74,9 @@ void Intake::registerTasks() {
 
 	controllerRef->registerCallback([this]() { this->moveVoltage(0); }, []() {}, Controller::master, Controller::r2,
 	                                Controller::falling);
+
+	controllerRef->registerCallback([this]() { toggleExtender(); }, []() {}, Controller::master, Controller::x,
+									Controller::rising);
 }
 
 // coroutine that runes to detect if intake is stalled

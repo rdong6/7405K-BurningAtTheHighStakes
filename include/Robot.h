@@ -3,6 +3,7 @@
 #include "lib/utils/ReferenceWrapper.h"
 #include "lib/utils/TupleFuncs.h"
 #include "pros/rtos.h"
+#include "subsystems/AutonSelector.h"
 #include "subsystems/Controller.h"
 #include "subsystems/Drive.h"
 #include "subsystems/Intake.h"
@@ -71,5 +72,5 @@ public:
 // Controller = OPCTRL
 
 // ODOM, DRIVE, LIFT, INTAKE, PNOOMATICS, LIFT, CONTROLLER
-inline Robot<Odometry, Drive, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
+inline Robot<AutonSelector, Odometry, Drive, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;

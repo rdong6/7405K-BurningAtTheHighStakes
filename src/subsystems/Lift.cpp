@@ -71,7 +71,7 @@ void Lift::registerTasks() {
 
 #ifdef SKILLS
 		        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
-#endif 
+#endif
 		        setState(State::IDLE);
 		        move(12000);
 	        },

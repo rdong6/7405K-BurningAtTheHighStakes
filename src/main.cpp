@@ -1,4 +1,5 @@
 #include "main.h"
+#include "../include/subsystems/AutonSelector.h"
 #include "Constants.h"
 #include "Robot.h"
 #include "RobotBase.h"
@@ -144,7 +145,7 @@ RobotThread autonomousUser() {
 	// auto skillsCoro = skillsAuton();
 	// while (skillsCoro) { co_yield skillsCoro(); }
 
-	auto autoCoro = redRingSide();
+	auto autoCoro = redSAWP();
 	while (autoCoro) { co_yield autoCoro(); }
 
 	// auto coro = redRingSide();

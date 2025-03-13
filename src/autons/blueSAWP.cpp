@@ -90,7 +90,7 @@ RobotThread blueSAWP() {
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ringStack.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
-	drive->setCurrentMotion(ProfiledMotion(-10), 60, 100, 85);
+	drive->setCurrentMotion(ProfiledMotion(-10, 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 	
 	drive->setCurrentMotion(ProfiledMotion(20, 60, 100, 85));
@@ -142,7 +142,7 @@ RobotThread blueSAWP() {
 	curPose = odom->getCurrentState().position;
 	liftFlags->targetAngle = 70;
 	lift->setState(Lift::HOLD);
-	drive->setBreakMode(pros::E_MOTOR_BRAKE_COAST);
+	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(ladder.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
