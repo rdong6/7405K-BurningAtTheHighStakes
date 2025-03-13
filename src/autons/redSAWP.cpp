@@ -82,7 +82,7 @@ RobotThread redSAWP() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(180 +curPose.headingTo(preRing3).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(300);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(preRing3.translation()), 60, 100, 85));
@@ -124,7 +124,7 @@ RobotThread redSAWP() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(alliancePreload).degrees(), PID(620, 1, 6650), false, false, 0.5, 12000, false, false));
+	        PIDTurn(curPose.headingTo(alliancePreload).degrees(), PID(600, 1, 6650), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
 	curPose = odom->getCurrentState().position;
@@ -161,10 +161,10 @@ RobotThread redSAWP() {
 	liftFlags->targetAngle = 80;
 	lift->setState(Lift::HOLD);
 	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-	co_yield drive->waitUntilSettled(2000);
+	co_yield drive->waitUntilSettled(800);
 	intake->setDistStop(false);
 	pnoomatics->setClamp(true);
-	intake->moveVoltage(12000);
+
 
 
 	printf("Ladder\n");
@@ -172,8 +172,9 @@ RobotThread redSAWP() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(ladder).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	        PIDTurn(curPose.headingTo(ladder).degrees(), PID(580, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
+	intake->moveVoltage(12000);
 
 	liftFlags->targetAngle = 170;
 	lift->setState(Lift::HOLD);
