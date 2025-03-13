@@ -205,9 +205,9 @@ namespace util {
 
 		size_t moduloInc(size_t index) { return (index + 1) % data.size(); }
 
-		size_t moduloDec(size_t index) {
-			if (index == 0) {
-				return data.size() - 1;
+	size_t moduloDec(size_t index) {
+		if (index == 0) {
+			return data.size() - 1;
 			} else {
 				return index - 1;
 			}

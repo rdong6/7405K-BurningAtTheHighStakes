@@ -9,6 +9,10 @@ void AutonSelector::registerTasks() {
 	robot->registerTask([this]() { return this->thread(); }, TaskType::SENTINEL);
 }
 
+void AutonSelector::addAuton(const char* name, AutonFn_t autonFunc, bool isQual) {
+	autons.emplace_back(name, autonFunc, isQual);
+}
+
 double AutonSelector::getPotValue() const {
 	return pot.get_value() / 4100.0 * 100;
 }
