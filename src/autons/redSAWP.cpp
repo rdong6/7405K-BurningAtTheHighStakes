@@ -14,7 +14,7 @@
 
 RobotThread redSAWP() {
 	// TODO: REMEMBER TO TURN THIS ON
-	// robotInstance->curAlliance = Alliance::RED;
+	robotInstance->curAlliance = Alliance::RED;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
@@ -58,8 +58,8 @@ RobotThread redSAWP() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(ring1).degrees(), PID(505, 1, 6700), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	        PIDTurn(curPose.headingTo(ring1).degrees(), PID(330, 1, 6700), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(800);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ring1.translation()), 60, 100, 85));
@@ -71,7 +71,7 @@ RobotThread redSAWP() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(curPose.headingTo(intakeRings).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(550);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(intakeRings.translation()), 60, 100, 85));
@@ -82,7 +82,7 @@ RobotThread redSAWP() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(180 + curPose.headingTo(preRing3).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(500);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(preRing3.translation()), 60, 100, 85));
@@ -95,7 +95,7 @@ RobotThread redSAWP() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(curPose.headingTo(ring3).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(550);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ring3.translation()), 60, 100, 85));
@@ -124,7 +124,7 @@ RobotThread redSAWP() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(alliancePreload).degrees(), PID(620, 1, 6650), false, false, 0.5, 12000, false, false));
+	        PIDTurn(curPose.headingTo(alliancePreload).degrees(), PID(490, 1, 6650), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
 	curPose = odom->getCurrentState().position;
@@ -138,7 +138,7 @@ RobotThread redSAWP() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(curPose.headingTo(m2Ring1).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(550);
 
 	intake->setDistStop(true);
 	curPose = odom->getCurrentState().position;
@@ -153,7 +153,7 @@ RobotThread redSAWP() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(180 + curPose.headingTo(mogo2).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(500);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo2.translation()), 60, 100, 40));

@@ -23,7 +23,7 @@
 
 RobotThread skillsAuton() {
 	// TODO: REENABLE THIS!
-	// robotInstance->curAlliance = Alliance::RED;
+	robotInstance->curAlliance = Alliance::RED;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"

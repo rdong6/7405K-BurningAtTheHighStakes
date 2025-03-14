@@ -140,7 +140,6 @@ RobotThread redMogoSide() {
 	pnoomatics->setLeftHammer(false);
 	co_yield util::coroutine::delay(500);
 	liftFlags->targetAngle = 175;
-	liftFlags->slewEnabled = true;
 	lift->setState(Lift::HOLD);
 	pnoomatics->setClamp(false);
 	co_yield drive->waitUntilSettled(1500);
