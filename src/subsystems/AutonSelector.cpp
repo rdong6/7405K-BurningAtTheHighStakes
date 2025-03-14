@@ -1,6 +1,7 @@
 #include "subsystems/AutonSelector.h"
 
 #include "lib/utils/Math.h"
+#include "pros/llemu.hpp"
 
 AutonSelector::AutonSelector(RobotBase* robot) : Subsystem(robot) {}
 
@@ -59,8 +60,24 @@ RobotThread AutonSelector::thread() {
 
 		if (std::abs(sum) >= 8) {
 			// we've turned a certain amt, now cycle to next auton
+			//
+
+
 			printf("Cycling to next one\n\n");
 			sum = 0;
+			if (autons.size() == 0) {
+				pros::lcd::print(6, "Auton: NONE");
+				continue;
+			}
+
+			autonIndex += 1 * util::sign(sum);
+			// if we go negative, wrap index around
+			if (autonIndex < 0) { autonIndex = autons.size() - 1; }
+
+			const Auton& selectedAuton = autons[autonIndex];
+			robot->isElim = !selectedAuton.isQual;
+			robot->autonFnPtr = selectedAuton.autonFunc;
+			pros::lcd::print(6, "Auton: %s", selectedAuton.name);
 		}
 
 		co_yield util::coroutine::nextCycle();

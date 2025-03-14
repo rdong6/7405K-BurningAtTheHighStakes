@@ -62,7 +62,6 @@ RobotThread skillsAuton() {
 	co_yield drive->waitUntilSettled(1000);
 
 	pnoomatics->setClamp(true);
-	intake->moveVoltage(12000);
 
 	printf("M1 ring1\n");
 	Pose firstRing(-32.0, 19);
@@ -71,6 +70,7 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(
 	        PIDTurn(curPose.headingTo(firstRing).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(500);
+	intake->moveVoltage(12000);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(firstRing.translation()), 75, 120, 60));
@@ -418,7 +418,7 @@ RobotThread skillsAuton() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(180 + curPose.headingTo(mogo3).degrees(), PID(470, 1, 6700), false, false, 0.5, 12000, false, false));
+	        PIDTurn(180 + curPose.headingTo(mogo3).degrees(), PID(370, 1, 6700), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(1045);
 
 	curPose = odom->getCurrentState().position;
@@ -428,7 +428,7 @@ RobotThread skillsAuton() {
 	pnoomatics->setClamp(true);
 
 	printf("Alliance stake\n");
-	Pose allianceStake(-118, -4);
+	Pose allianceStake(-118, -6);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -453,7 +453,7 @@ RobotThread skillsAuton() {
 	drive->setCurrentMotion(ProfiledMotion(-9, 50, 75, 45));
 	co_yield drive->waitUntilSettled(1500);
 
-	/*printf("M3 ring1\n");
+	printf("M3 ring1\n");
 	Pose m3RingOne(-106.4, 45.5);
 
 	curPose = odom->getCurrentState().position;
@@ -517,8 +517,8 @@ RobotThread skillsAuton() {
 	pnoomatics->setClamp(false);
 	co_yield util::coroutine::delay(150);
 	intake->moveVoltage(0);
-	drive->setCurrentMotion(TimedMotion(800, -10500));
-	co_yield drive->waitUntilSettled(800);
+	drive->setCurrentMotion(TimedMotion(650, -10500));
+	co_yield drive->waitUntilSettled(650);
 
 	printf("Pre Mogo Jam\n");
 	Pose preMogoJam(-93.7, 35.8);
@@ -560,11 +560,11 @@ RobotThread skillsAuton() {
 	lift->setState(Lift::HOLD);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(hangPose.translation()) - 15, 75, 120, 55));
+	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(hangPose.translation()) - 18, 75, 120, 75));
 	co_yield drive->waitUntilSettled(2000);
 
 	drive->setCurrentMotion(TimedMotion(250, 10000));
-	co_yield drive->waitUntilSettled(250);*/
+	co_yield drive->waitUntilSettled(250);
 
 
 	/*printf("Center ring\n");

@@ -14,6 +14,7 @@ class AutonSelector : public Subsystem {
 	pros::adi::AnalogIn pot = pros::adi::AnalogIn('F');
 
 	util::CircularBuffer<Auton> autons = util::CircularBuffer<Auton>(16);
+	int autonIndex = 0;
 
 	[[nodiscard]] double getPotValue() const;
 	RobotThread thread();

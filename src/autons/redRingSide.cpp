@@ -129,54 +129,6 @@ RobotThread redRingSide() {
 	lift->setState(Lift::HOLD);
 	co_yield drive->waitUntilSettled(2000);
 
-	/*Pose ringStack(-6.0, -34.0);
-
-	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(ringStack).degrees(), PID(620, 1, 6700), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(300);
-	// intake->setExtender(true);
-
-	// co_yield util::coroutine::delay(600);
-	// intakeFlags->ladyBrownClearanceEnabled = true;
-	// liftFlags->targetAngle = 80;
-	// lift->setState(Lift::HOLD);
-
-	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ringStack.translation()), 60, 60, 5));
-	co_yield drive->waitUntilSettled(2000);*/
-
-
-	/*pnoomatics->setRightHammer(true);
-	intake->setExtender(false);
-
-
-	Pose allianceStake(-12.9, -25.3);
-
-	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(allianceStake).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
-	pnoomatics->setRightHammer(false);
-
-	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(allianceStake.translation()) + 4, 60, 100, 85));
-	co_yield drive->waitUntilSettled(2000);
-
-	drive->setCurrentMotion(ProfiledMotion(-8, 60, 100, 60));
-co_yield util::coroutine::delay(700);
-	liftFlags->targetAngle = 220;
-	lift->setState(Lift::HOLD);
-	Timeout liftTimeout = Timeout(600);
-	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
-	co_yield util::coroutine::nextCycle();
-	co_yield drive->waitUntilSettled(1000);
-
-
-	drive->setCurrentMotion(ProfiledMotion(-10, 60, 100, 85));
-	co_yield drive->waitUntilSettled(1000);
-	intakeFlags->ladyBrownClearanceEnabled = true;
-	liftFlags->targetAngle = 80;
-	lift->setState(Lift::HOLD);*/
 
 	Pose ladder(14.8, -32.5);
 
