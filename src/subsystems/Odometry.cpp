@@ -54,7 +54,7 @@ RobotThread Odometry::updatePosition() {
 
 		// if rotation sensor port is defined, then we use that to get dist traveled
 		// otherwise we use motor encoders
-		
+
 		if constexpr (ports::leftRotation != 0 && ports::rightRotation != 0) {
 			// use right & left deadwheels to calculate deltaX
 			double LE = leftWheel.get_position();

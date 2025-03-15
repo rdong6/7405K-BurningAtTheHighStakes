@@ -33,13 +33,29 @@ void initialize() {
 	// logger_initialize("test.txt", 100);
 
 	pros::lcd::initialize();
+
 	robot_init();
 
-	// robotInstance->curAlliance = Alliance::BLUE;
+	auto autonSelector = robotInstance->getSubsystem<AutonSelector>().value();
+	autonSelector->addAuton("Red Ring Side", redRingSide, true);
+	autonSelector->addAuton("Red Mogo Side", redMogoSide, true);
+	autonSelector->addAuton("Red SAWP", redSAWP, true);
+
+	autonSelector->addAuton("Blue Ring Side", blueRingSide, true);
+	autonSelector->addAuton("Blue Mogo Side", blueMogoSide, true);
+	autonSelector->addAuton("Blue SAWP", blueSAWP, true);
+
+	autonSelector->addAuton("Skills", skillsAuton, true);
 
 	// NOTE: This is bad code! There's always potential for data races because scheduler is running, so any other part of
 	// codebase could register a task at the same time the initialize thread is registering the autonomousUser thread
 	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::AUTON);
+
+	robotTask = pros::c::task_create(
+	        [](void* robot) {
+		        if (robot) { static_cast<decltype(robotInstance)>(robot)->run(); }
+	        },
+	        robotInstance, TASK_PRIORITY_DEFAULT, 0x4000, "Scheduler");
 }
 
 RobotThread testAuton() {
@@ -142,11 +158,16 @@ RobotThread autonomousUser() {
 
 	// for skills
 
-	auto skillsCoro = skillsAuton();
-	while (skillsCoro) { co_yield skillsCoro(); }
+	// auto skillsCoro = skillsAuton();
+	// while (skillsCoro) { co_yield skillsCoro(); }
 
 	// auto autoCoro = blueMogoSide();
 	// while (autoCoro) { co_yield autoCoro(); }
+
+	if (robotInstance->autonFnPtr) {
+		auto autoCoro = robotInstance->autonFnPtr();
+		while (autoCoro) { co_yield autoCoro(); }
+	}
 
 	// auto coro = redRingSide();
 	// auto coro = blueMogoSide();

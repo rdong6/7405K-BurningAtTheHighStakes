@@ -30,14 +30,17 @@ RobotThread blueMogoSide() {
 	uint32_t startTime = pros::millis();
 
 	drive->setCurrentMotion(ProfiledMotion(3, 60, 100, 60));
-	co_yield drive->waitUntilSettled(2000);
-
+	co_yield util::coroutine::delay(200);
 	// score on alliance stake w/ preload
 	liftFlags->targetAngle = 220;
 	lift->setState(Lift::HOLD);
 	co_yield util::coroutine::nextCycle();
-	Timeout liftTimeout = Timeout(255);
+	Timeout liftTimeout = Timeout(500);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
+	lift->setState(Lift::STOW);
+	uint32_t start = pros::millis();
+	co_yield drive->waitUntilSettled(2000);
+	co_yield util::coroutine::delay(100 - (pros::millis() - start));
 
 	// move back first to get mogo
 
@@ -46,7 +49,7 @@ RobotThread blueMogoSide() {
 
 	Pose curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
-	co_yield util::coroutine::delay(600);
+	co_yield util::coroutine::delay(700);
 	lift->setState(Lift::STOW);
 	co_yield drive->waitUntilSettled(700);
 
@@ -64,7 +67,7 @@ RobotThread blueMogoSide() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(ring1).degrees(), PID(555, 1, 6800), false, false, 0.5, 12000, false, false));
+	        PIDTurn(curPose.headingTo(ring1).degrees(), PID(554, 1, 6800), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
 	curPose = odom->getCurrentState().position;
@@ -102,7 +105,7 @@ RobotThread blueMogoSide() {
 	co_yield drive->waitUntilSettled(2000);
 
 	printf("Corner\n");
-	Pose corner(-20, -60.2);
+	Pose corner(-20, -57.2);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -118,7 +121,7 @@ RobotThread blueMogoSide() {
 	co_yield drive->waitUntilSettled(800);
 
 	drive->setCurrentMotion(TimedMotion(400, 12000));
-	co_yield drive->waitUntilSettled(400);
+	co_yield drive->waitUntilSettled(195);
 
 	drive->setCurrentMotion(ProfiledMotion(-36, 50, 80, 65));
 	co_yield drive->waitUntilSettled(900);

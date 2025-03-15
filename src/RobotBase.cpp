@@ -125,9 +125,4 @@ void RobotBase::registerTask(TaskFunc func, TaskType type, const RobotFunc& pred
 
 void robot_init() {
 	robotInstance = new std::decay<decltype(*robotInstance)>::type();
-	robotTask = pros::c::task_create(
-	        [](void* robot) {
-		        if (robot) { static_cast<decltype(robotInstance)>(robot)->run(); }
-	        },
-	        robotInstance, TASK_PRIORITY_DEFAULT, 0x4000, "Scheduler");
 }
