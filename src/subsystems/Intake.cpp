@@ -74,9 +74,6 @@ void Intake::registerTasks() {
 
 	controllerRef->registerCallback([this]() { this->moveVoltage(0); }, []() {}, Controller::master, Controller::r2,
 	                                Controller::falling);
-
-	controllerRef->registerCallback([this]() { toggleExtender(); }, []() {}, Controller::master, Controller::x,
-									Controller::rising);
 }
 
 // coroutine that runes to detect if intake is stalled
@@ -117,20 +114,21 @@ RobotThread Intake::ringDetectorCoro() {
 		// round to int as the decimal don't really matter. math is quicker + no round off errors to cause drift from MA filter
 		int hueMA = ringColorMA.update(std::lround(color.get_hue()));
 		int proximity = color.get_proximity();
+		// printf("Hue: %d\tProximity: %d\n", hueMA, proximity);
 
 		if (!alreadySeenRing && proximity >= 200) {
 			if (hueMA <= 15) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::RED);
 				printf("Seen red ring. %d\n", ringsInIntake());
-			} else if (hueMA >= 218) {
+			} else if (hueMA >= 212) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::BLUE);
 				printf("Seen blue ring. %d\n", ringsInIntake());
 			}
 		} else {
 			// already seen ring or no ring is in front of color sensor
-			if (25 <= hueMA <= 212 && proximity < 100) { counter++; }
+			if (25 <= hueMA <= 200 && proximity < 100) { counter++; }
 
 			if (counter > 3) {
 				counter = 0;

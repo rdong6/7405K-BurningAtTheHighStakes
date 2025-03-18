@@ -125,24 +125,42 @@ RobotThread blueRingSide() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(preload.translation()), 60, 100, 60));
 	co_yield util::coroutine::delay(500);
-	liftFlags->targetAngle = 80;
-	lift->setState(Lift::HOLD);
+	// liftFlags->targetAngle = 80;
+	// lift->setState(Lift::HOLD);
 	co_yield drive->waitUntilSettled(2000);
 
 
-	Pose ladder(14.8, 32.5);
+	// Pose ladder(14.8, 32.5);
+	//
+	// curPose = odom->getCurrentState().position;
+	// drive->setCurrentMotion(
+	//         PIDTurn(curPose.headingTo(ladder).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	// co_yield drive->waitUntilSettled(530);
+	//
+	// curPose = odom->getCurrentState().position;
+	// liftFlags->targetAngle = 175;
+	// lift->setState(Lift::HOLD);
+	// drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 60, 100, 85));
+	// drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	// co_yield drive->waitUntilSettled(2000);
+
+	Pose posCorner(-27.04, 62);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(ladder).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(530);
+	        PIDTurn(curPose.headingTo(posCorner).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(600);
+
 
 	curPose = odom->getCurrentState().position;
-	liftFlags->targetAngle = 175;
-	lift->setState(Lift::HOLD);
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 60, 100, 85));
-	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(posCorner.translation()), 60, 100, 85));
+	co_yield util::coroutine::delay(400);
+	intake->moveVoltage(0);
 	co_yield drive->waitUntilSettled(2000);
+
+	drive->setCurrentMotion(PIDTurn(106.3, PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(600);
+	pnoomatics->setLeftHammer(true);
 
 	printf("Took %f seconds\n", (pros::millis() - startTime) / 1000.0);
 	co_yield util::coroutine::delay(2000);

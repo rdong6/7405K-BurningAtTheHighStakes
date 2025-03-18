@@ -395,7 +395,7 @@ RobotThread skillsAuton() {
 	intake->moveVoltage(0);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(setUpRingSeventhRing.translation()), 75, 120, 80));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(setUpRingSeventhRing.translation()), 75, 120, 60));
 	co_yield drive->waitUntilSettled(5000);
 
 	printf("Seventh ring\n");

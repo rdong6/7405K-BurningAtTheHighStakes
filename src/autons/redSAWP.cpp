@@ -154,6 +154,8 @@ RobotThread redSAWP() {
 
 	liftFlags->targetAngle = 170;
 	lift->setState(Lift::HOLD);
+	drive->setCurrentMotion(ProfiledMotion(3.5, 60, 50, 50));
+	co_yield drive->waitUntilSettled(2000);
 	// drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 60, 100, 85));
 	// co_yield drive->waitUntilSettled(2000);*/
 
