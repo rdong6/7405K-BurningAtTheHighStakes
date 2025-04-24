@@ -4,7 +4,7 @@
 // limits velocity of robot around turns so that no wheel of the robot violates requested max velocity
 class DifferentialDriveConstraint : public ITrajectoryConstraint {
 public:
-	DifferentialDriveConstraint(double maxVel, double trackwidth) : maxVel(maxVel), trackwidth(trackwidth) {}
+	constexpr explicit DifferentialDriveConstraint(double maxVel, double trackwidth) : maxVel(maxVel), trackwidth(trackwidth) {}
 
 	[[nodiscard]] constexpr double getMaxVel(const Pose& pose, double curvature, double vel) const override {
 		double angularVel = vel * curvature;

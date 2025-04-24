@@ -5,7 +5,7 @@
 // making it easier to track trajectories w/ sharp turns.
 class CentripetalAccelerationConstraint : public ITrajectoryConstraint {
 public:
-	explicit CentripetalAccelerationConstraint(double maxCentripetalAcceleration)
+	constexpr explicit CentripetalAccelerationConstraint(double maxCentripetalAcceleration)
 	    : maxCentripetalAccel(maxCentripetalAcceleration) {}
 
 	[[nodiscard]] constexpr double getMaxVel(const Pose& pose, double curvature, double vel) const override {

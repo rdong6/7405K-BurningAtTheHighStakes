@@ -1,4 +1,5 @@
 #include "lib/spline/Path.h"
+#include <fstream>
 
 unsigned int Path::counter = 0;
 

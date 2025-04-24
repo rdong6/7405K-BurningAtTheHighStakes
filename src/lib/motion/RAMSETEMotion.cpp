@@ -8,7 +8,7 @@
 #include "pros/rtos.hpp"
 #include <numbers>
 
-RAMSETEMotion::RAMSETEMotion(Trajectory& trajectory, RAMSETE ramsete)
+RAMSETEMotion::RAMSETEMotion(const Trajectory& trajectory, RAMSETE ramsete)
     : ramsete(ramsete), trajectory(trajectory), elapsedTime(0) {}
 
 IMotion::MotorVoltages RAMSETEMotion::calculate(const kinState& state) {
@@ -17,31 +17,20 @@ IMotion::MotorVoltages RAMSETEMotion::calculate(const kinState& state) {
 	Trajectory::State sampledState = trajectory.sample(elapsedTime);
 	RAMSETE::WheelVelocities wheelVels = ramsete.calculate(state.position, sampledState);
 
-	// double vel = sampledState.vel;
-	// double angularVel = sampledState.vel * (sampledState.curvature);
-	// RAMSETE::WheelVelocities wheelVels{vel - angularVel * odometers::trackWidth * 0.5,
-	//                                    vel + angularVel * odometers::trackWidth * 0.5};
-
 	double leftMotorRPM = wheelVels.left * 60.0;// converts in/s to in/min
-	// left deadwheel diameter is used only because we used motor encoders
-	// HAVE TO CHANGE WHEN WE USE DEADWHEELS IN THE SEASON
 	leftMotorRPM /= (odometers::driveGearRatio * std::numbers::pi);
 
 	double rightMotorRPM = wheelVels.right * 60.0;
 	rightMotorRPM /= (odometers::driveGearRatio * std::numbers::pi);
 
-	// logger->info("Left RPM: {}  Right RPM: {}  Target: ({}, {}, {})  Cur: ({}, {}, {})  Vel: {}  Ang Vel: {}\n",
-	//              leftMotorRPM, rightMotorRPM, targetPose.X(), targetPose.X(),
-	//              util::toDeg(targetPose.theta()), state.position.X(), state.position.X(),
-	//              util::toDeg(state.position.theta()), point.vel, point.vel * point.curv);
-
+	// TODO: Fix this as we cannot assume a drive will always use blue carts
 	double maxAbsWheelRPM = std::fmax(std::fabs(leftMotorRPM), std::fabs(rightMotorRPM));
 	if (maxAbsWheelRPM > 600) {
 		leftMotorRPM = leftMotorRPM / maxAbsWheelRPM * 600;
 		rightMotorRPM = rightMotorRPM / maxAbsWheelRPM * 600;
 	}
 
-	printf("[RamseteMotin] ElapsedTime: %.2f\tSampled State: (t: %.2f X: %.2f Y: %.2f H: %.2f v: %.2f)\tCur State: (%.2f, "
+	printf("[RamseteMotion] ElapsedTime: %.2f\tSampled State: (t: %.2f X: %.2f Y: %.2f H: %.2f v: %.2f)\tCur State: (%.2f, "
 	       "%.2f, %.2f)\tLeft: %.2f\tRight: "
 	       "%.2f\n",
 	       elapsedTime, sampledState.t, sampledState.pose.X(), sampledState.pose.Y(), sampledState.pose.rotation().degrees(),

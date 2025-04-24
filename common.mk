@@ -3,10 +3,10 @@ DEVICE=VEX EDR V5
 
 
 # Flags/Compiler Parameters
-MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=softfp -g -Os # use -Og for debugging
+MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard -g -Os # use -Og for debugging
 # NOTE: FMT_USE_FALLBACK_FILE=1 to get fmtlib 11.1.3 to compile due to issues w/ flockfile. newlib doesn't appear to implement it, yet the templated checks don't catch it.
 CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK $(INC_FLAGS) -MMD -MP -DFMT_STATIC_THOUSANDS_SEPERATOR=',' -DFMT_USE_LONG_DOUBLE=0 -DFMT_USE_FLOAT128=0 -DFMT_USE_FLOAT=0 -DFMT_USE_USER_DEFINED_LITERALS=0 -DFMT_USE_FULL_CACHE_DRAGONBOX=0 -DFREERTOS -DVEX -DFMT_USE_FALLBACK_FILE #-DSKILLS
-GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables
+GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables -ftree-vectorize -ftree-vectorizer-verbose=1
 
 # Check if the llemu files in libvgl exist. If they do, define macros that the
 # llemu headers in the kernel repo can use to conditionally include the libvgl
@@ -160,6 +160,9 @@ clean:
 	@$(call rmdir,$(BINDIR)/)
 	@$(call rmdir,$(DEPDIR)/)
 	@$(call rm,$(ROOT)/compile_commands.json)
+
+runSimulator: quick
+	@./vex-v5-qemu/target/debug/client-cli hot-cold --kernel ./vex-v5-qemu/target/armv7a-none-eabi/debug/kernel ./bin/hot.package.bin ./bin/cold.package.bin
 
 makeDirectory: $(DEPDIR)
 	@$(call mkdir,$(DEPDIR))

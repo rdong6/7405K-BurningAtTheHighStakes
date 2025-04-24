@@ -12,8 +12,6 @@ namespace {
 	}
 }// namespace
 
-RAMSETE::RAMSETE(double beta, double zeta) : beta(beta), zeta(zeta) {}
-
 RAMSETE::WheelVelocities RAMSETE::calculate(const Pose& curPose, const Pose& targetPose, double linearVelRef,
                                             double angularVelRef) const {
 	Pose errorPose = targetPose.relativeTo(curPose);

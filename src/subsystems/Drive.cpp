@@ -64,8 +64,8 @@ RobotThread Drive::runner() {
 
 		if (curMotion->isVelocityControlled()) {
 			// add a 0.5 so requested velocity rounds to nearest number when casting to int
-			setVelocityLeft(motorVolts.left + 0.5);
-			setVelocityRight(motorVolts.right + 0.5);
+			setVelocityLeft(std::lround(motorVolts.left));
+			setVelocityRight(std::lround(motorVolts.right));
 		} else {
 			// do something where it rounds it to nearest 120mV? because only changes in increments of 120mV causes any actual
 			// change on motor as mv is converted to PWM (+-100)
@@ -123,6 +123,7 @@ void Drive::setCurrentMotion(Motion motion) {
 	curMotion = std::move(motion);
 }
 
+// TODO: Better handle how we deal w/ 5.5w motors as they cap at 8V instead of 12V
 void Drive::setVoltageLeft(int voltage) {
 	leftDrive.move_voltage(voltage);
 	weakLeft.move_voltage(voltage);

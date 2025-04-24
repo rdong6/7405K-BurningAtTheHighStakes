@@ -1,6 +1,5 @@
 #pragma once
 #include "Spline.h"
-#include <fstream>
 
 // Use this macro w/ Path class declarations to pregen the trajectory
 // Doesn't work with static local objs because of C++ Initialization.
@@ -23,11 +22,11 @@ public:
 	// TODO: lazily parameterize the splines
 	template<SplineType... splines>
 	explicit Path(TrajectoryConfig config, splines&&... args)
-	    : splinesVector{Spline(std::forward<splines>(args))...}, id(counter++) {
+	    : config(config), splinesVector{Spline(std::forward<splines>(args))...}, id(counter++) {
 		parameterizeSplines();
 	}
 
-	explicit Path(std::vector<Spline>&& splines) : splinesVector(std::forward<std::vector<Spline>>(splines)), id(counter++) {
+	explicit Path(std::vector<Spline>&& splines) : config(), splinesVector(std::forward<std::vector<Spline>>(splines)), id(counter++) {
 		parameterizeSplines();
 	}
 

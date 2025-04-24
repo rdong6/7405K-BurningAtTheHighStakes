@@ -75,5 +75,5 @@ public:
 	uint32_t delay = 0;// in ms
 };
 
-// Initializes all robotics code + starts the scheduler
+// Initializes all robotics code
 void robot_init();

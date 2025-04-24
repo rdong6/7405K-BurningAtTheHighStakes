@@ -195,7 +195,7 @@ void PursuitMotion::start() {
 	double targetRightVel = isReversed * curVel * (2 - curv * odometers::trackWidth) / 2.0;
 
 	// sometimes the vels go above max vel
-	// clamp so wheel vels don't violate constraints of robot
+	// normalize so wheel vels don't violate constraints of robot
 	double ratio = std::max(std::fabs(targetLeftVel), std::fabs(targetRightVel)) / maxVel;
 	if (ratio > 1) {
 		targetLeftVel /= ratio;
@@ -217,6 +217,7 @@ void PursuitMotion::start() {
 	targetLeftVel *= 60.0;
 	targetRightVel *= 60.0;
 
+	// convert from in/min into RPM
 	targetLeftVel /= (odometers::leftDeadwheelDiameter * std::numbers::pi);
 	targetRightVel /= (odometers::rightDeadwheelDiameter * std::numbers::pi);
 

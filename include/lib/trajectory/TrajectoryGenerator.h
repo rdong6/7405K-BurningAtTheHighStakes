@@ -18,6 +18,7 @@ class TrajectoryGenerator {
 public:
 	TrajectoryGenerator() = default;
 	explicit TrajectoryGenerator(std::vector<TrajectoryConstraint> constraints) : constraints(std::move(constraints)) {}
+	constexpr TrajectoryGenerator(std::initializer_list<TrajectoryConstraint> constraints) : constraints(constraints) {}
 
 	[[nodiscard]] Trajectory generate(const Path& path) const;
 

@@ -24,9 +24,14 @@ public:
 
 	// take dot product of the two vectors
 	// this * other
-	constexpr double dot(const Translation2D& other) { return X() * other.X() + Y() * other.Y(); }
+	constexpr double dot(const Translation2D& other) const { return X() * other.X() + Y() * other.Y(); }
 
-	constexpr double distanceTo(const Translation2D& other) const { return std::hypot(other.m_x - m_x, other.m_y - m_y); }
+	constexpr double distanceTo(const Translation2D& other) const {
+		const double x = other.m_x - m_x;
+		const double y = other.m_y - m_y;
+		return vsqrtd(x * x + y * y);
+		// return std::hypot(other.m_x - m_x, other.m_y - m_y);
+	}
 
 	constexpr Rotation2D angle() const { return Rotation2D{m_x, m_y}; }
 

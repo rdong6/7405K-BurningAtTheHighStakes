@@ -6,8 +6,6 @@
 #include "lib/utils/Math.h"
 #include "subsystems/Drive.h"
 #include <cmath>
-#include <cstdio>
-#include <math.h>
 #include <string>
 #include <type_traits>
 
@@ -39,7 +37,7 @@ void Odometry::setPose(Pose pose) {
 
 RobotThread Odometry::updatePosition() {
 	auto drive = robot->getSubsystem<Drive>();
-	const double imuScalar = 1.005586592;
+	const double imuScalar = 1.00539000754;
 
 	prevRotation = imu.get_rotation() * imuScalar;
 
@@ -120,9 +118,8 @@ RobotThread Odometry::updatePosition() {
 		}
 
 
-		Rotation2D newHeading = curState.position.rotation() + Rotation2D(dh);
 		Pose newPose = curState.position.exp(Twist2D{deltaX, deltaY, dh});
-		curState.position = Pose(newPose.translation(), newHeading);
+		curState.position = Pose(newPose.translation(), curState.position.rotation() + Rotation2D(dh));
 
 		printOdom(curState);
 
@@ -162,8 +159,6 @@ void Odometry::printOdom(kinState state) {
 	pros::lcd::set_text(0, "gH: " + std::to_string((180 / M_PI) * state.position.theta()));
 	pros::lcd::set_text(1, "gX: " + std::to_string(state.position.X()));
 	pros::lcd::set_text(2, "gY: " + std::to_string(state.position.Y()));
-	// logger->debug("X: {:2f} Y: {:2f} H: {:2f}\n", state.position.X(), state.position.X(),
-	//               util::toDeg(state.position.theta()));
 }
 
 const kinState& Odometry::getCurrentState() const {

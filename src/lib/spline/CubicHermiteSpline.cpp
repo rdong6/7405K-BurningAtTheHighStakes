@@ -23,19 +23,15 @@ Pose CubicHermiteSpline::getPoint(double t) const {
 	Eigen::Vector4d polynomialBases{t * t * t, t * t, t, 1};
 	Eigen::Vector<double, 6> result = coefficients * polynomialBases;
 
-	double dx, dy, ddx, ddy;
 	// If t = 0, all other terms in the equation cancel out to zero. We can use
 	// the last x^0 term in the equation.
+	double dx, dy;
 	if (util::fpEquality(t, 0.0)) {
 		dx = coefficients(2, 3);
 		dy = coefficients(3, 3);
-		ddx = coefficients(4, 3);
-		ddy = coefficients(5, 3);
 	} else {
 		dx = result(2);
 		dy = result(3);
-		ddx = result(4);
-		ddy = result(5);
 	}
 
 	return {result(0), result(1), Rotation2D{dx, dy}};

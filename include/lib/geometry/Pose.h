@@ -115,7 +115,7 @@ constexpr Pose Pose::exp(const Twist2D& twist) const {
 	const double sinTheta = std::sin(dtheta);
 	const double cosTheta = std::cos(dtheta);
 
-	// s = sin(∆theta) / ∆theta or it's taylor expansion
+	// s = sin(∆theta) / ∆theta or it's taylor polynomial's approximation
 	// c = (1 - cos(∆theta)) / ∆theta
 	double s, c;
 	if (util::fpEquality(dtheta, 0.0)) {
@@ -147,7 +147,7 @@ constexpr Twist2D Pose::log(const Pose& final) const {
 	}
 
 	const Translation2D translationPart = transform.translation().rotateBy({halfThetaByTanOfHalfDtheta, -halfDTheta}) *
-	                                      std::hypot(halfThetaByTanOfHalfDtheta, halfDTheta);
+	        vsqrtd(halfThetaByTanOfHalfDtheta * halfThetaByTanOfHalfDtheta + halfDTheta * halfDTheta);
 
 	return {translationPart.X(), translationPart.Y(), dtheta};
 }
@@ -155,18 +155,19 @@ constexpr Twist2D Pose::log(const Pose& final) const {
 
 // For PathEditor project -> need to expose stuff for interoperability between C++ & javascript
 // custom serialization for Pose -> only exposes it as an (X,Y) pair
-#ifdef PATH_EDITOR
-#include <glaze/glaze.hpp>
-template<> struct glz::meta<Pose> {
-	using T = Pose;
-	// JSON -> C++
-	static constexpr auto read_x = [](Pose& pose, const std::string& input) { pose = Pose(std::stod(input), pose.Y(), pose.rotation()); };
-	static constexpr auto read_y = [](Pose& pose, const std::string& input) { pose = Pose(pose.X(), std::stod(input), pose.rotation()); };
-
-	// C++ -> JSON
-	static constexpr auto write_x = [](const Pose& pose) { return pose.X(); };
-	static constexpr auto write_y = [](const Pose& pose) { return pose.Y(); };
-
-	static constexpr auto value = object("x", custom<read_x, write_x>, "y", custom<read_y, write_y>);
-};
-#endif
+// #ifdef PATH_EDITOR
+// #include <glaze/glaze.hpp>
+// template<> struct glz::meta<Pose> {
+// 	using T = Pose;
+// 	// JSON -> C++
+// 	static constexpr auto read_x = [](Pose& pose, const std::string& input) { pose = Pose(std::stod(input), pose.Y(),
+// pose.rotation()); }; 	static constexpr auto read_y = [](Pose& pose, const std::string& input) { pose = Pose(pose.X(),
+// std::stod(input), pose.rotation()); };
+//
+// 	// C++ -> JSON
+// 	static constexpr auto write_x = [](const Pose& pose) { return pose.X(); };
+// 	static constexpr auto write_y = [](const Pose& pose) { return pose.Y(); };
+//
+// 	static constexpr auto value = object("x", custom<read_x, write_x>, "y", custom<read_y, write_y>);
+// };
+// #endif

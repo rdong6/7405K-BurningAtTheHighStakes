@@ -156,7 +156,7 @@ RobotThread Intake::blueismCoro() {
 
 	while (true) {
 		// wait until we detect a ring w/ dist sensor
-		co_yield [this]() -> bool { return !ringsSeen.empty() && blueismDistance.get() <= 20; };
+		co_yield [this]() -> bool { return !ringsSeen.empty() && blueismDistance.get() <= 50; };
 
 		// if we see a ring, check what color it is and if it's the one we want, eject it
 		//

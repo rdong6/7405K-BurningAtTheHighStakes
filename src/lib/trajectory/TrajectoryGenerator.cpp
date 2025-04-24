@@ -3,7 +3,7 @@
 #include "lib/trajectory/constraints/CentripetalAccelerationConstraint.h"
 #include "lib/trajectory/constraints/DifferentialDriveConstraint.h"
 
-// TODO: Move trjaectory generator code into here now that we no longer use templates
+// TODO: Move trajectory generator code into here now that we no longer use templates
 Trajectory TrajectoryGenerator::generate(const Path& path) const {
 	const TrajectoryConfig& config = path.getConfig();
 	const std::vector<PoseWithCurvature>& points = path.getPoints();
@@ -104,6 +104,7 @@ Trajectory TrajectoryGenerator::generate(const Path& path) const {
 
 		successor = constrainedState;
 	}
+
 
 	// Integrate forwards to get finalized data
 	std::vector<Trajectory::State> trajectoryStates(points.size());

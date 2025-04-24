@@ -32,7 +32,7 @@ IMotion::MotorVoltages ProfiledMotion::calculate(const kinState& state) {
 	double time = (pros::millis() - startTime) / 1000.0;// because profile works in terms of seconds
 
 	// testing to see if forcing it to the end of motion is better
-	if (time >= profile.getTotalTime()) { overtime = true; }
+	if (time > profile.getTotalTime()) { overtime = true; }
 
 	// Returns position, velocity and acceleration at a given time during the trapezoid motion
 	auto targetState = profile.getState(time);

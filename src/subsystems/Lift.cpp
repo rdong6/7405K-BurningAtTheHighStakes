@@ -141,7 +141,7 @@ RobotThread Lift::updateAngle() {
 
 RobotThread Lift::runner() {
 	auto liftFlags = robot->getFlag<Lift>().value();
-	liftFlags->pid = PID(260, 10, 0, true, 10);
+	liftFlags->pid = PID(200, 30, 40, true, 10);
 	liftFlags->isMoving = true;
 	liftFlags->pid.reset();
 
@@ -225,7 +225,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 26.5;// mmeant to be 26 pre-smudge
+			liftFlags->targetAngle = 42.45;// mmeant to be 26 pre-smudge
 			liftFlags->errorThresh = 0.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
@@ -234,7 +234,7 @@ void Lift::setState(State state) {
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:
-			liftFlags->targetAngle = 2.5;// determine
+			liftFlags->targetAngle = 7.8;// determine
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			break;
 		case State::IDLE:

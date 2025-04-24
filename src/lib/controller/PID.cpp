@@ -20,7 +20,11 @@ double PID::operator()(double error) {
 	// integral windup thingamajig - 2 hacks are here
 	// first one is a crappy iBound where any error below a certain threshold gets accumulated
 	// and the second one is whenever we flip signs/overshoot/undershoot our target, we reset errorSum
-	if (std::fabs(error) < iBound) { errorSum += error; }
+	if (std::fabs(error) < iBound) {
+		errorSum += error;
+	} else {
+		errorSum = 0;
+	}
 	if (util::sign(error) != util::sign(prevError) && errorZeroFlip) { errorSum = 0; }
 
 	// Proportional = error * kP

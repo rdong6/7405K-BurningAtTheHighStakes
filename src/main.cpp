@@ -7,6 +7,7 @@
 #include "lib/motion/OdomCharacterizationMotion.h"
 #include "lib/motion/PIDTurn.h"
 #include "lib/motion/ProfiledMotion.h"
+#include "lib/spline/Boomerang.h"
 #include "lib/utils/CoroutineGenerator.h"
 #include "lib/utils/Math.h"
 #include "lib/utils/ReferenceWrapper.h"
@@ -35,22 +36,23 @@ void initialize() {
 	pros::lcd::initialize();
 
 	robot_init();
+	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::OPCTRL);
 
-	auto autonSelector = robotInstance->getSubsystem<AutonSelector>().value();
-	autonSelector->addAuton("Red Ring Side", redRingSide, true);
-	autonSelector->addAuton("Red Mogo Side", redMogoSide, true);
-	// autonSelector->addAuton("Red SAWP", redSAWP, true);
-
-	autonSelector->addAuton("Blue Ring Side", blueRingSide, true);
-	autonSelector->addAuton("Blue Mogo Side", blueMogoSide, true);
+	// auton selector code using a pot to select
+	// auto autonSelector = robotInstance->getSubsystem<AutonSelector>().value();
+	// autonSelector->addAuton("Red Ring Side", redRingSide, true);
+	// autonSelector->addAuton("Red Mogo Side", redMogoSide, true);
+	// // autonSelector->addAuton("Red SAWP", redSAWP, true);
+	//
+	// autonSelector->addAuton("Blue Ring Side", blueRingSide, true);
+	// autonSelector->addAuton("Blue Mogo Side", blueMogoSide, true);
 	// autonSelector->addAuton("Blue SAWP", blueSAWP, true);
 
 	// autonSelector->addAuton("Skills", skillsAuton, true);
 
-	// NOTE: This is bad code! There's always potential for data races because scheduler is running, so any other part of
-	// codebase could register a task at the same time the initialize thread is registering the autonomousUser thread
-	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::AUTON);
-
+	// everything's initialized, run the scheduler and startup the codebase
+	// at this point, anything that touches our code should only come from coroutines
+	// otherwise there will be potential for data races
 	robotTask = pros::c::task_create(
 	        [](void* robot) {
 		        if (robot) { static_cast<decltype(robotInstance)>(robot)->run(); }
@@ -71,30 +73,11 @@ RobotThread testAuton() {
 	auto odom = robotInstance->getSubsystem<Odometry>().value();
 #pragma GCC diagnostic pop
 
-	// working but fucked PID Constants: P = 750, I = 1, D = 5250
-
-	// const double P = 750;
-	// const double I = 1;
-	// const double D = 5250;
-	// const double timeoutAmt = 800;
-
 	// 600ms pid
-	const double P = 620;
-	const double I = 1;
+	const double P = 810;
+	const double I = 0;
 	const double D = 6500;
-	const double timeoutAmt = 600;
-
-	drive->setCurrentMotion(PIDTurn(-90, PID(615, 1, 6700, true, 10), false, false));
-	// drive->setCurrentMotion(PIDTurn(120, PID(100, 1, 485, true, 10), false, false));
-	co_yield drive->waitUntilSettled(800);
-	printf("Timed Out Heading: %f\n", odom->getCurrentState().position.rotation().degrees());
-	co_yield util::coroutine::delay(250);
-	printf("Final Heading: %f\n", odom->getCurrentState().position.rotation().degrees());
-	odom->reset();
-
-	while (!pros::c::controller_get_digital(pros::E_CONTROLLER_MASTER, pros::E_CONTROLLER_DIGITAL_A)) {
-		co_yield util::coroutine::nextCycle();
-	}
+	const uint32_t timeoutAmt = 600;
 
 	drive->setCurrentMotion(PIDTurn(25, PID(P, I, D, true, 10), false, false));
 	// drive->setCurrentMotion(PIDTurn(120, PID(100, 1, 485, true, 10), false, false));
@@ -153,29 +136,61 @@ RobotThread testAuton() {
 	co_yield util::coroutine::nextCycle();
 }
 
+#include "FreeRTOSFuncs.h"
+#include "lib/motion/BoomerangMotion.h"
+RobotThread testBoomerangMotions() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+	auto drive = robotInstance->getSubsystem<Drive>().value();
+	auto intake = robotInstance->getSubsystem<Intake>().value();
+	auto intakeFlags = robotInstance->getFlag<Intake>().value();
+	auto lift = robotInstance->getSubsystem<Lift>().value();
+	auto liftFlags = robotInstance->getFlag<Lift>().value();
+	auto pnoomatics = robotInstance->getSubsystem<Pnooomatics>().value();
+	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
+	auto odom = robotInstance->getSubsystem<Odometry>().value();
+#pragma GCC diagnostic pop
+
+	// uint32_t totalTime = 0;
+	// const uint32_t numItterations = 10000;
+	//
+	// for (int i = 0; i < numItterations; i++) {
+	// 	enter_critical();
+	// 	uint32_t startTime = pros::micros();
+	// 	drive->setCurrentMotion(BoomerangMotion(odom->getCurrentState().position, Pose(20, 20, 1.5707963268), 0.45, 30, 40));
+	// 	uint32_t endTime = pros::micros();
+	// 	totalTime += (endTime - startTime);
+	// 	// printf("Took %f ms\n", (endTime - startTime) / 1000.0);
+	// 	exit_critical();
+	// }
+	//
+	// printf("Took avg %f ms\n", (totalTime / 1000.0) / numItterations);
+
+	drive->setCurrentMotion(OdomCharacterizationMotion());
+	co_yield drive->waitUntilSettled(10000);
+
+	co_yield util::coroutine::nextCycle();
+}
+
 RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
+	// auto skillsCoro = testBoomerangMotions();
+	// auto skillsCoro = testAuton();
+	auto skillsCoro = redRingSide();
+	while (skillsCoro) { co_yield skillsCoro(); }
 
 	// for skills
 
 	// auto skillsCoro = skillsAuton();
 	// while (skillsCoro) { co_yield skillsCoro(); }
 
-	auto autoCoro = blueRingSide();
-	while (autoCoro) { co_yield autoCoro(); }
+
+	// auton selector code
 
 	// if (robotInstance->autonFnPtr) {
 	// 	auto autoCoro = robotInstance->autonFnPtr();
 	// 	while (autoCoro) { co_yield autoCoro(); }
 	// }
-
-	// auto coro = redRingSide();
-	// auto coro = blueMogoSide();
-	// auto coro = redRingSide();
-	// auto coro = redMogoSide();
-	// auto coro = killsAuton();
-	// auto coro = testAuton();
-	// while (coro) { co_yield coro(); }
 
 	co_yield util::coroutine::nextCycle();
 }

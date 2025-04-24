@@ -2,6 +2,8 @@
 #include "lib/geometry/Pose.h"
 #include "lib/trajectory/Trajectory.h"
 
+// The gain values for RAMSETE should be robot-agnostic as this controller doesn't do actual velocity tracking. It only provides
+// corrective velocity control for Pose errors
 class RAMSETE {
 private:
 	double beta;
@@ -15,7 +17,7 @@ public:
 		double right;
 	};
 
-	RAMSETE(double beta, double zeta);
+	constexpr RAMSETE(double beta, double zeta) : beta(beta), zeta(zeta) {}
 
 	WheelVelocities calculate(const Pose& curPose, const Pose& targetPose, double linearVelRef, double angularVelRef) const;
 	WheelVelocities calculate(const Pose& curPose, const Trajectory::State& state) const;

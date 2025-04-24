@@ -1,7 +1,7 @@
 #pragma once
+#include "lib/controller/RAMSETE.h"
 #include <cstdint>
 #include <initializer_list>
-#include <numbers>
 
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -10,31 +10,31 @@
 
 
 namespace ports {
-	constexpr int frontLeftMotor = -7;
-	constexpr int middleLeftMotor = -3;
-	constexpr int backLeftMotor = -12;
+	constexpr int frontLeftMotor = -4;
+	constexpr int middleLeftMotor = -8;
+	constexpr int backLeftMotor = -6;
 	constexpr int weakLeftMotor = 0;
 
-	constexpr int frontRightMotor = 10;
-	constexpr int middleRightMotor = 2;
-	constexpr int backRightMotor = 11;
+	constexpr int frontRightMotor = 2;
+	constexpr int middleRightMotor = 5;
+	constexpr int backRightMotor = 21;
 	constexpr int weakRightMotor = 0;
 
-	constexpr std::initializer_list<std::int8_t> intake = {-17}; 
-	constexpr int intakeDistance = 9;// for dist stop
-	constexpr int intakeColor = 19;
-	constexpr int blueismDistance = 20;
+	constexpr std::initializer_list<std::int8_t> intake = {-1};
+	constexpr int intakeDistance = 13;// for dist stop
+	constexpr int intakeColor = 15;
+	constexpr int blueismDistance = 14;
 
 	constexpr int clampDistance = 0;
 
-	constexpr int liftMotor = -8;
-	constexpr int liftRotation = 18;
+	constexpr int liftMotor = -11;
+	constexpr int liftRotation = 3;
 
 	constexpr int leftRotation = 0;
 	constexpr int rightRotation = 0;
-	constexpr int backRotation = 5;
-	constexpr int verticalRotation = -6;// this will only ever be used if we have 1 vertical deadwheel on the bot
-	constexpr int imu = 1;
+	constexpr int backRotation = -10;
+	constexpr int verticalRotation = -12;// this will only ever be used if we have 1 vertical deadwheel on the bot
+	constexpr int imu = 7;
 }// namespace ports
 
 namespace odometers {
@@ -49,10 +49,20 @@ namespace odometers {
 	constexpr double backDeadwheelDiameter = 2.75;// ignored if backRotation is 0
 	constexpr double verticalDeadwheelDiameter = 2; // used only if vertical deadwheel
 
-	constexpr double backOffset = 2.35183757807;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
-	constexpr double verticalOffset = 0.107209776566;// only used if we have 1 vertical deadwheel (no left & right deadwheels)
+	// constexpr double backOffset = 0;
+	// constexpr double verticalOffset = 0;
 
-	// constexpr double backOffset = 2.30037430088;// ignored if backRotation is 0 (offset of back deadwheel to center of
-	// rotation) constexpr double verticalOffset = 0.0380916051888;// only used if we have 1 vertical deadwheel (no left & right
+	constexpr double backOffset = 0.364319505698;
+	constexpr double verticalOffset = 2.09360573869;
+
+	// constexpr double backOffset = 1.9812784336;// ignored if backRotation is 0 (offset of back deadwheel to center of
+	// rotation)
+	// constexpr double verticalOffset = 0.5168626979855;// only used if we have 1 vertical deadwheel (no left & right
 	// deadwheels)
 }// namespace odometers
+
+namespace trajectory {
+	constexpr double maxCentripetalAcceleration = 15;
+	constexpr double maxDrivetrainVel = 50;
+	constexpr RAMSETE ramsete = RAMSETE(0.02, 0.001);
+}// namespace trajectory

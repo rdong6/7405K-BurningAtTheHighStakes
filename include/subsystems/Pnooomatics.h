@@ -6,9 +6,9 @@
 
 class Pnooomatics : public Subsystem {
 private:
-	pros::adi::DigitalOut clamp{'D'};
-	pros::adi::DigitalOut rightHammer{'B'};
-	pros::adi::DigitalOut leftHammer{'E'};
+	pros::adi::DigitalOut clamp{'H'};
+	pros::adi::DigitalOut rightHammer{'G'};
+	pros::adi::DigitalOut leftHammer{'F'};
 	pros::Distance dist{ports::clampDistance};
 
 	bool clampEnabled = false;

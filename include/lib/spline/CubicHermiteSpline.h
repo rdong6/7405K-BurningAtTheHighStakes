@@ -25,12 +25,12 @@ public:
 
 private:
 	// each row is coefficients for different func
-	// row 0 = coefficients of P(t) for X-axis
-	// row 1 = coefficients of P(t) for Y-axis
-	// row 2 = coefficients of P'(t) for X-axis
-	// row 3 = coefficients of P'(t) for Y-axis
-	// row 4 = coefficients of P''(t) for X-axis
-	// row 5 = coefficients of P''(t) for Y-axis
+	// row 0 = coefficients of P(t) for X
+	// row 1 = coefficients of P(t) for Y
+	// row 2 = coefficients of P'(t) for X
+	// row 3 = coefficients of P'(t) for Y
+	// row 4 = coefficients of P''(t) for X
+	// row 5 = coefficients of P''(t) for Y
 	Eigen::Matrix<double, 6, 4> coefficients = Eigen::Matrix<double, 6, 4>::Zero();
 
 	/*

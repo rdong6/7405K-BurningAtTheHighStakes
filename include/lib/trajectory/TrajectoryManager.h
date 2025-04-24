@@ -9,7 +9,7 @@
 class Path;
 
 // Singleton!! People hate on singletons, I can't figure out another design pattern that does what I need
-// 1 global instance and ONLY 1!
+// 1 global instance and ONLY 1 INSTANCE!
 class TrajectoryManager {
 private:
 	TrajectoryManager() = default;

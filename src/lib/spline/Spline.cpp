@@ -11,7 +11,7 @@ namespace {
 	};
 }// namespace
 
-double ISpline::getCurvature(double dx, double dy, double ddx, double ddy) const {
+double ISpline::getCurvature(double dx, double dy, double ddx, double ddy) {
 	double denominator = std::pow(dx * dx + dy * dy, 1.5);
 	double k = (dx * dy - dy * dx) / denominator;
 
@@ -23,17 +23,8 @@ double ISpline::getCurvature(double dx, double dy, double ddx, double ddy) const
 }
 
 
-double ISpline::getCurvature(const Pose& firstDeriv, const Pose& secondDeriv) const {
+double ISpline::getCurvature(const Pose& firstDeriv, const Pose& secondDeriv) {
 	return getCurvature(firstDeriv.X(), firstDeriv.Y(), secondDeriv.X(), secondDeriv.Y());
-
-	/*double denominator = std::pow(firstDeriv.X() * firstDeriv.X() + firstDeriv.Y() * firstDeriv.Y(), 1.5);
-	double k = (secondDeriv.X() * firstDeriv.Y() - secondDeriv.Y() * firstDeriv.X()) / denominator;
-
-	if (std::isnan(k)) {
-	    return 0.0;// idk what to do w/ a NaN curvature
-	}
-
-	return -k;*/
 }
 
 // Paramaterizes by subdividing a spline until change between points is under a threshold
