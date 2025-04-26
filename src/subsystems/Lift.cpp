@@ -79,7 +79,6 @@ void Lift::registerTasks() {
 
 	controllerRef->registerCallback(
 	        [this]() {
-		        // robot->getFlag<Lift>().value()->state = State::IDLE;
 #ifdef SKILLS
 		        robotInstance->getSubsystem<Intake>().value()->setDistStop(false);
 #endif
@@ -225,7 +224,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 42.45;// mmeant to be 26 pre-smudge
+			liftFlags->targetAngle = 45.2;// mmeant to be 26 pre-smudge
 			liftFlags->errorThresh = 0.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
@@ -234,7 +233,7 @@ void Lift::setState(State state) {
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:
-			liftFlags->targetAngle = 7.8;// determine
+			liftFlags->targetAngle = 10;// determine
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			break;
 		case State::IDLE:

@@ -36,7 +36,7 @@ void initialize() {
 	pros::lcd::initialize();
 
 	robot_init();
-	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::OPCTRL);
+	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::AUTON);
 
 	// auton selector code using a pot to select
 	// auto autonSelector = robotInstance->getSubsystem<AutonSelector>().value();

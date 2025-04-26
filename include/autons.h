@@ -6,6 +6,7 @@ RobotThread blueRingSide();
 RobotThread blueMogoSide();
 RobotThread blueSAWP();
 RobotThread redRingSide();
+RobotThread redRingRush();
 RobotThread redMogoSide();
 RobotThread redSAWP();
 RobotThread sbhsRedMogoSide();
