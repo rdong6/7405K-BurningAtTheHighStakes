@@ -39,8 +39,7 @@ RobotThread redRingSide() {
 	lift->setState(Lift::HOLD);
 	co_yield util::coroutine::nextCycle();
 	Timeout liftTimeout = Timeout(800);// TUNE THIS
-	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); }*/
-	;
+	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };*/
 
 	Pose curPose = odom->getCurrentState().position;
 	Pose mogo1(-43.2, 0);

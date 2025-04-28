@@ -78,7 +78,7 @@ RobotThread blueMogoSide() {
 	co_yield util::coroutine::delay(150);
 
 	printf("Setup ring intake\n");
-	Pose setupRingIntake(-19.4, -12.6);
+	Pose setupRingIntake(-18.8, -12.4);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(180 + curPose.headingTo(setupRingIntake).degrees(), PID(620, 1, 6500), false, false, 0.5,
@@ -126,7 +126,7 @@ RobotThread blueMogoSide() {
 	drive->setCurrentMotion(ProfiledMotion(-36, 50, 80, 65));
 	co_yield drive->waitUntilSettled(900);
 
-	pnoomatics->setRightHammer(true);
+	// pnoomatics->setRightHammer(true);
 
 	drive->setCurrentMotion(ProfiledMotion(24, 40, 60, 85));
 	co_yield drive->waitUntilSettled(900);
@@ -147,7 +147,7 @@ RobotThread blueMogoSide() {
 	co_yield util::coroutine::delay(500);
 	liftFlags->targetAngle = 175;
 	lift->setState(Lift::HOLD);
-	pnoomatics->setClamp(false);
+	// pnoomatics->setClamp(false);
 	co_yield drive->waitUntilSettled(1500);
 	printf("Took %f seconds\n", (pros::millis() - startTime) / 1000.0);
 }

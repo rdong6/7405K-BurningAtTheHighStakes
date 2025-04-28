@@ -26,6 +26,11 @@ RobotThread redMogoSide() {
 	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
 	auto odom = robotInstance->getSubsystem<Odometry>().value();
 #pragma GCC diagnostic pop
+
+	//delay for alliance
+	co_yield util::coroutine::delay(1500);
+	
+	
 	uint32_t startTime = pros::millis();
 
 	drive->setCurrentMotion(ProfiledMotion(3, 60, 100, 60));

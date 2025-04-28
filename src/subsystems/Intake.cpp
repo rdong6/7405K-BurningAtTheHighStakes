@@ -26,8 +26,8 @@ void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::OPCTRL);
 
 	// blueism coro -> only runs in auton
-	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::AUTON);
-	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::AUTON);
+	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::OPCTRL);
+	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::OPCTRL);
 
 	// antijam
 	robot->registerTask([this]() { return this->antiJamCoro(); }, TaskType::AUTON,
@@ -114,7 +114,7 @@ RobotThread Intake::ringDetectorCoro() {
 		// round to int as the decimal don't really matter. math is quicker + no round off errors to cause drift from MA filter
 		int hueMA = ringColorMA.update(std::lround(color.get_hue()));
 		int proximity = color.get_proximity();
-		// printf("Hue: %d\tProximity: %d\n", hueMA, proximity);
+		// printf("Hue: %d\tProx: %d\n", hueMA, proximity);
 
 		if (!alreadySeenRing && proximity >= 200) {
 			if (hueMA <= 15) {
