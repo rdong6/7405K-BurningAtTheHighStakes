@@ -176,7 +176,7 @@ RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
 	// auto skillsCoro = testBoomerangMotions();
 	// auto skillsCoro = testAuton();
-	auto skillsCoro = blueMogoSide();
+	auto skillsCoro = redMogoSide();
 	while (skillsCoro) { co_yield skillsCoro(); }
 
 	// for skills

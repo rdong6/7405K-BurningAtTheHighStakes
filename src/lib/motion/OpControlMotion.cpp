@@ -11,22 +11,22 @@ namespace {
 
 static int dampen(int input) {
     /*
-        double s = 40;
-        double a = .60;
-        double v = (127a-127)/(-ss+254s-16129);
-        double c = a - 2vs;
-        double output;
-        if (abs(input) < abs(s)) {
-            output = a input;
-        }
-        else {
-            double x = abs(input);
-            double y = -(s - x) * (c + v * (s + x)) + a * s;
-            output = y * input / abs(input);
-        }
-    */
-    double expo = 0.3;
-    double output = 0;
+	    double s = 40;
+	    double a = .60;
+	    double v = (127a-127)/(-ss+254s-16129);
+	    double c = a - 2vs;
+	    double output;
+	    if (abs(input) < abs(s)) {
+	        output = a input;
+	    }
+	    else {
+	        double x = abs(input);
+	        double y = -(s - x) * (c + v * (s + x)) + a * s;
+	        output = y * input / abs(input);
+	    }
+	*/
+	double expo = 0.35;
+	double output = 0;
     double in = input / 127.0;
     output = ((in *  in * in) * 118 * expo) + in * 118 * (1 - expo);
     return (int)std::round(output);

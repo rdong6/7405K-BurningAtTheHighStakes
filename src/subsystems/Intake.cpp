@@ -26,8 +26,8 @@ void Intake::registerTasks() {
 	robot->registerTask([this]() { return this->stalledDetectorCoro(); }, TaskType::OPCTRL);
 
 	// blueism coro -> only runs in auton
-	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::OPCTRL);
-	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::OPCTRL);
+	robot->registerTask([this]() { return this->ringDetectorCoro(); }, TaskType::AUTON);
+	robot->registerTask([this]() { return this->blueismCoro(); }, TaskType::AUTON);
 
 	// antijam
 	robot->registerTask([this]() { return this->antiJamCoro(); }, TaskType::AUTON,
@@ -45,7 +45,6 @@ void Intake::registerTasks() {
 	                    [robot = this->robot]() { return robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled; });
 
 	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
-
 #ifdef SKILLS
 	robot->registerTask([this]() { return this->runner(); }, TaskType::OPCTRL);
 #endif

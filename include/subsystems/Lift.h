@@ -15,7 +15,7 @@ public:
 	// LEVEL_2 = upper part of lady brown
 	// STOW = move lift down into bot
 	// HOLD = hold lift at target angle
-	enum State { IDLE, LEVEL_1, LEVEL_2, STOW, HOLD };
+	enum State { IDLE, LEVEL_1, DESCORE, ALLIANCE, STOW, HOLD };
 
 private:
 	pros::Motor motor{ports::liftMotor};
@@ -57,6 +57,5 @@ public:
 
 	void registerTasks() override;
 
-	void toggleState();
 	void setState(State state);
 };

@@ -9,7 +9,7 @@
 #include <limits>
 
 #define UPPER_BOUNDS 250
-#define LOWER_BOUNDS 1.5
+#define LOWER_BOUNDS 7.6
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -31,7 +31,8 @@ void Lift::registerTasks() {
 	robot->registerTask([this]() { return this->runner(); }, TaskType::OPCTRL);
 
 #ifdef SKILLS
-	robot->registerTask([this]() { return this->driverSkillsMacro(); }, TaskType::OPCTRL);// for skills only
+	robot->registerTask([this]() { return this->driverSkillsMacro(); },
+	                    TaskType::OPCTRL);// for skills only -> at the start of the run
 #endif
 
 	auto controller = robot->getSubsystem<Controller>();
@@ -74,6 +75,7 @@ void Lift::registerTasks() {
 #endif
 		        setState(State::IDLE);
 		        move(12000);
+		        motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
 
@@ -91,11 +93,24 @@ void Lift::registerTasks() {
 
 	controllerRef->registerCallback([this]() { move(0); }, []() {}, Controller::master, Controller::l2, Controller::falling);
 
+
 	// when roman hits the controller, register the coroutine once to run -> when he releases the button, kill the coroutine
 	// maybe change this controller callback during skills
+	controllerRef->registerCallback([this]() { setState(Lift::State::DESCORE); }, []() {}, Controller::master, Controller::a,
+	                                Controller::rising);
+
+	// x -> alliance stake position & holds
+	controllerRef->registerCallback([this]() { robot->getFlag<Lift>().value()->state = State::ALLIANCE; }, []() {},
+	                                Controller::master, Controller::x, Controller::rising);
+
 	controllerRef->registerCallback(
 	        [this]() {
-		        toggleState();
+		        auto liftFlags = robot->getFlag<Lift>().value();
+		        if (liftFlags->state == State::LEVEL_1) {
+			        liftFlags->state = State::IDLE;
+		        } else {
+			        liftFlags->state = State::LEVEL_1;
+		        }
 	        },
 	        []() {}, Controller::master, Controller::down, Controller::rising);
 }
@@ -197,43 +212,29 @@ RobotThread Lift::runner() {
 	}
 }
 
-void Lift::toggleState() {
-	switch (robot->getFlag<Lift>().value()->state) {
-		case State::LEVEL_1:
-			setState(State::STOW);
-			break;
-		case State::LEVEL_2:
-			setState(State::LEVEL_1);
-			break;
-		case State::STOW:
-			setState(State::LEVEL_1);
-			break;
-		case State::IDLE:
-			setState(State::LEVEL_1);
-			break;
-		case State::HOLD:
-			setState(State::LEVEL_1);
-			break;
-	}
-}
-
 void Lift::setState(State state) {
 	auto liftFlags = robot->getFlag<Lift>().value();
+	liftFlags->pid = PID(200, 30, 40, true, 10);
 	liftFlags->state = state;
 	liftFlags->errorThresh = 1.5;
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 42.8;// mmeant to be 26 pre-smudge
+			liftFlags->targetAngle = 42.25;// mmeant to be 26 pre-smudge
 			liftFlags->errorThresh = 0.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
-		case State::LEVEL_2:
-			liftFlags->targetAngle = 50;
+		case State::ALLIANCE:
+			liftFlags->targetAngle = 100;
+			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+			break;
+		case State::DESCORE:
+			liftFlags->pid = PID(500, 0, 40, true, 10);
+			liftFlags->targetAngle = 160;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:
-			liftFlags->targetAngle = 10;// determine
+			liftFlags->targetAngle = 13;// determine
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			break;
 		case State::IDLE:

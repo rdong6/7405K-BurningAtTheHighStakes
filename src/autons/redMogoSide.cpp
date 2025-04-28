@@ -26,10 +26,6 @@ RobotThread redMogoSide() {
 	auto pnoomaticFlags = robotInstance->getFlag<Pnooomatics>().value();
 	auto odom = robotInstance->getSubsystem<Odometry>().value();
 #pragma GCC diagnostic pop
-
-	//delay for alliance
-	co_yield util::coroutine::delay(1500);
-	
 	
 	uint32_t startTime = pros::millis();
 
@@ -44,8 +40,7 @@ RobotThread redMogoSide() {
 	lift->setState(Lift::STOW);
 	uint32_t start = pros::millis();
 	co_yield drive->waitUntilSettled(2000);
-	co_yield util::coroutine::delay(100 - (pros::millis() - start));
-
+	co_yield util::coroutine::delay(150 - (pros::millis() - start));
 	// move back first to get mogo
 
 	printf("Mogo 1\n");
@@ -65,7 +60,7 @@ RobotThread redMogoSide() {
 	co_yield drive->waitUntilSettled(150);
 
 	printf("Ring 1\n");
-	Pose ring1(-36.7, -20.2);
+	Pose ring1(-37, -17.5);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -74,13 +69,11 @@ RobotThread redMogoSide() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ring1.translation()), 60, 100, 85));
-	co_yield drive->waitUntilSettled(2000);
-
 	pnoomatics->setRightHammer(true);
-	co_yield util::coroutine::delay(150);
+	co_yield drive->waitUntilSettled(1250);
 
 	printf("Setup ring intake\n");
-	Pose setupRingIntake(-19.4, 12.6);
+	Pose setupRingIntake(-25.9, 1);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(PIDTurn(180 + curPose.headingTo(setupRingIntake).degrees(), PID(620, 1, 6500), false, false, 0.5,
@@ -91,8 +84,11 @@ RobotThread redMogoSide() {
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(setupRingIntake.translation()), 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
 
+	drive->setCurrentMotion(PIDTurn(158, PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(600);
+
 	printf("Ring intake\n");
-	Pose ringIntake(-47.4, 19.5);
+	Pose ringIntake(-42.2, 23.7);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -100,14 +96,15 @@ RobotThread redMogoSide() {
 	co_yield util::coroutine::delay(165);
 	pnoomatics->setRightHammer(false);
 	co_yield drive->waitUntilSettled(300);
+	co_yield util::coroutine::delay(250);
 
 	intake->moveVoltage(12000);
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ringIntake.translation()), 25, 60, 70));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ringIntake.translation()), 20, 40, 70));
 	co_yield drive->waitUntilSettled(2000);
 
 	printf("Corner\n");
-	Pose corner(-20, 66.2);
+	Pose corner(-20, 53.5);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -134,7 +131,7 @@ RobotThread redMogoSide() {
 	co_yield drive->waitUntilSettled(900);
 
 	printf("Ladder\n");
-	Pose ladder(-35.2,-5.14);
+	Pose ladder(-41.6, -4.3);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -144,12 +141,12 @@ RobotThread redMogoSide() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 50, 100, 65));
 	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-	intake->moveVoltage(0);
+	// intake->moveVoltage(0);
 	pnoomatics->setLeftHammer(false);
 	co_yield util::coroutine::delay(500);
 	liftFlags->targetAngle = 175;
 	lift->setState(Lift::HOLD);
-	pnoomatics->setClamp(false);
+	// pnoomatics->setClamp(false);
 	co_yield drive->waitUntilSettled(1500);
 
 	printf("Took %f seconds\n", (pros::millis() - startTime) / 1000.0);
