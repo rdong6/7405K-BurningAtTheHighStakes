@@ -29,7 +29,7 @@ RobotThread redMogoSide() {
 	
 	uint32_t startTime = pros::millis();
 
-	drive->setCurrentMotion(ProfiledMotion(3, 60, 100, 60));
+	drive->setCurrentMotion(ProfiledMotion(2.5, 60, 100, 60));
 	co_yield util::coroutine::delay(200);
 	// score on alliance stake w/ preload
 	liftFlags->targetAngle = 220;
@@ -60,7 +60,7 @@ RobotThread redMogoSide() {
 	co_yield drive->waitUntilSettled(150);
 
 	printf("Ring 1\n");
-	Pose ring1(-37, -17.5);
+	Pose ring1(-36.5, -21);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -90,7 +90,7 @@ RobotThread redMogoSide() {
 	co_yield util::coroutine::delay(100);
 
 	printf("Ring intake\n");
-	Pose ringIntake(-42.2, 23.7);
+	Pose ringIntake(-42.5, 24.2);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -103,7 +103,7 @@ RobotThread redMogoSide() {
 	co_yield drive->waitUntilSettled(2000);
 
 	printf("Corner\n");
-	Pose corner(-20, 53.5);
+	Pose corner(-20, 56.5);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -112,11 +112,7 @@ RobotThread redMogoSide() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()), 50, 100, 65));
-	co_yield util::coroutine::delay(500);
-	intake->moveVoltage(0);
-	co_yield util::coroutine::delay(700);
-	intake->moveVoltage(12000);
-	co_yield drive->waitUntilSettled(800);
+	co_yield drive->waitUntilSettled(2000);
 
 	drive->setCurrentMotion(TimedMotion(400, 12000));
 	co_yield drive->waitUntilSettled(195);
@@ -126,7 +122,7 @@ RobotThread redMogoSide() {
 
 	pnoomatics->setLeftHammer(true);
 
-	drive->setCurrentMotion(ProfiledMotion(24, 40, 60, 85));
+	drive->setCurrentMotion(ProfiledMotion(29, 40, 60, 85));
 	co_yield drive->waitUntilSettled(900);
 
 	printf("Ladder\n");
@@ -134,7 +130,7 @@ RobotThread redMogoSide() {
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(ladder).degrees(), PID(525, 1, 6700), false, false, 0.5, 12000, false, false));
+	        PIDTurn(curPose.headingTo(ladder).degrees() + 20, PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(1000);
 
 	curPose = odom->getCurrentState().position;

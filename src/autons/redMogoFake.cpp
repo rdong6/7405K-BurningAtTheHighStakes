@@ -12,7 +12,7 @@
 #include "subsystems/Odometry.h"
 #include "subsystems/Pnooomatics.h"
 
-RobotThread redMogoSide() {
+RobotThread redMogoSideFake() {
 	robotInstance->curAlliance = Alliance::RED;
 
 #pragma GCC diagnostic push
@@ -47,7 +47,7 @@ RobotThread redMogoSide() {
 	        PIDTurn(180 + curPose.headingTo(mogo1).degrees(), PID(554, 1, 6800), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
-	Pose curPose = odom->getCurrentState().position;
+	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
 	co_yield drive->waitUntilSettled(1500);
 

@@ -33,8 +33,6 @@ void initialize() {
 	// TODO: Fix logger so no unaligned accesses
 	// logger_initialize("test.txt", 100);
 
-	pros::lcd::initialize();
-
 	robot_init();
 	robotInstance->registerTask([]() { return autonomousUser(); }, TaskType::AUTON);
 
@@ -55,6 +53,7 @@ void initialize() {
 	// otherwise there will be potential for data races
 	robotTask = pros::c::task_create(
 	        [](void* robot) {
+		        pros::lcd::initialize();
 		        if (robot) { static_cast<decltype(robotInstance)>(robot)->run(); }
 	        },
 	        robotInstance, TASK_PRIORITY_DEFAULT, 0x4000, "Scheduler");
@@ -176,7 +175,7 @@ RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
 	// auto skillsCoro = testBoomerangMotions();
 	// auto skillsCoro = testAuton();
-	auto skillsCoro = redMogoSide();
+	auto skillsCoro = redRingSideTest();
 	while (skillsCoro) { co_yield skillsCoro(); }
 
 	// for skills

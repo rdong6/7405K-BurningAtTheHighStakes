@@ -3,7 +3,7 @@ DEVICE=VEX EDR V5
 
 
 # Flags/Compiler Parameters
-MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard -g -Os # use -Og for debugging
+MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=hard -mthumb -g -Os # use -Og for debugging
 # NOTE: FMT_USE_FALLBACK_FILE=1 to get fmtlib 11.1.3 to compile due to issues w/ flockfile. newlib doesn't appear to implement it, yet the templated checks don't catch it.
 CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK $(INC_FLAGS) -MMD -MP -DFMT_STATIC_THOUSANDS_SEPERATOR=',' -DFMT_USE_LONG_DOUBLE=0 -DFMT_USE_FLOAT128=0 -DFMT_USE_FLOAT=0 -DFMT_USE_USER_DEFINED_LITERALS=0 -DFMT_USE_FULL_CACHE_DRAGONBOX=0 -DFREERTOS -DVEX -DFMT_USE_FALLBACK_FILE #-DSKILLS
 GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables -ftree-vectorize -ftree-vectorizer-verbose=1
@@ -45,7 +45,7 @@ endif
 EXCLUDE_COLD_LIBRARIES+=$(FWDIR)/libc.a $(FWDIR)/libm.a
 COLD_LIBRARIES=$(filter-out $(EXCLUDE_COLD_LIBRARIES), $(LIBRARIES))
 wlprefix=-Wl,$(subst $(SPACE),$(COMMA),$1)
-LNK_FLAGS=--gc-sections --start-group $(strip $(LIBRARIES)) -lgcc -lstdc++ --end-group -T$(FWDIR)/v5-common.ld --no-warn-rwx-segments
+LNK_FLAGS=--gc-sections --start-group $(strip $(LIBRARIES)) -lgcc -lstdc++ --end-group -T$(FWDIR)/v5-common.ld --no-warn-rwx-segments --sort-section=alignment --sort-common
 
 # Directories
 INC_FLAGS:= $(addprefix -I,$(INCDIR))

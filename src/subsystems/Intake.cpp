@@ -190,7 +190,7 @@ RobotThread Intake::ladyBrownClearanceCoro() {
 		codeOverride = true;
 		motors.move_voltage(-4000);
 
-		co_yield util::coroutine::delay(70);
+		co_yield util::coroutine::delay(50);
 		robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = false;
 
 		motors.move_voltage(0);

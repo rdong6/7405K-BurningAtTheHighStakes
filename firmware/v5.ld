@@ -28,10 +28,6 @@ MEMORY
    HOT_MEMORY : ORIGIN = start_of_hot_mem, LENGTH = _HOT_MEM_SIZE  /* Just over 8 MB */
 }
 
-/* used in _sbrk implementation */
-_HEAP_START = ORIGIN(HEAP);
-_HEAP_END = ORIGIN(HEAP) + LENGTH(HEAP);
-
 REGION_ALIAS("RAM", COLD_MEMORY);
 
-ENTRY(_start)
+ENTRY(vexStartup)

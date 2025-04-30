@@ -156,6 +156,7 @@ double Odometry::getRightPos() const {
 }
 
 void Odometry::printOdom(kinState state) {
+	printf("X: %.2f Y: %.2f H: %.2f\n", state.position.X(), state.position.Y(), state.position.theta());
 	pros::lcd::set_text(0, "gH: " + std::to_string((180 / M_PI) * state.position.theta()));
 	pros::lcd::set_text(1, "gX: " + std::to_string(state.position.X()));
 	pros::lcd::set_text(2, "gY: " + std::to_string(state.position.Y()));

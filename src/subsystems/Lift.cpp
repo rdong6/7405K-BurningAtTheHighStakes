@@ -8,8 +8,8 @@
 #include "subsystems/Subsystem.h"
 #include <limits>
 
-#define UPPER_BOUNDS 250
-#define LOWER_BOUNDS 7.6
+#define UPPER_BOUNDS 300
+#define LOWER_BOUNDS 15
 
 Lift::Lift(RobotBase* robot) : Subsystem(robot) {
 	motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -100,16 +100,16 @@ void Lift::registerTasks() {
 	                                Controller::rising);
 
 	// x -> alliance stake position & holds
-	controllerRef->registerCallback([this]() { robot->getFlag<Lift>().value()->state = State::ALLIANCE; }, []() {},
-	                                Controller::master, Controller::x, Controller::rising);
+	controllerRef->registerCallback([this]() { setState(State::ALLIANCE); }, []() {}, Controller::master, Controller::x,
+	                                Controller::rising);
 
 	controllerRef->registerCallback(
 	        [this]() {
 		        auto liftFlags = robot->getFlag<Lift>().value();
 		        if (liftFlags->state == State::LEVEL_1) {
-			        liftFlags->state = State::IDLE;
+			        setState(State::STOW);
 		        } else {
-			        liftFlags->state = State::LEVEL_1;
+			        setState(State::LEVEL_1);
 		        }
 	        },
 	        []() {}, Controller::master, Controller::down, Controller::rising);
@@ -165,10 +165,9 @@ RobotThread Lift::runner() {
 	while (true) {
 		if (liftFlags->kill) { break; }
 
-
+		// TODO: clean this up. but State::IDLE just stops subsystem thread from running. doesn't do anything to brake mode
 		if (liftFlags->state == State::IDLE) {
 			liftFlags->isMoving = false;
-			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			move(0);
 			co_yield [&]() -> bool { return liftFlags->state != State::IDLE; };
 			continue;
@@ -195,7 +194,7 @@ RobotThread Lift::runner() {
 
 
 			move(slewOutput);
-			// printf("Running. Error: %f  CurAngle: %f\n", error, liftFlags->curAngle);
+			// printf("Running. Error: %f  CurAngle: %f Target: %f\n", error, liftFlags->curAngle, liftFlags->targetAngle);
 		} else {
 			liftFlags->isMoving = false;
 
@@ -203,6 +202,8 @@ RobotThread Lift::runner() {
 				motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 				liftFlags->state = State::IDLE;
 			}
+
+			if (liftFlags->state == State::DESCORE) { liftFlags->state = State::IDLE; }
 
 			move(0);
 			liftFlags->pid.reset();
@@ -214,27 +215,27 @@ RobotThread Lift::runner() {
 
 void Lift::setState(State state) {
 	auto liftFlags = robot->getFlag<Lift>().value();
-	liftFlags->pid = PID(200, 30, 40, true, 10);
+	liftFlags->pid = PID(150, 0, 50, true, 10);
 	liftFlags->state = state;
 	liftFlags->errorThresh = 1.5;
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->targetAngle = 42.25;// mmeant to be 26 pre-smudge
+			liftFlags->pid = PID(200, 30, 40, true, 10);
+			liftFlags->targetAngle = 42.25;// meant to be 26 pre-smudge
 			liftFlags->errorThresh = 0.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::ALLIANCE:
-			liftFlags->targetAngle = 100;
+			liftFlags->targetAngle = 183;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::DESCORE:
-			liftFlags->pid = PID(500, 0, 40, true, 10);
-			liftFlags->targetAngle = 160;
+			liftFlags->targetAngle = 161;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:
-			liftFlags->targetAngle = 13;// determine
+			liftFlags->targetAngle = 15;// determine
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 			break;
 		case State::IDLE:
