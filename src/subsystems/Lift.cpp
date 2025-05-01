@@ -79,6 +79,9 @@ void Lift::registerTasks() {
 	        },
 	        []() {}, Controller::master, Controller::l1, Controller::hold);
 
+	controllerRef->registerCallback([this]() { liftDriverDownTimestamp = pros::millis(); }, []() {}, Controller::master,
+	                                Controller::l2, Controller::hold);
+
 	controllerRef->registerCallback(
 	        [this]() {
 #ifdef SKILLS
@@ -86,6 +89,8 @@ void Lift::registerTasks() {
 #endif
 		        setState(State::IDLE);
 		        move(-12000);
+
+		        if (pros::millis() - liftDriverDownTimestamp < 333) { motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD); }
 	        },
 	        []() {}, Controller::master, Controller::l2, Controller::hold);
 
@@ -227,11 +232,12 @@ void Lift::setState(State state) {
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::ALLIANCE:
-			liftFlags->targetAngle = 183;
+			liftFlags->pid = PID(100, 0, 50, true, 10);
+			liftFlags->targetAngle = 173;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::DESCORE:
-			liftFlags->targetAngle = 161;
+			liftFlags->targetAngle = 163;// need to change for world
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 			break;
 		case State::STOW:

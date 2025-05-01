@@ -9,6 +9,21 @@
 #include <string>
 #include <type_traits>
 
+// Checking if IMU disconnects
+#include "v5JumpTable.h"
+namespace {
+	int32_t getDeviceTimestamp(uint8_t port) {
+		V5_DeviceT device = fnVexDeviceGetByIndex(port - 1);
+		if (device == nullptr) { return std::numeric_limits<int32_t>::max(); }
+
+		if (!port_mutex_take(port - 1)) { return std::numeric_limits<int32_t>::max(); }
+
+		int32_t timestamp = fnVexDeviceGetTimestamp(device);
+		return_port(port - 1);
+		return timestamp;
+	}
+}// namespace
+
 // Constructor sets up the ports of the devices, and initializes state of devices + members of the class
 Odometry::Odometry(RobotBase* robot) : Subsystem(robot) {
 	backWheel.reset_position();
@@ -37,9 +52,10 @@ void Odometry::setPose(Pose pose) {
 
 RobotThread Odometry::updatePosition() {
 	auto drive = robot->getSubsystem<Drive>();
-	const double imuScalar = 1.00539000754;
+	const double imuScalar = 1.002456017242;
 
 	prevRotation = imu.get_rotation() * imuScalar;
+	int32_t prevIMUTimestamp = getDeviceTimestamp(ports::imu);
 
 	while (true) {
 		double l_dist;
@@ -122,6 +138,13 @@ RobotThread Odometry::updatePosition() {
 		curState.position = Pose(newPose.translation(), curState.position.rotation() + Rotation2D(dh));
 
 		printOdom(curState);
+
+		int32_t imuTimestamp = getDeviceTimestamp(ports::imu);
+		int32_t deltaTimestamp = imuTimestamp - prevIMUTimestamp;
+		if (deltaTimestamp == 0 || deltaTimestamp >= 15) {
+			printf("\n\n\nSOMETHING WENT WRONG WITH IMU DEVICE\n\n\n");
+		}
+		prevIMUTimestamp = imuTimestamp;
 
 		// to tune the trackwidth - the data being printed to line 6 is not needed
 		// pros::lcd::print(5, "LE: %f", sDrive.getLeftPosition() / 360.0 * M_PI * odometers::leftDeadwheelDiameter);

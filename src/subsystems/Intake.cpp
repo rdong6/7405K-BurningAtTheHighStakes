@@ -115,17 +115,18 @@ RobotThread Intake::ringDetectorCoro() {
 		int proximity = color.get_proximity();
 		// printf("Hue: %d\tProx: %d\n", hueMA, proximity);
 
-		if (!alreadySeenRing && proximity >= 200) {
-			if (hueMA <= 15) {
+		if (!alreadySeenRing && proximity >= 200 /* TUNE THIS! */) {
+			if (hueMA <= 15 /* TUNE THIS! */) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::RED);
 				printf("Seen red ring. %d\n", ringsInIntake());
-			} else if (hueMA >= 212) {
+			} else if (hueMA >= 212 /* TUNE THIS ! */) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::BLUE);
 				printf("Seen blue ring. %d\n", ringsInIntake());
 			}
 		} else {
+			// NEED TO TUNE THIS!!
 			// already seen ring or no ring is in front of color sensor
 			if (25 <= hueMA <= 200 && proximity < 100) { counter++; }
 
@@ -162,7 +163,7 @@ RobotThread Intake::blueismCoro() {
 		// we put the check here for if an alliance is set because regardless of if color sort is enabled, we want to continue
 		// to remove rings from the queue as we see them
 		if (robot->curAlliance != Alliance::INVALID && ringsSeen.front() != robot->curAlliance) {
-			co_yield util::coroutine::delay(50);
+			co_yield util::coroutine::delay(50 /* TUNE THIS! */);
 
 			// Now code takes over intake and stops it to eject ring
 			codeOverride = true;
@@ -170,7 +171,7 @@ RobotThread Intake::blueismCoro() {
 			printf("Color sorting\n");
 
 			// determines how long we stop intake for before resuming any normal operations
-			co_yield util::coroutine::delay(250);
+			co_yield util::coroutine::delay(250 /* TUNE THIS! */);
 
 			// returns control to intake and if requested, resume intake to last commanded voltage before blueism commenced
 			codeOverride = false;
