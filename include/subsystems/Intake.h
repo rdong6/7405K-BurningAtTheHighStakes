@@ -19,7 +19,7 @@ private:
 	pros::Distance distance{ports::intakeDistance};
 	pros::Distance blueismDistance{ports::blueismDistance};
 	pros::Optical color{ports::intakeColor};
-	pros::adi::DigitalOut extender{'H'};
+	pros::adi::DigitalOut extender{'E'};
 
 	bool codeOverride = false;// intake code takes control of intake -> no other subsystem/controller can override
 

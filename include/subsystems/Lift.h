@@ -23,6 +23,8 @@ private:
 
 	Timeout liftIgnoreDriverInputTimeout = Timeout(0);
 
+	double liftDriverDownTimestamp = 0;
+
 	RobotThread updateAngle();
 	RobotThread runner();
 
