@@ -226,7 +226,7 @@ void Lift::setState(State state) {
 
 	switch (state) {
 		case State::LEVEL_1:
-			liftFlags->pid = PID(200, 30, 40, true, 10);
+			liftFlags->pid = PID(240, 15, 50, true, 10);
 			liftFlags->targetAngle = 42.25;// meant to be 26 pre-smudge
 			liftFlags->errorThresh = 0.5;
 			motor.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);

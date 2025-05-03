@@ -32,7 +32,8 @@ RobotThread redSAWP() {
 	co_yield util::coroutine::delay(200);
 	// score on alliance stake w/ preload
 	liftFlags->targetAngle = 225;
-	lift->setState(Lift::HOLD);
+	liftFlags->pid = PID(1000, 0, 0);
+	liftFlags->state = Lift::HOLD;
 	co_yield util::coroutine::nextCycle();
 	Timeout liftTimeout = Timeout(500);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };

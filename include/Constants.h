@@ -34,7 +34,7 @@ namespace ports {
 	constexpr int rightRotation = 0;
 	constexpr int backRotation = -10;
 	constexpr int verticalRotation = -12;// this will only ever be used if we have 1 vertical deadwheel on the bot
-	constexpr int imu = 1;
+	constexpr int imu = 16;
 }// namespace ports
 
 namespace odometers {

@@ -73,4 +73,5 @@ public:
 
 // ODOM, DRIVE, LIFT, INTAKE, PNOOMATICS, LIFT, CONTROLLER
 inline Robot<AutonSelector, Odometry, Drive, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
+// inline Robot<AutonSelector, Odometry, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;

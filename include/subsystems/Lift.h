@@ -22,8 +22,7 @@ private:
 	pros::Rotation rotation{ports::liftRotation};
 
 	Timeout liftIgnoreDriverInputTimeout = Timeout(0);
-
-	double liftDriverDownTimestamp = 0;
+	uint32_t liftDriverDownTimestamp;// time when driver first holds l2 so lift goes down
 
 	RobotThread updateAngle();
 	RobotThread runner();

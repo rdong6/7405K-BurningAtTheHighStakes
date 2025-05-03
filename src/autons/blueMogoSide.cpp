@@ -32,8 +32,9 @@ RobotThread blueMogoSide() {
 	drive->setCurrentMotion(ProfiledMotion(3.4, 60, 100, 60));
 	co_yield util::coroutine::delay(200);
 	// score on alliance stake w/ preload
-	liftFlags->targetAngle = 220;
-	lift->setState(Lift::HOLD);
+	liftFlags->targetAngle = 225;
+	liftFlags->pid = PID(1000, 0, 0);
+	liftFlags->state = Lift::HOLD;
 	co_yield util::coroutine::nextCycle();
 	Timeout liftTimeout = Timeout(500);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
@@ -50,9 +51,7 @@ RobotThread blueMogoSide() {
 	Pose curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
 	co_yield drive->waitUntilSettled(1500);
-
 	pnoomatics->setClamp(true);
-
 	co_yield util::coroutine::delay(100);
 
 	curPose = odom->getCurrentState().position;

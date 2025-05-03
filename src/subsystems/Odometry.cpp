@@ -52,7 +52,8 @@ void Odometry::setPose(Pose pose) {
 
 RobotThread Odometry::updatePosition() {
 	auto drive = robot->getSubsystem<Drive>();
-	const double imuScalar = 1.002456017242;
+	// const double imuScalar = 1.002456017242; // for imu in port 1
+	const double imuScalar = 1.007838745801;// for imu in port 16
 
 	prevRotation = imu.get_rotation() * imuScalar;
 	int32_t prevIMUTimestamp = getDeviceTimestamp(ports::imu);

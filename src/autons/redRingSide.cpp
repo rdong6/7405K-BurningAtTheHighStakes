@@ -38,7 +38,8 @@ RobotThread redRingSideTest() {
 	co_yield util::coroutine::delay(200);
 	// score on alliance stake w/ preload
 	liftFlags->targetAngle = 225;
-	lift->setState(Lift::HOLD);
+	liftFlags->pid = PID(1000, 0, 0);
+	liftFlags->state = Lift::HOLD;
 	co_yield util::coroutine::nextCycle();
 	Timeout liftTimeout = Timeout(500);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
@@ -121,7 +122,7 @@ RobotThread redRingSideTest() {
 	co_yield drive->waitUntilSettled(900);
 
 	printf("alliance ring\n");
-	Pose allianceRing(4.8, 3.4);
+	Pose allianceRing(2.8, 3.4);
 	drive->setCurrentMotion(ProfiledMotion(-8, 50, 80, 65));
 	co_yield drive->waitUntilSettled(500);
 
@@ -145,7 +146,7 @@ RobotThread redRingSideTest() {
 	co_yield drive->waitUntilSettled(500);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 50, 100, 65));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()) + 3, 50, 100, 65));
 	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 	co_yield util::coroutine::delay(500);
 	liftFlags->targetAngle = 175;
@@ -155,6 +156,11 @@ RobotThread redRingSideTest() {
 
 	printf("Took %f seconds\n", (pros::millis() - startTime) / 1000.0);
 }
+
+
+
+
+
 
 // TODO: change all the headings
 RobotThread redRingSide() {
