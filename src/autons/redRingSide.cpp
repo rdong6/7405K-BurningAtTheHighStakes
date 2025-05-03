@@ -158,10 +158,6 @@ RobotThread redRingSideTest() {
 }
 
 
-
-
-
-
 // TODO: change all the headings
 RobotThread redRingSide() {
 	robotInstance->curAlliance = Alliance::RED;

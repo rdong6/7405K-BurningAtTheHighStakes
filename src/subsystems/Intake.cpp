@@ -219,7 +219,7 @@ RobotThread Intake::ladyBrownLoadedCoro() {
 
 		// we detected a ring in our intake that's about to be loaded into lady brown
 		// wait until intake stalls -> that indicates that the ring has been loaded into lady brown
-		if (blueismDistance.get() <= 20) {
+		if (blueismDistance.get() <= 50) {
 			co_yield util::coroutine::nextCycle();
 			while (!isStalled()) { co_yield util::coroutine::nextCycle(); }
 
