@@ -163,7 +163,7 @@ RobotThread Intake::blueismCoro() {
 		// we put the check here for if an alliance is set because regardless of if color sort is enabled, we want to continue
 		// to remove rings from the queue as we see them
 		if (robot->curAlliance != Alliance::INVALID && ringsSeen.front() != robot->curAlliance) {
-			co_yield util::coroutine::delay(50 /* TUNE THIS! */);
+			co_yield util::coroutine::delay(40 /* TUNE THIS! */);
 
 			// Now code takes over intake and stops it to eject ring
 			codeOverride = true;
@@ -341,4 +341,8 @@ bool Intake::isStalled() const {
 }
 int Intake::ringsInIntake() const {
 	return ringsSeen.size();
+}
+
+bool Intake::ringAtDistSensor() {
+	return blueismDistance.get() < 50;
 }

@@ -61,7 +61,7 @@ RobotThread redMogoSide() {
 	co_yield drive->waitUntilSettled(150);
 
 	printf("Ring 1\n");
-	Pose ring1(-36.5, -21);
+	Pose ring1(-37.5, -15.5);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -112,18 +112,18 @@ RobotThread redMogoSide() {
 	co_yield drive->waitUntilSettled(600);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()), 50, 100, 65));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 15, 60, 100, 65));
 	co_yield drive->waitUntilSettled(2000);
 
-	drive->setCurrentMotion(TimedMotion(400, 12000));
-	co_yield drive->waitUntilSettled(195);
+	// drive->setCurrentMotion(TimedMotion(400, 12000));
+	// co_yield drive->waitUntilSettled(195);
 
-	drive->setCurrentMotion(ProfiledMotion(-36, 50, 80, 65));
+	drive->setCurrentMotion(ProfiledMotion(-22, 50, 80, 65));
 	co_yield drive->waitUntilSettled(900);
 
 	pnoomatics->setLeftHammer(true);
 
-	drive->setCurrentMotion(ProfiledMotion(29, 40, 60, 85));
+	drive->setCurrentMotion(ProfiledMotion(12, 40, 60, 85));
 	co_yield drive->waitUntilSettled(900);
 
 	printf("Ladder\n");

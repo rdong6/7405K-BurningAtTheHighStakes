@@ -23,6 +23,11 @@ namespace {
 		auto lift = robotInstance->getSubsystem<Lift>().value();
 		auto liftFlags = robotInstance->getFlag<Lift>().value();
 
+		intake->moveVoltage(12000);
+		while (!intake->ringAtDistSensor()) { co_yield util::coroutine::nextCycle(); }// see the first ring pass by dist sensor
+		co_yield util::coroutine::delay(400);
+		while (!intake->ringAtDistSensor()) { co_yield util::coroutine::nextCycle(); }// see the first ring pass by dist sensor
+		co_yield util::coroutine::delay(400);
 		while (!intake->ringAtDistSensor()) { co_yield util::coroutine::nextCycle(); }// see the first ring pass by dist sensor
 		intake->setDistStop(true);
 		co_yield util::coroutine::delay(75);// ensure ring has passed by dist sensor
@@ -44,10 +49,10 @@ namespace {
 		// co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
 		// intake->moveVoltage(12000);
 	}
-}// namespace
+}
 
-RobotThread redMogoRush() {
-	robotInstance->curAlliance = Alliance::RED;
+RobotThread blueMogoRush() {
+	robotInstance->curAlliance = Alliance::BLUE;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
@@ -83,11 +88,11 @@ RobotThread redMogoRush() {
 
 	// 25.6, 22.1
 	printf("Mogo 1\n");
-	Pose mogo1(26.3, 20.3);
+	Pose mogo1(26.3, -20.3);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(180 + curPose.headingTo(mogo1).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(560);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-1 * curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
@@ -99,19 +104,21 @@ RobotThread redMogoRush() {
 	co_yield util::coroutine::delay(100);
 
 	printf("Pre corner\n");
-	Pose preCorner(2.3, 2.1);
+	Pose preCorner(13, 12);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(curPose.headingTo(preCorner).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
-	curPose = odom->getCurrentState().position;
 	intake->moveVoltage(12000);
+	robotInstance->registerTask([]() { return ::cornerLoadingMacro(); },
+								TaskType::AUTON);// registers additional thread to just help w/ this corner clearing macro
+	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(preCorner.translation()), 60, 100, 35));
 	co_yield drive->waitUntilSettled(1500);
 
 	printf("Corner\n");
-	Pose corner(-9.4, -22.3);
+	Pose corner(-6.2, 29.9);
 	// for corner, intake first ring onto mogo
 	// intake 2nd ring onto lady brown -> do this by waiting for first ring to be in intake, enable dist stop. wait until first
 	// ring is laoded. then move lady brown into loading position. then run intake
@@ -119,34 +126,33 @@ RobotThread redMogoRush() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(curPose.headingTo(corner).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(550);
+	co_yield drive->waitUntilSettled(500);
 
 	curPose = odom->getCurrentState().position;
-	robotInstance->registerTask([]() { return ::cornerLoadingMacro(); },
-	                            TaskType::AUTON);// registers additional thread to just help w/ this corner clearing macro
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 15, 60, 100, 50));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 20, 60, 100, 50));
 	co_yield drive->waitUntilSettled(2500);
 
 	drive->setCurrentMotion(ProfiledMotion(-22, 50, 80, 65));
 	co_yield drive->waitUntilSettled(900);
 
-	drive->setCurrentMotion(ProfiledMotion(15, 40, 60, 85));
+	drive->setCurrentMotion(ProfiledMotion(20, 40, 60, 85));
 	co_yield drive->waitUntilSettled(900);
 
 	// CORNER CLEAR WOOOO
-	co_yield util::coroutine::delay(650);
+	co_yield util::coroutine::delay(750);
 
-	pnoomatics->setRightHammer(true);
-	co_yield util::coroutine::delay(100);
+	pnoomatics->setLeftHammer(true);
+	co_yield util::coroutine::delay(250);
 
 	drive->setCurrentMotion(
-			PIDTurn(30, PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
+			PIDTurn(330, PID(810, 1, 6500), false, false, 0.5, 12000, false, true));
 	co_yield drive->waitUntilSettled(550);
 
-	pnoomatics->setRightHammer(false);
+	pnoomatics->setLeftHammer(false);
 
 
-	Pose preWallstake(5.6, -6.1);
+	printf("Pre wallstake\n");
+	Pose preWallstake(10.6, 6.1);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(180 + curPose.headingTo(preWallstake).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -156,7 +162,8 @@ RobotThread redMogoRush() {
 	drive->setCurrentMotion(ProfiledMotion(-1 * curPose.translation().distanceTo(preWallstake.translation()), 60, 100, 70));
 	co_yield drive->waitUntilSettled(1500);
 
-	Pose wallstake(49.5, -13.9);
+	printf("Wallstake\n");
+	Pose wallstake(43.6, 25);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(curPose.headingTo(wallstake).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -166,12 +173,11 @@ RobotThread redMogoRush() {
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(wallstake.translation()), 60, 100, 70));
 	co_yield drive->waitUntilSettled(1750);
 
-	drive->setCurrentMotion(PIDTurn(323, PID(700, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	drive->setCurrentMotion(PIDTurn(42, PID(720, 1, 6500), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(550);
 
 	liftFlags->targetAngle = 155;
 	lift->setState(Lift::HOLD);
-
 
 	printf("Took %f seconds\n", (pros::millis() - startTime) / 1000.0);
 	co_yield util::coroutine::delay(2000);

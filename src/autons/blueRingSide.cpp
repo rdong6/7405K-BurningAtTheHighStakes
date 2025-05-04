@@ -57,10 +57,10 @@ RobotThread blueRingSide() {
 	co_yield util::coroutine::delay(100);
 
 	printf("Center rings\n");
-	Pose centerRings(-54.2, 5);
+	Pose centerRings(-54.2, 4.7);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(centerRings).degrees() - 4, PID(550, 1, 6500), false, false, 0.5, 12000, false, false));
+	        PIDTurn(curPose.headingTo(centerRings).degrees() - 4, PID(580, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
 
 	curPose = odom->getCurrentState().position;

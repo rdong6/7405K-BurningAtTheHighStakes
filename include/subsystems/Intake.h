@@ -79,4 +79,6 @@ public:
 	bool isStalled() const;
 
 	int ringsInIntake() const;// returns # of rings in our intake -> only works in auton due to ringDetectorCoro
+
+	bool ringAtDistSensor();// helper function for just 1 auton. returns whether dist sensor detects a ring
 };
