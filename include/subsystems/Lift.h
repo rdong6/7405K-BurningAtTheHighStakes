@@ -27,6 +27,8 @@ private:
 	RobotThread updateAngle();
 	RobotThread runner();
 
+	RobotThread opctrlResetState(); // sets lift state to be stow for start of driver in matches
+
 	RobotThread driverSkillsMacro();
 
 	void move(int mv);

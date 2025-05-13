@@ -173,8 +173,8 @@ RobotThread testBoomerangMotions() {
 
 RobotThread autonomousUser() {
 	robotInstance->getSubsystem<Odometry>().value()->reset();
-	auto skillsCoro = redMogoRush();
-	while (skillsCoro) { co_yield skillsCoro(); }
+	auto skillsCoro = blueMogoRush();
+	while (skillsCoro) { co_yield skillsCoro(); } 
 
 
 	// auton selector code

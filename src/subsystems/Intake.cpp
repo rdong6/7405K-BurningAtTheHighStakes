@@ -83,7 +83,7 @@ RobotThread Intake::stalledDetectorCoro() {
 		// Can't use torque -> check if blueism triggers this
 		// need something to check that we command the motor to actually move and it aint
 		if (robot->getFlag<Intake>().value()->isMoving && motors.get_torque() >= 0.275 /* TODO: Determine this value*/ &&
-		    std::fabs(motors.get_actual_velocity()) <= 10 /*TODO: Determine this threshold*/) {
+		    std::fabs(motors.get_actual_velocity()) <= 10 /*TODO: Determine this threshold*/) { 
 			intakeStalledCounter++;
 		} else {
 			intakeStalledCounter = 0;
@@ -113,14 +113,14 @@ RobotThread Intake::ringDetectorCoro() {
 		// round to int as the decimal don't really matter. math is quicker + no round off errors to cause drift from MA filter
 		int hueMA = ringColorMA.update(std::lround(color.get_hue()));
 		int proximity = color.get_proximity();
-		// printf("Hue: %d\tProx: %d\n", hueMA, proximity);
+		// printf("Hue: %d\tProx: %d\tRaw: %d\n", hueMA, proximity, color.get_hue());
 
 		if (!alreadySeenRing && proximity >= 200 /* TUNE THIS! */) {
-			if (hueMA <= 15 /* TUNE THIS! */) {
+			if (hueMA <= 30 /* TUNE THIS! */) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::RED);
 				printf("Seen red ring. %d\n", ringsInIntake());
-			} else if (hueMA >= 212 /* TUNE THIS ! */) {
+			} else if (hueMA >= 160 /* TUNE THIS ! */) {
 				alreadySeenRing = true;
 				ringsSeen.push(Alliance::BLUE);
 				printf("Seen blue ring. %d\n", ringsInIntake());
@@ -128,7 +128,7 @@ RobotThread Intake::ringDetectorCoro() {
 		} else {
 			// NEED TO TUNE THIS!!
 			// already seen ring or no ring is in front of color sensor
-			if (25 <= hueMA <= 200 && proximity < 100) { counter++; }
+			if (30 <= hueMA <= 200 && proximity < 100) { counter++; }
 
 			if (counter > 3) {
 				counter = 0;

@@ -51,7 +51,7 @@ RobotThread blueRingRush() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(180 + curPose.headingTo(mogo1).degrees(), PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(500);
+	co_yield drive->waitUntilSettled(400);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
@@ -93,10 +93,10 @@ RobotThread blueRingRush() {
 
 	intake->moveVoltage(12000);
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 15, 60, 100, 65));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 15, 60, 100, 45));
 	co_yield util::coroutine::delay(1600);
 
-	drive->setCurrentMotion(ProfiledMotion(-22, 50, 80, 65));
+	drive->setCurrentMotion(ProfiledMotion(-22, 50, 50, 50));
 	co_yield drive->waitUntilSettled(900);
 
 	drive->setCurrentMotion(ProfiledMotion(12, 40, 60, 85));
@@ -107,10 +107,6 @@ RobotThread blueRingRush() {
 	drive->setCurrentMotion(ProfiledMotion(-5, 50, 60, 65));
 	co_yield drive->waitUntilSettled(900);
 
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// FOR ELIMS
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	printf("Preload\n");
 	Pose preload(-5.5, 18.0);
 	// quals
@@ -120,9 +116,16 @@ RobotThread blueRingRush() {
 	        PIDTurn(curPose.headingTo(preload).degrees(), PID(350, 1, 6900), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(800);
 
+	// curPose = odom->getCurrentState().position;
+	// drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(preload.translation()), 60, 100, 85));
+	
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(preload.translation()), 60, 100, 85));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(preload.translation())+5, 60, 100, 85));
+	
 	co_yield util::coroutine::delay(500);
+	lift->setState(Lift::LEVEL_1);
+
+	pnoomatics->setLeftHammer(true);
 	// liftFlags->targetAngle = 80;
 	// lift->setState(Lift::HOLD);
 	co_yield drive->waitUntilSettled(2000);
@@ -131,19 +134,43 @@ RobotThread blueRingRush() {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// FOR QUALS
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Pose ladder(14.8, 32.5);
+	// Pose ladder(14.8, 32.5);
+
+	// curPose = odom->getCurrentState().position;
+	// drive->setCurrentMotion(
+	//         PIDTurn(curPose.headingTo(ladder).degrees(), PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
+	// co_yield drive->waitUntilSettled(600);
+
+	// curPose = odom->getCurrentState().position;
+	// liftFlags->targetAngle = 175;
+	// lift->setState(Lift::HOLD);
+	// drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 60, 100, 85));
+	// drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	// co_yield drive->waitUntilSettled(2000);
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// FOR ELIMS
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Pose allianceStake(-20.3, 22.4);
+
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(ladder).degrees(), PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
+	        PIDTurn(curPose.headingTo(allianceStake).degrees(), PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(600);
+	pnoomatics->setLeftHammer(false);
 
 	curPose = odom->getCurrentState().position;
-	liftFlags->targetAngle = 175;
-	lift->setState(Lift::HOLD);
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(ladder.translation()), 60, 100, 85));
-	drive->setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(allianceStake.translation())+3, 60, 100, 85));
 	co_yield drive->waitUntilSettled(2000);
+
+	drive->setCurrentMotion(ProfiledMotion(-6.5, 60, 100, 85));
+	co_yield drive->waitUntilSettled(2000);
+
+	liftFlags->targetAngle = 225;
+	liftFlags->pid = PID(1000, 0, 0);
+	liftFlags->state = Lift::HOLD;
+
 
 	// printf("Positive Corner\n");
 	// Pose posCorner(-27.04, 62);

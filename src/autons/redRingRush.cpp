@@ -39,7 +39,7 @@ RobotThread redRingRush() {
 	printf("Rush rings\n");
 	Pose rush(47.5, 0);
 	Pose curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(rush.translation()), 60, 120, 100));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(rush.translation()), 75, 120, 100));
     intake->moveVoltage(12000);
     intake->setDistStop(true);
 	co_yield util::coroutine::delay(650);
@@ -51,7 +51,7 @@ RobotThread redRingRush() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(180 + curPose.headingTo(mogo1).degrees(), PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(500);// cut to 500
+	co_yield drive->waitUntilSettled(390);// cut to 500
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));

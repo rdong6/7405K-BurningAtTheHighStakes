@@ -74,17 +74,21 @@ RobotThread blueMogoRush() {
 	printf("Mogo rush\n");
 	Pose mogoRush(41.5, 0);
 	Pose curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(mogoRush.translation()), 70, 120, 80));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(mogoRush.translation()), 70, 100, 80));
+
 	co_yield util::coroutine::delay(500);
 	intake->setDistStop(true);
 	intake->moveVoltage(12000);
-	co_yield drive->waitUntilSettled(1500);
+	co_yield util::coroutine::delay(650);
+	
 
 	liftFlags->targetAngle = 240;
 	lift->setState(Lift::HOLD);
-	liftFlags->pid = PID(1000, 0, 50);
+	liftFlags->pid = PID(3000, 0, 50);
 	Timeout liftTimeout = Timeout(200);
 	co_yield [=]() { return liftFlags->curAngle >= 230 || liftTimeout.timedOut(); };
+
+	co_yield drive->waitUntilSettled(200);
 
 	// 25.6, 22.1
 	printf("Mogo 1\n");
@@ -92,7 +96,7 @@ RobotThread blueMogoRush() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(180 + curPose.headingTo(mogo1).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(560);
+	co_yield drive->waitUntilSettled(550);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-1 * curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
@@ -102,13 +106,14 @@ RobotThread blueMogoRush() {
 	pnoomatics->setClamp(true);
 	intake->setDistStop(false);
 	co_yield util::coroutine::delay(100);
+	intake->moveVoltage(12000);
 
 	printf("Pre corner\n");
 	Pose preCorner(13, 12);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(curPose.headingTo(preCorner).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	co_yield drive->waitUntilSettled(450);
 
 	intake->moveVoltage(12000);
 	robotInstance->registerTask([]() { return ::cornerLoadingMacro(); },
@@ -118,7 +123,7 @@ RobotThread blueMogoRush() {
 	co_yield drive->waitUntilSettled(1500);
 
 	printf("Corner\n");
-	Pose corner(-6.2, 29.9);
+	Pose corner(-6.2, 34.9);
 	// for corner, intake first ring onto mogo
 	// intake 2nd ring onto lady brown -> do this by waiting for first ring to be in intake, enable dist stop. wait until first
 	// ring is laoded. then move lady brown into loading position. then run intake
@@ -129,8 +134,8 @@ RobotThread blueMogoRush() {
 	co_yield drive->waitUntilSettled(500);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 20, 60, 100, 50));
-	co_yield drive->waitUntilSettled(2500);
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 20, 60, 50, 40));
+	co_yield drive->waitUntilSettled(1300);
 
 	drive->setCurrentMotion(ProfiledMotion(-22, 50, 80, 65));
 	co_yield drive->waitUntilSettled(900);
@@ -139,7 +144,7 @@ RobotThread blueMogoRush() {
 	co_yield drive->waitUntilSettled(900);
 
 	// CORNER CLEAR WOOOO
-	co_yield util::coroutine::delay(750);
+	co_yield util::coroutine::delay(500);
 
 	pnoomatics->setLeftHammer(true);
 	co_yield util::coroutine::delay(250);
@@ -163,7 +168,7 @@ RobotThread blueMogoRush() {
 	co_yield drive->waitUntilSettled(1500);
 
 	printf("Wallstake\n");
-	Pose wallstake(43.6, 25);
+	Pose wallstake(45.6, 25);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 			PIDTurn(curPose.headingTo(wallstake).degrees(), PID(620, 1, 6500), false, false, 0.5, 12000, false, false));
@@ -173,7 +178,7 @@ RobotThread blueMogoRush() {
 	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(wallstake.translation()), 60, 100, 70));
 	co_yield drive->waitUntilSettled(1750);
 
-	drive->setCurrentMotion(PIDTurn(42, PID(720, 1, 6500), false, false, 0.5, 12000, false, false));
+	drive->setCurrentMotion(PIDTurn(36.5, PID(720, 1, 6500), false, false, 0.5, 12000, false, false));
 	co_yield drive->waitUntilSettled(550);
 
 	liftFlags->targetAngle = 155;

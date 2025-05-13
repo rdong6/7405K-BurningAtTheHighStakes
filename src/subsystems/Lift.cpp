@@ -29,6 +29,7 @@ void Lift::registerTasks() {
 	robot->registerTask([this]() { return this->updateAngle(); }, TaskType::SENTINEL);
 	robot->registerTask([this]() { return this->runner(); }, TaskType::AUTON);
 	robot->registerTask([this]() { return this->runner(); }, TaskType::OPCTRL);
+	robot->registerTask([this]() { return this->opctrlResetState(); }, TaskType::OPCTRL);
 
 #ifdef SKILLS
 	robot->registerTask([this]() { return this->driverSkillsMacro(); },
@@ -118,6 +119,11 @@ void Lift::registerTasks() {
 		        }
 	        },
 	        []() {}, Controller::master, Controller::down, Controller::rising);
+}
+
+RobotThread Lift::opctrlResetState() {
+	setState(STOW);
+	co_yield util::coroutine::nextCycle();
 }
 
 RobotThread Lift::driverSkillsMacro() {
@@ -255,8 +261,10 @@ void Lift::setState(State state) {
 
 void Lift::move(int mv) {
 	double curAngle = robot->getFlag<Lift>().value()->curAngle;
-	if (mv > 0 && curAngle > UPPER_BOUNDS) { mv = 0; }
-	if (mv < 0 && curAngle < LOWER_BOUNDS) { mv = 0; }
+	// if (!liftFlags->kill) {
+	// 	if (mv > 0 && curAngle > UPPER_BOUNDS) { mv = 0; }
+	// 	if (mv < 0 && curAngle < LOWER_BOUNDS) { mv = 0; }
+	// }
 
 	if (mv == 0) {
 		motor.brake();

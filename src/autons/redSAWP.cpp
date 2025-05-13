@@ -37,8 +37,7 @@ RobotThread redSAWP() {
 	co_yield util::coroutine::nextCycle();
 	Timeout liftTimeout = Timeout(500);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
-	lift->setState(Lift::STOW);
-	uint32_t start = pros::millis();
+	// uint32_t start = pros::millis();
 	co_yield drive->waitUntilSettled(2000);
 	// co_yield util::coroutine::delay(150 - (pros::millis() - start));
 
@@ -46,6 +45,8 @@ RobotThread redSAWP() {
 	Pose mogo1(-35.7, 0);
 	Pose curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
+	co_yield util::coroutine::delay(400);
+	lift->setState(Lift::STOW);
 	co_yield drive->waitUntilSettled(1500);
 	pnoomatics->setClamp(true);
 	co_yield util::coroutine::delay(100);
@@ -85,7 +86,7 @@ RobotThread redSAWP() {
 	co_yield drive->waitUntilSettled(900);
 
 	printf("Alliance ring\n");
-	Pose allianceRing(3, 4.6);
+	Pose allianceRing(-2.7, 13);
 	drive->setCurrentMotion(ProfiledMotion(-8, 50, 80, 85));
 	co_yield drive->waitUntilSettled(500);
 
@@ -101,7 +102,7 @@ RobotThread redSAWP() {
 	co_yield drive->waitUntilSettled(2000);
 
 	printf("m2 ring1\n");
-	Pose m2ring1(6.2, 65.4);
+	Pose m2ring1(-5.5, 70.5);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(curPose.headingTo(m2ring1).degrees(), PID(620, 1, 6300), false, false, 0.5, 12000, false, false));
@@ -116,7 +117,7 @@ RobotThread redSAWP() {
 	co_yield drive->waitUntilSettled(1800);
 
 	printf("Mogo 2\n");
-	Pose mogo2(-6.3, 45.2);
+	Pose mogo2(-16.0, 46.3);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
@@ -131,7 +132,7 @@ RobotThread redSAWP() {
 	intake->moveVoltage(12000);	
 
 	printf("ladder\n");
-	Pose ladder(-10.1, 45.8);
+	Pose ladder(-30.8, 42.8);
 
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(

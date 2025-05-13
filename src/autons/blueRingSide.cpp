@@ -41,31 +41,33 @@ RobotThread blueRingSide() {
 	liftFlags->pid = PID(1000, 0, 0);
 	liftFlags->state = Lift::HOLD;
 	co_yield util::coroutine::nextCycle();
-	Timeout liftTimeout = Timeout(500);
+	Timeout liftTimeout = Timeout(400);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
-	lift->setState(Lift::STOW);
-	uint32_t start = pros::millis();
+	// uint32_t start = pros::millis();
 	co_yield drive->waitUntilSettled(2000);
-	co_yield util::coroutine::delay(150 - (pros::millis() - start));
+	// co_yield util::coroutine::delay(150 - (pros::millis() - start));
 
 	printf("Mogo 1\n");
 	Pose mogo1(-35.7, 0);
 	Pose curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
-	co_yield drive->waitUntilSettled(1500);
+	co_yield util::coroutine::delay(400);
+	lift->setState(Lift::STOW);
+	co_yield drive->waitUntilSettled(800);
 	pnoomatics->setClamp(true);
 	co_yield util::coroutine::delay(100);
 
 	printf("Center rings\n");
-	Pose centerRings(-54.2, 4.7);
+	// Pose centerRings(-54.2, 4.7);
+	Pose centerRings(-51.5, 5.7);
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
-	        PIDTurn(curPose.headingTo(centerRings).degrees() - 4, PID(580, 1, 6500), false, false, 0.5, 12000, false, false));
-	co_yield drive->waitUntilSettled(600);
+	        PIDTurn(curPose.headingTo(centerRings).degrees() - 4, PID(470, 1, 6800), false, false, 0.5, 12000, false, false));
+	co_yield drive->waitUntilSettled(700);
 
 	curPose = odom->getCurrentState().position;
 	intake->moveVoltage(12000);
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(centerRings.translation()) + 2.75, 60, 100, 60));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(centerRings.translation()) + 3.25, 60, 100, 60));
 	pnoomatics->setRightHammer(true);
 	co_yield drive->waitUntilSettled(2500);
 
@@ -109,7 +111,7 @@ RobotThread blueRingSide() {
 	co_yield drive->waitUntilSettled(550);
 
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 15, 60, 100, 65));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(corner.translation()) + 15, 60, 100, 45));
 	co_yield drive->waitUntilSettled(1600);
 
 	// drive->setCurrentMotion(TimedMotion(400, 12000));
@@ -118,11 +120,11 @@ RobotThread blueRingSide() {
 	drive->setCurrentMotion(ProfiledMotion(-22, 50, 80, 65));
 	co_yield drive->waitUntilSettled(900);
 
-	drive->setCurrentMotion(ProfiledMotion(12, 40, 60, 85));
+	drive->setCurrentMotion(ProfiledMotion(12, 40, 50, 50));
 	co_yield drive->waitUntilSettled(900);
 
 	printf("alliance ring\n");
-	Pose allianceRing(6, -3.4);
+	Pose allianceRing(13, -3.4);
 	drive->setCurrentMotion(ProfiledMotion(-8, 50, 80, 65));
 	co_yield drive->waitUntilSettled(500);
 
@@ -134,8 +136,10 @@ RobotThread blueRingSide() {
 	intake->moveVoltage(12000);
 	intake->setExtender(true);
 	curPose = odom->getCurrentState().position;
-	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(allianceRing.translation()) + 3, 60, 95, 70));
+	drive->setCurrentMotion(ProfiledMotion(curPose.translation().distanceTo(allianceRing.translation()), 60, 95, 65));
 	co_yield util::coroutine::delay(1150);
+	liftFlags->targetAngle = 100;
+	lift->setState(Lift::HOLD);
 	intake->setExtender(false);
 	co_yield drive->waitUntilSettled(1200);
 
@@ -144,7 +148,7 @@ RobotThread blueRingSide() {
 	curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(
 	        PIDTurn(curPose.headingTo(ladder).degrees(), PID(810, 1, 6500), false, false, 0.5, 12000, false, false));
-	liftFlags->targetAngle = 175;
+	liftFlags->targetAngle = 180;
 	lift->setState(Lift::HOLD);
 	co_yield drive->waitUntilSettled(500);
 

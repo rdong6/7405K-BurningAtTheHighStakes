@@ -35,10 +35,9 @@ RobotThread blueSAWP() {
 	liftFlags->pid = PID(1000, 0, 0);
 	liftFlags->state = Lift::HOLD;
 	co_yield util::coroutine::nextCycle();
-	Timeout liftTimeout = Timeout(500);
+	Timeout liftTimeout = Timeout(400);
 	co_yield [=]() { return !liftFlags->isMoving || liftTimeout.timedOut(); };
-	lift->setState(Lift::STOW);
-	uint32_t start = pros::millis();
+	// uint32_t start = pros::millis();
 	co_yield drive->waitUntilSettled(2000);
 	// co_yield util::coroutine::delay(150 - (pros::millis() - start));
 
@@ -46,7 +45,9 @@ RobotThread blueSAWP() {
 	Pose mogo1(-35.7, 0);
 	Pose curPose = odom->getCurrentState().position;
 	drive->setCurrentMotion(ProfiledMotion(-curPose.translation().distanceTo(mogo1.translation()), 60, 100, 35));
-	co_yield drive->waitUntilSettled(1500);
+	co_yield util::coroutine::delay(400);
+        lift->setState(Lift::STOW);
+        co_yield drive->waitUntilSettled(1500);
 	pnoomatics->setClamp(true);
 	co_yield util::coroutine::delay(100);
 
