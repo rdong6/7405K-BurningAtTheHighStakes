@@ -2,6 +2,8 @@
 #include "LogLevel.h"
 #include <string_view>
 
+// TODO: finish this logger someday... ¯\_(ツ)_/¯
+
 namespace lib {
 	 struct Metadata {
 		constexpr Metadata(const char* sourceLocation, const char* callerFunction, const char* fmt, LogLevel level) : sourceLocation(sourceLocation), callerFunction(callerFunction), fmt(fmt), level(level) {}

@@ -16,15 +16,15 @@ private:
 
 	bool brakeLeft;
 	bool brakeRight;
-	bool forceRight;
-	bool forceRightTerminate = false;
 	bool forceLeft;
 	bool forceLeftTerminate = false;
+	bool forceRight;
+	bool forceRightTerminate = false;
 
 
 public:
 	PIDTurn(double targetHeading, PID pid, bool brakeLeft = false, bool brakeRight = false, double threshold = 0.5,
-	        double maxPower = 12000, bool forceRight = false, bool forceLeft = false);
+	        double maxPower = 12000, bool forceLeft = false, bool forceRight = false);
 	void start() override;
 	MotorVoltages calculate(const kinState& state) override;
 	bool isSettled(const kinState& state) override;

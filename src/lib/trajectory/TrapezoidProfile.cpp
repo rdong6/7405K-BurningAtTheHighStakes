@@ -15,7 +15,6 @@ TrapezoidProfile::TrapezoidProfile(double distance, double max_acceleration, dou
 	acc_max = max_acceleration;
 	dec_max = max_deceleration;
 	v_max = fmin(fmin(vsqrtd(acc_max * dist) + start_vel * start_vel, vsqrtd(dec_max * dist)), max_velocity);
-	printf("[Trapezoid Profile] Max Vel: %f\n", v_max);
 
 	// generate variables
 
@@ -33,6 +32,8 @@ TrapezoidProfile::TrapezoidProfile(double distance, double max_acceleration, dou
 	d_coast = dist - d_acc - d_dec;
 
 	t_coast = d_coast / v_max;
+
+	printf("[Trapezoid Profile] Max Vel: %f Total Time: %f\n", v_max, getTotalTime());
 }
 
 // can get rid of these three functions and combine them into one func

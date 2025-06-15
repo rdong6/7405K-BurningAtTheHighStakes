@@ -22,10 +22,9 @@ void Pnooomatics::registerTasks() {
 	controllerRef->registerCallback([this]() { toggleClamp(); }, []() {}, Controller::master, Controller::b,
 	                                Controller::rising);
 
-	// Y = right hammer
-	// Right = left hammer
 	controllerRef->registerCallback([this]() { toggleRightHammer(); }, []() {}, Controller::master, Controller::y,
 	                                Controller::rising);
+
 	controllerRef->registerCallback([this]() { toggleLeftHammer(); }, []() {}, Controller::master, Controller::right,
 									Controller::rising);
 }
@@ -45,7 +44,7 @@ void Pnooomatics::setClamp(bool enable) {
 	clampEnabled = enable;
 	clamp.set_value(enable);
 	if (clampEnabled) { pros::c::controller_rumble(pros::E_CONTROLLER_MASTER, "."); }
-	// pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Clamp: %d", enable);
+	pros::c::controller_print(pros::E_CONTROLLER_MASTER, 0, 0, "Clamp: %d", enable);
 }
 
 void Pnooomatics::toggleClamp() {

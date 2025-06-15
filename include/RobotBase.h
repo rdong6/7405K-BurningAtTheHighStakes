@@ -45,7 +45,6 @@ private:
 		return std::nullopt;
 	}
 
-
 public:
 	RobotBase() = default;
 
@@ -70,9 +69,7 @@ public:
 	AutonFn_t autonFnPtr = nullptr;
 	Alliance curAlliance = Alliance::INVALID;
 
-	bool isElim = false;// whether we're running elim or qual auton
-	bool allianceStake = false;
-	uint32_t delay = 0;// in ms
+	bool isElim = false;
 };
 
 // Initializes all robotics code

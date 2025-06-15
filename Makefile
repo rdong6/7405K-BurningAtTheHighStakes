@@ -18,7 +18,7 @@ LIB_SRC_DIRS:=$(SRCDIR)/fmt $(SRCDIR)/lib $(SRCDIR)/subsystems
 EXTRA_LIB_SRC_FILES:=$(SRCDIR)/RobotBase.cpp
 #EXTRA_LIB_SRC_FILES=$(SRCDIR)/RobotBase.cpp $(SRCDIR)/subsystems/Odometry.cpp $(SRCDIR)/subsystems/Drive.cpp $(SRCDIR)/subsystems/Controller.cpp $(SRCDIR)/subsystems/Pnooomatics.cpp $(SRCDIR)/subsystems/Lift.cpp
 
-# files to include in hot package, even if they're in LIB_SRC_DIRS
+# files to include in hot package (excludes files if they're in LIB_SRC_DIRS) - IDT this act works
 EXCLUDE_LIB_SRC_FILES:=$(SRCDIR)/lib/trajectory/TrajectoryGen_hot.cpp
 
 ### Don't touch stuff below here

@@ -35,7 +35,6 @@ private:
 
 	RobotThread runner();
 
-	// Motor Control
 	void setVoltageLeft(int voltage);
 	void setVoltageRight(int voltage);
 

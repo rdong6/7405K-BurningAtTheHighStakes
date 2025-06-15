@@ -80,8 +80,6 @@ RobotThread Intake::stalledDetectorCoro() {
 	unsigned int intakeStalledCounter = 0;
 
 	while (true) {
-		// Can't use torque -> check if blueism triggers this
-		// need something to check that we command the motor to actually move and it aint
 		if (robot->getFlag<Intake>().value()->isMoving && motors.get_torque() >= 0.275 /* TODO: Determine this value*/ &&
 		    std::fabs(motors.get_actual_velocity()) <= 10 /*TODO: Determine this threshold*/) { 
 			intakeStalledCounter++;
@@ -126,7 +124,6 @@ RobotThread Intake::ringDetectorCoro() {
 				printf("Seen blue ring. %d\n", ringsInIntake());
 			}
 		} else {
-			// NEED TO TUNE THIS!!
 			// already seen ring or no ring is in front of color sensor
 			if (30 <= hueMA <= 200 && proximity < 100) { counter++; }
 
@@ -144,15 +141,12 @@ RobotThread Intake::ringDetectorCoro() {
 }
 
 
+// Blueism Logic (happening in parallel):
+// 1) Detect color of ring passing through intake -> append it to a queue of rings seen
+// 2) Each time the dist sensor sees a ring, look at queue to see what color the ring is. If it's the color we want to
+// eject, initiate the ejection
 RobotThread Intake::blueismCoro() {
 	auto intakeFlags = robot->getFlag<Intake>().value();
-
-
-	// TODO: implement a queue -> so we eject the right ring and not the wrong ring
-	// Logic happening in parallel
-	// 1) Detect color of ring passing through intake -> append it to a queue of rings seen
-	// 2) Each time the dist sensor sees a ring, look at queue to see what color the ring is. If it's the color we want to
-	// eject, initiate the ejection
 
 	while (true) {
 		// wait until we detect a ring w/ dist sensor
@@ -161,7 +155,7 @@ RobotThread Intake::blueismCoro() {
 		// if we see a ring, check what color it is and if it's the one we want, eject it
 		//
 		// we put the check here for if an alliance is set because regardless of if color sort is enabled, we want to continue
-		// to remove rings from the queue as we see them
+		// to remove rings from the queue as we see them pass through the intake
 		if (robot->curAlliance != Alliance::INVALID && ringsSeen.front() != robot->curAlliance) {
 			co_yield util::coroutine::delay(40 /* TUNE THIS! */);
 
@@ -214,7 +208,7 @@ RobotThread Intake::ladyBrownLoadedCoro() {
 		};
 
 		// TODO: clean up this logic -> so we don't have duplicate detections or for example, we just detected lady brown was
-		// loaded. and in next itteration, we're stalled while waiting for intake to stall
+		// loaded. and in next iteration, we're stalled while waiting for intake to stall
 		// which could lead to false positives
 
 		// we detected a ring in our intake that's about to be loaded into lady brown
@@ -227,6 +221,7 @@ RobotThread Intake::ladyBrownLoadedCoro() {
 			// now has ring in it
 			moveVoltage(0);
 			printf("Lady brown has been loaded\n");
+
 			// automatically retract intake hook slightly -> so we don't have to manually do it in autons
 			robot->getFlag<Intake>().value()->ladyBrownClearanceEnabled = true;
 		}
@@ -254,7 +249,6 @@ RobotThread Intake::runner() {
 		// dist & torque stop
 		int32_t dist = distance.get();// in mm
 
-		// printf("Torque: %f  Vel: %f\n", motors.get_torque(), motors.get_actual_velocity());
 		if (intakeFlags->torqueStop &&
 		    (motors.get_torque() > 0.97 && fabs(motors.get_actual_velocity()) >= 20) /*tune later*/) {
 			this->brake();
@@ -267,10 +261,12 @@ RobotThread Intake::runner() {
 				intakeFlags->fullyIn = true;
 			} else if (dist <= 60) {
 				if (intakeFlags->storeSecond) { intakeFlags->storeSecond = false; }
+
 				intakeFlags->fullyIn = false;
 				intakeFlags->partiallyIn = true;
 			} else {
 				if (intakeFlags->storeSecond) { intakeFlags->storeSecond = false; }
+				
 				intakeFlags->partiallyIn = false;
 				intakeFlags->fullyIn = false;
 			}

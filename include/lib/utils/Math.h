@@ -53,12 +53,6 @@ namespace util {
 		}
 	}
 
-	// linear interpolate between 2 values
-	// 0 ≤ t ≤ 1
-	constexpr double lerp(double start, double end, double t) {
-		return start + (end - start) * t;
-	}
-
 	// normalizes value to be within a certain range (0-range)
 	// ex: clamp angle to between 0˚-360˚ instead of angle being continuous
 	//	- normalize(angle, 2π) -> restrict to [0, 2π]
@@ -68,7 +62,7 @@ namespace util {
 	}
 
 	// linear interpolate between two values
-	// t is between 0 and 1
+	// 0 <= t <= 1
 	template<typename T>
 	constexpr T lerp(const T& startValue, const T& endValue, double t) {
 		return startValue + (endValue - startValue) * t;

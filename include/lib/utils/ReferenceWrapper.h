@@ -1,6 +1,6 @@
 #pragma once
 
-// basically same thing as std::reference_wrapper<T>
+// same thing as std::reference_wrapper<T>
 // except the accessor has overloaded the operators * and ->
 
 namespace detail {

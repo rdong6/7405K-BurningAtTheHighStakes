@@ -17,7 +17,8 @@ IMotion::MotorVoltages RAMSETEMotion::calculate(const kinState& state) {
 	Trajectory::State sampledState = trajectory.sample(elapsedTime);
 	RAMSETE::WheelVelocities wheelVels = ramsete.calculate(state.position, sampledState);
 
-	double leftMotorRPM = wheelVels.left * 60.0;// converts in/s to in/min
+	// converts in/s to in/min
+	double leftMotorRPM = wheelVels.left * 60.0;
 	leftMotorRPM /= (odometers::driveGearRatio * std::numbers::pi);
 
 	double rightMotorRPM = wheelVels.right * 60.0;

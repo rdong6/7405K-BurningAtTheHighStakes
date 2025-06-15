@@ -128,10 +128,6 @@ RobotThread testAuton() {
 	co_yield util::coroutine::delay(250);
 	printf("Final Heading: %f\n", odom->getCurrentState().position.rotation().degrees());
 
-
-	// drive->setCurrentMotion(ProfiledMotion(15, 60, 125, 85));
-	// co_yield drive->waitUntilSettled(2000);
-
 	co_yield util::coroutine::nextCycle();
 }
 
@@ -150,25 +146,20 @@ RobotThread testBoomerangMotions() {
 	auto odom = robotInstance->getSubsystem<Odometry>().value();
 #pragma GCC diagnostic pop
 
-	// uint32_t totalTime = 0;
-	// const uint32_t numItterations = 10000;
-	//
-	// for (int i = 0; i < numItterations; i++) {
-	// 	enter_critical();
-	// 	uint32_t startTime = pros::micros();
-	// 	drive->setCurrentMotion(BoomerangMotion(odom->getCurrentState().position, Pose(20, 20, 1.5707963268), 0.45, 30, 40));
-	// 	uint32_t endTime = pros::micros();
-	// 	totalTime += (endTime - startTime);
-	// 	// printf("Took %f ms\n", (endTime - startTime) / 1000.0);
-	// 	exit_critical();
-	// }
-	//
-	// printf("Took avg %f ms\n", (totalTime / 1000.0) / numItterations);
+	uint32_t totalTime = 0;
+	const uint32_t numItterations = 10000;
 
-	drive->setCurrentMotion(OdomCharacterizationMotion());
-	co_yield drive->waitUntilSettled(10000);
+	for (int i = 0; i < numItterations; i++) {
+		enter_critical();
+		uint32_t startTime = pros::micros();
+		drive->setCurrentMotion(BoomerangMotion(odom->getCurrentState().position, Pose(20, 20, 1.5707963268), 0.45, 30, 40));
+		uint32_t endTime = pros::micros();
+		totalTime += (endTime - startTime);
+		// printf("Took %f ms\n", (endTime - startTime) / 1000.0);
+		exit_critical();
+	}
 
-	co_yield util::coroutine::nextCycle();
+	printf("Took avg %f ms\n", (totalTime / 1000.0) / numItterations);
 }
 
 RobotThread autonomousUser() {
@@ -208,4 +199,4 @@ void opcontrol() {
 	// printf("%s\n", buffer2);
 }
 
-// conversion factor (abs time to ms): ((3/2)/1000000)
+// guessed conversion factor (abs time to ms): ((3/2)/1000000)

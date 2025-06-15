@@ -32,7 +32,6 @@ private:
 	// Constraints for spline parameterization. (max change from last point)
 	static constexpr double kMaxDx = 0.25;
 	static constexpr double kMaxDy = 0.01;
-	// static  constexpr double kMaxDtheta = 0.05235989251996422;
 	static constexpr double kMaxDtheta = 0.5;
 
 

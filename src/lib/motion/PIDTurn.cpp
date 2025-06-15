@@ -10,7 +10,7 @@ namespace {
 }// namespace
 
 PIDTurn::PIDTurn(double targetHeading, PID pid, bool brakeLeft, bool brakeRight, double threshold, double maxPower,
-                 bool forceRight, bool forceLeft)
+                 bool forceLeft, bool forceRight)
     : targetHeading(targetHeading), threshold(threshold), maxPower(maxPower), pid(pid), brakeLeft(brakeLeft),
       brakeRight(brakeRight), forceRight(forceRight), forceLeft(forceLeft) {}
 
@@ -66,7 +66,6 @@ IMotion::MotorVoltages PIDTurn::calculate(const kinState& state) {
 		counter = 0;
 	}
 
-	// compute motor powers given our heading error
 	double turnPwr = pid(error);
 
 	if (fabs(turnPwr) >= maxPower) { turnPwr = util::sign(turnPwr) * maxPower; }

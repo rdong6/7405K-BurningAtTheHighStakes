@@ -7,10 +7,11 @@
 #include "subsystems/Drive.h"
 #include <cmath>
 #include <string>
-#include <type_traits>
 
 // Checking if IMU disconnects
 #include "v5JumpTable.h"
+
+// archaic code to debug something with IMU
 namespace {
 	int32_t getDeviceTimestamp(uint8_t port) {
 		V5_DeviceT device = fnVexDeviceGetByIndex(port - 1);
@@ -52,11 +53,8 @@ void Odometry::setPose(Pose pose) {
 
 RobotThread Odometry::updatePosition() {
 	auto drive = robot->getSubsystem<Drive>();
-	// const double imuScalar = 1.002456017242; // for imu in port 1
-	const double imuScalar = 1.007838745801;// for imu in port 16
 
-	prevRotation = imu.get_rotation() * imuScalar;
-	int32_t prevIMUTimestamp = getDeviceTimestamp(ports::imu);
+	prevRotation = imu.get_rotation() * odometers::imuScalar;
 
 	while (true) {
 		double l_dist;
@@ -103,7 +101,7 @@ RobotThread Odometry::updatePosition() {
 
 		if constexpr (ports::imu > 0) {
 			// negative as CCW is positive, while for VEX CCW is negative
-			double curRotation = -imu.get_rotation() * imuScalar;
+			double curRotation = -imu.get_rotation() * odometers::imuScalar;
 			pros::lcd::print(5, "Unscaled IMU: %f", imu.get_rotation());
 			dh = util::toRad(curRotation - prevRotation);
 			prevRotation = curRotation;
@@ -120,7 +118,6 @@ RobotThread Odometry::updatePosition() {
 
 		if constexpr (ports::leftRotation == 0 && ports::rightRotation == 0 && ports::verticalRotation != 0) {
 			deltaX = v_dist + (odometers::verticalOffset * dh);
-			// printf("DeltaX: %f\tV_dist: %f\n", deltaX, v_dist);
 		}
 
 		if constexpr (ports::backRotation != 0) {
@@ -134,26 +131,11 @@ RobotThread Odometry::updatePosition() {
 			deltaY = 0;
 		}
 
-
+		// calc new position
 		Pose newPose = curState.position.exp(Twist2D{deltaX, deltaY, dh});
 		curState.position = Pose(newPose.translation(), curState.position.rotation() + Rotation2D(dh));
 
 		printOdom(curState);
-
-		int32_t imuTimestamp = getDeviceTimestamp(ports::imu);
-		int32_t deltaTimestamp = imuTimestamp - prevIMUTimestamp;
-		if (deltaTimestamp == 0 || deltaTimestamp >= 17) {
-			printf("\n\n\nSOMETHING WENT WRONG WITH IMU DEVICE. delta timestamp: %d\n\n\n", deltaTimestamp);
-		}
-		prevIMUTimestamp = imuTimestamp;
-
-		// to tune the trackwidth - the data being printed to line 6 is not needed
-		// pros::lcd::print(5, "LE: %f", sDrive.getLeftPosition() / 360.0 * M_PI * odometers::leftDeadwheelDiameter);
-		// pros::lcd::print(6, "RE: %f", sDrive.getRightPosition() / 360.0 * M_PI * odometers::rightDeadwheelDiameter);
-		// pros::lcd::print(7, "h: %f",
-		//                  ((sDrive.getLeftPosition() / 360.0 * M_PI * odometers::leftDeadwheelDiameter) -
-		//                   (sDrive.getRightPosition() / 360.0 * M_PI * odometers::rightDeadwheelDiameter)) /
-		//                          10.4714285483 / M_PI * 180);
 
 		co_yield util::coroutine::nextCycle();
 	}

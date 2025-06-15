@@ -16,6 +16,7 @@
 #include <tuple>
 #include <type_traits>
 
+// archaic code that used to have a purpose
 namespace detail {
 	template<typename, typename>
 	struct tuple_holds {};
@@ -39,9 +40,9 @@ public:
 	Robot() : RobotBase() {
 		// setup the function table to get access to each subsystem & register tasks
 
-		// in order to ensure that the subsysetms get scheduled in the order they are specified in the parameter pack
+		// in order to ensure that the subsystems get scheduled in the order they are specified in the parameter pack
 		// we need to apply this custom for_each func to the tuple
-		// std::apply() doesn't work as expansion of the paramater pack is impl defined
+		// std::apply() doesn't work as expansion of the parameter pack is impl defined
 		util::tuple::for_each(subsystems, [this](auto x) {
 			this->invokeTable[typeid(x)] =
 			        static_cast<std::function<decltype(x)()>>([this]() { return std::get<decltype(x)>(this->subsystems); });
@@ -64,14 +65,5 @@ public:
 	}
 };
 
-// Odom = SENT
-// Drive = AUTON/OPCTRL
-// Lift = SENT & AUTON/OPCTRL
-// Intake = SENT
-// Pnoomatics = SENT
-// Controller = OPCTRL
-
-// ODOM, DRIVE, LIFT, INTAKE, PNOOMATICS, LIFT, CONTROLLER
 inline Robot<AutonSelector, Odometry, Drive, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
-// inline Robot<AutonSelector, Odometry, Lift, Intake, Pnooomatics, Controller>* robotInstance = nullptr;
 inline pros::task_t robotTask = nullptr;

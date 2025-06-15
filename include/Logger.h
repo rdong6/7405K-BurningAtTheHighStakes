@@ -9,6 +9,9 @@
 #include <string_view>
 #include <type_traits>
 
+
+// SHITTY TERRIBLE LOW-LATENCY LOGGER -> doesn't work on VEX because it uses unaligned loads/stores
+// Maybe I should've kept my logger I wrote sophmore year ¯\_(ツ)_/¯
 namespace detail {
 	template<typename... TTypes>
 	struct PackSize {

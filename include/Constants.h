@@ -40,6 +40,8 @@ namespace ports {
 namespace odometers {
 	constexpr double driveGearRatio = 2.75;// wheel diameter + gear ratio included
 
+	constexpr double imuScalar = 1.007838745801;
+
 	constexpr double trackWidth = 11.75;// distance between left and right wheels of drivetrain
 	constexpr double deadwheelTrackWidth =
 	        0.0;// dist between left & right deadwheels -> only used if deadwheels used to calc heading
@@ -49,16 +51,9 @@ namespace odometers {
 	constexpr double backDeadwheelDiameter = 2.75;// ignored if backRotation is 0
 	constexpr double verticalDeadwheelDiameter = 2; // used only if vertical deadwheel
 
-	// constexpr double backOffset = 0;
-	// constexpr double verticalOffset = 0;
-
-	constexpr double backOffset = 0.364319505698;
-	constexpr double verticalOffset = 2.09360573869;
-
-	// constexpr double backOffset = 1.9812784336;// ignored if backRotation is 0 (offset of back deadwheel to center of
-	// rotation)
-	// constexpr double verticalOffset = 0.5168626979855;// only used if we have 1 vertical deadwheel (no left & right
-	// deadwheels)
+	constexpr double backOffset =
+	        0.364319505698;// ignored if backRotation is 0 (offset of back deadwheel to center of rotation)
+	constexpr double verticalOffset = 2.09360573869;// only used if we have 1 vertical deadwheel (no left & right deadwheels)
 }// namespace odometers
 
 namespace trajectory {

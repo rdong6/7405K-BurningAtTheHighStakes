@@ -105,7 +105,6 @@ void Lift::registerTasks() {
 	controllerRef->registerCallback([this]() { setState(Lift::State::DESCORE); }, []() {}, Controller::master, Controller::a,
 	                                Controller::rising);
 
-	// x -> alliance stake position & holds
 	controllerRef->registerCallback([this]() { setState(State::ALLIANCE); }, []() {}, Controller::master, Controller::x,
 	                                Controller::rising);
 
@@ -144,7 +143,8 @@ RobotThread Lift::updateAngle() {
 		int32_t pos = rotation.get_position();
 		double rotationVel = rotation.get_velocity() / 100.0;// deg/s
 
-		// 1:3
+		// code that got disabled but it checks if rotation sensor data froze. if it did, we'd kill lift subsystem
+		// needs to be tested more to ensure the heuristic is correct
 		double motorVel = motor.get_actual_velocity();
 		// if (liftFlags->isMoving && (std::fabs(motorVel) <= 5 || std::fabs(rotationVel) <= 1 ||
 		//                             rotation.get_velocity() == std::numeric_limits<int32_t>::max())) {
@@ -261,10 +261,10 @@ void Lift::setState(State state) {
 
 void Lift::move(int mv) {
 	double curAngle = robot->getFlag<Lift>().value()->curAngle;
-	// if (!liftFlags->kill) {
-	// 	if (mv > 0 && curAngle > UPPER_BOUNDS) { mv = 0; }
-	// 	if (mv < 0 && curAngle < LOWER_BOUNDS) { mv = 0; }
-	// }
+	if (!robot->getFlag<Lift>().value()->kill) {
+		if (mv > 0 && curAngle > UPPER_BOUNDS) { mv = 0; }
+		if (mv < 0 && curAngle < LOWER_BOUNDS) { mv = 0; }
+	}
 
 	if (mv == 0) {
 		motor.brake();

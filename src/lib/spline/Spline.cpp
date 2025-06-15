@@ -4,13 +4,6 @@
 #include <stack>
 #include <stdexcept>
 
-namespace {
-	struct StackContents {
-		double t0;
-		double t1;
-	};
-}// namespace
-
 double ISpline::getCurvature(double dx, double dy, double ddx, double ddy) {
 	double denominator = std::pow(dx * dx + dy * dy, 1.5);
 	double k = (dx * dy - dy * dx) / denominator;
@@ -22,22 +15,26 @@ double ISpline::getCurvature(double dx, double dy, double ddx, double ddy) {
 	return -k;
 }
 
-
 double ISpline::getCurvature(const Pose& firstDeriv, const Pose& secondDeriv) {
 	return getCurvature(firstDeriv.X(), firstDeriv.Y(), secondDeriv.X(), secondDeriv.Y());
 }
 
 // Paramaterizes by subdividing a spline until change between points is under a threshold
 std::vector<PoseWithCurvature> ISpline::parameterize(double t0, double t1) const {
-	std::vector<PoseWithCurvature> splinePoints;
-
-	// add initial point as paramaterization doesn't do it
-	splinePoints.push_back(getPointWithCurvature(0));
+	struct StackContents {
+		double t0;
+		double t1;
+	};
 
 	// instead of recursively calling to subdivide the spline
 	// allows us to if it's a malformed spline and we can't paramaterize it, instead of just stack overflowing
 	std::stack<StackContents> stack;// stores t0 and t1 for each subdivision
 	stack.emplace(StackContents{t0, t1});
+
+	std::vector<PoseWithCurvature> splinePoints;
+
+	// add initial point as paramaterization doesn't do it
+	splinePoints.push_back(getPointWithCurvature(0));
 
 	size_t itterations = 0;// keeps track of itterations, if we exceed certain amount it's a malformed spline
 	while (!stack.empty()) {

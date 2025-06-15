@@ -19,7 +19,7 @@ struct TrajectoryConfig {
 class Path {
 public:
 	// TODO: potentially fix this. i think i have some unwanted behaviour due to type deduction
-	// TODO: lazily parameterize the splines
+	// TODO: lazily parameterize the splines?
 	template<SplineType... splines>
 	explicit Path(TrajectoryConfig config, splines&&... args)
 	    : config(config), splinesVector{Spline(std::forward<splines>(args))...}, id(counter++) {

@@ -1,3 +1,14 @@
+/*
+ * Jump table for V5 SDK functions dumped from libv5rt.a using ghidra.
+ * Last dumped: March 17, 2024 by Richard
+ *
+ * Includes header definitions from libv5rt headers.
+ *
+ * In order to call functions like vexDeviceMotorTypeGet(), you MUST first use claim_port. This is to ensure the mutex for VDML
+ * in PROS is properly locked. You must then return_port() afterwards in order to allow release the mutex. Failure to do so will
+ * result in PROS not working.
+ */
+
 #pragma once
 #include <stdarg.h>
 #include <stdint.h>

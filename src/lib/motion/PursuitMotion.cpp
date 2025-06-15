@@ -10,7 +10,6 @@
 #include <numbers>
 
 namespace {
-	// careful! sgn(0) = 0
 	template<typename T>
 	int sgn(T val) {
 		return (T(0) < val) - (val < T(0));
@@ -48,7 +47,7 @@ PursuitMotion::PursuitMotion(std::span<fttbtkjfk::PursuitPoint>&& path, double l
 	// we will use rate limiter to limit accel
 	// but by using infinite accel, we sidestep issue of 0 vel at start of path
 
-	// calulate vels from back of path to front - so that we rate limit decel
+	// calculate vels from back of path to front - so that we rate limit decel
 	// vf = √(vi^2 + 2 * a * d)
 	vels[path.size() - 1] = 0;// ending will always be 0 vel
 	for (size_t i = path.size() - 2; i >= 0; i--) {
@@ -113,7 +112,7 @@ Pose PursuitMotion::getLookaheadPoint(const Pose& pos) const {
 	for (size_t i = path.size() - 1; i > lastLookaheadIndex; i--) {
 		// is this cast bad? yes. do i care? no
 
-		// TODO: FIx this! Can't just recast a ptr anymore as Pose structure change
+		// TODO: Fix this! Can't just recast a ptr anymore as Pose structure change
 		const Pose& lineStart = *reinterpret_cast<const Pose*>(&path[i - 1].pose);
 		const Pose& lineEnd = *reinterpret_cast<const Pose*>(&path[i].pose);
 
@@ -202,14 +201,6 @@ void PursuitMotion::start() {
 		targetRightVel /= ratio;
 	}
 
-	// logger->info(
-	//         "TVel: {:2f} LVel: {:2f}  RVel: {:2f} Curv: {:2f} Look: ({:2f}, {:2f}) Cur: ({:2f}, {:2f}, {:2f}) Dist: "
-	//         "{:2f} dLVel: {:2f} dRVel: {:2f}\n",
-	//         curVel, targetLeftVel, targetRightVel, curv, lookaheadPose.X(), lookaheadPose.X(),
-	//         state.position.X(), state.position.X(), util::toDeg(state.position.theta()),
-	//         curDistFromEnd(state), sDrive.getLeftVelocity() * (odometers::leftDeadwheelDiameter * std::numbers::pi)
-	//         / 60.0, sDrive.getRightVelocity() * (odometers::rightDeadwheelDiameter * std::numbers::pi) / 60.0);
-
 	// convert wheel rpm into motor rpm
 	// gear ratio is in wheel diamater
 
@@ -220,6 +211,14 @@ void PursuitMotion::start() {
 	// convert from in/min into RPM
 	targetLeftVel /= (odometers::leftDeadwheelDiameter * std::numbers::pi);
 	targetRightVel /= (odometers::rightDeadwheelDiameter * std::numbers::pi);
+
+	// logger->info(
+	//         "TVel: {:2f} LVel: {:2f}  RVel: {:2f} Curv: {:2f} Look: ({:2f}, {:2f}) Cur: ({:2f}, {:2f}, {:2f}) Dist: "
+	//         "{:2f} dLVel: {:2f} dRVel: {:2f}\n",
+	//         curVel, targetLeftVel, targetRightVel, curv, lookaheadPose.X(), lookaheadPose.X(),
+	//         state.position.X(), state.position.X(), util::toDeg(state.position.theta()),
+	//         curDistFromEnd(state), sDrive.getLeftVelocity() * (odometers::leftDeadwheelDiameter * std::numbers::pi)
+	//         / 60.0, sDrive.getRightVelocity() * (odometers::rightDeadwheelDiameter * std::numbers::pi) / 60.0);
 
 	return {targetLeftVel, targetRightVel};
 }

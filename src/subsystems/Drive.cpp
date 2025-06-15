@@ -63,7 +63,6 @@ RobotThread Drive::runner() {
 		auto motorVolts = curMotion->calculate(curState);
 
 		if (curMotion->isVelocityControlled()) {
-			// add a 0.5 so requested velocity rounds to nearest number when casting to int
 			setVelocityLeft(std::lround(motorVolts.left));
 			setVelocityRight(std::lround(motorVolts.right));
 		} else {
@@ -119,7 +118,6 @@ RobotFunc Drive::waitUntilDist(double dist) const {
 }
 
 void Drive::setCurrentMotion(Motion motion) {
-	// Tells the drive to do whatever motion is passed in
 	curMotion = std::move(motion);
 }
 

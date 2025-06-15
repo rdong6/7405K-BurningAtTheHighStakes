@@ -14,6 +14,7 @@ void BoomerangMotion::start() {
 
 IMotion::MotorVoltages BoomerangMotion::calculate(const kinState& state) {
 	// TODO: Replace wrapper around ramsete w/ time dilation (kinda like a pure-pursuit, ramsete hybrid)
+	// TODO: or just use a time-invariant path follower
 
 	elapsedTime = (pros::millis() - startTime) / 1000.0;
 

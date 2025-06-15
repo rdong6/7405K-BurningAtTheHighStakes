@@ -9,14 +9,10 @@
 
 ProfiledMotion::ProfiledMotion(double dist, double maxVel, double accel, double decel, double threshold)
     : threshold(threshold), errorSum(0), startPose(), profile(dist, accel, decel, maxVel), prevSign(dist >= 0),
-      overtime(false) {
-	// toggles whether or not debug info from this motion is logged
-	// logger->setLevel(static_cast<LogSource::LogLevel>(LogSource::INFO | LogSource::WARNING | LogSource::ERROR));
-}
+      overtime(false) {}
 
 void ProfiledMotion::start() {
 	if (startTime == 0) [[unlikely]] {
-		// logger->debug("Motion start. Total Time: {}\n", profile.getTotalTime());
 		auto odom = robotInstance->getSubsystem<Odometry>();
 		if (odom) { startPose = odom.value()->getCurrentState().position; }
 		IMotion::start();
